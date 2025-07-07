@@ -1,5 +1,9 @@
 "use client";
 import React, { useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/atom-one-dark.min.css'; 
 
 interface Message {
   role: "user" | "assistant";
@@ -23,7 +27,7 @@ export const Chat: React.FC = () => {
 
     try {
       const response = await fetch(
-        "https://192.168.31.208:1234/v1/chat/completions",
+        "http://192.168.86.31:1234/v1/chat/completions",
         {
           method: "POST",
           headers: {
@@ -67,7 +71,9 @@ export const Chat: React.FC = () => {
       <div className="chat-container">
         {messages.map((msg, idx) => (
           <p key={idx} className={`chat-message ${msg.role}`}>
+            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]} >
             {msg.content}
+            </Markdown>
           </p>
         ))}
       </div>

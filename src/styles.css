@@ -39,10 +39,6 @@
   box-sizing: border-box;
 }
 
-* {
-  margin: 0;
-}
-
 body {
   color: var(--gray1);
   background-color: var(--gray9);
@@ -285,4 +281,12 @@ body {
   align-items: flex-end;
   justify-content: flex-end;
   align-self: stretch;
+}
+
+pre code {
+  display: block;
+  background: #1d1f21;
+  color: #c5c8c6;
+  line-height: 1.5;
+  padding: 1rem;
 }
