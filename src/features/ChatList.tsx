@@ -2,10 +2,9 @@
 import React, { useEffect, useState } from "react";
 
 interface Message {
-  id?: number;
   role: "user" | "assistant";
-  message: string;
-  timestamp: string;
+  content: string;
+  timestamp?: string;
 }
 
 const ChatList: React.FC = () => {
@@ -14,13 +13,19 @@ const ChatList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/chat")
+    fetch("https://192.168.31.208:1234/v1/chat/history", {
+      headers: {
+        "Content-Type": "application/json",
+        // Add Authorization if needed
+      },
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch chat data");
         return res.json();
       })
       .then((data) => {
-        setMessages(Array.isArray(data) ? data : []);
+        // OpenAI compatible: expects { data: [ { role, content, ... } ] }
+        setMessages(Array.isArray(data.data) ? data.data : []);
         setLoading(false);
       })
       .catch((err) => {
@@ -37,10 +42,10 @@ const ChatList: React.FC = () => {
     <div className="chat-list" style={{ marginTop: 32 }}>
       <h2>All Chat Data</h2>
       <ul>
-        {messages.map((msg) => (
-          <li key={msg.id || msg.timestamp}>
-            <strong>{msg.role}:</strong> {msg.message}{" "}
-            <em>({msg.timestamp})</em>
+        {messages.map((msg, idx) => (
+          <li key={idx}>
+            <strong>{msg.role}:</strong> {msg.content}{" "}
+            {msg.timestamp && <em>({msg.timestamp})</em>}
           </li>
         ))}
       </ul>

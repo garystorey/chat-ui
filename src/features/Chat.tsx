@@ -1,12 +1,10 @@
 "use client";
-import React, { useState  } from "react";
+import React, { useState } from "react";
 
-// Add Message type locally since we no longer import from store
 interface Message {
-  id?: number;
   role: "user" | "assistant";
-  messages: string;
-  timestamp: string;
+  content: string;
+  timestamp?: string;
 }
 
 export const Chat: React.FC = () => {
@@ -15,22 +13,28 @@ export const Chat: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    const timestamp = new Date().toISOString();
-    const userMsg: Message = { role: "user", messages: input, timestamp };
+    const userMsg: Message = {
+      role: "user",
+      content: input,
+      timestamp: new Date().toISOString(),
+    };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
     try {
       const response = await fetch(
-        "http://192.168.86.31:1234/v1/chat/completions",
+        "https://192.168.31.208:1234/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer sk-local",
+            // Add Authorization if needed
           },
           body: JSON.stringify({
-            messages,
+            messages: [
+              ...messages.map(({ role, content }) => ({ role, content })),
+              { role: "user", content: input },
+            ],
             temperature: 0.7,
           }),
         }
@@ -42,7 +46,7 @@ export const Chat: React.FC = () => {
 
       const assistantMsg: Message = {
         role: "assistant",
-        messages: reply,
+        content: reply,
         timestamp: new Date().toISOString(),
       };
 
@@ -50,7 +54,7 @@ export const Chat: React.FC = () => {
     } catch (err) {
       const errorMsg: Message = {
         role: "assistant",
-        messages: "⚠️ Error: Failed to reach AI backend.",
+        content: "⚠️ Error: Failed to reach AI backend.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -63,7 +67,7 @@ export const Chat: React.FC = () => {
       <div className="chat-container">
         {messages.map((msg, idx) => (
           <p key={idx} className={`chat-message ${msg.role}`}>
-            {msg.messages}
+            {msg.content}
           </p>
         ))}
       </div>
