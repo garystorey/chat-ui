@@ -1,36 +1,22 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState  } from "react";
 
 // Add Message type locally since we no longer import from store
 interface Message {
   id?: number;
   role: "user" | "assistant";
-  message: string;
+  messages: string;
   timestamp: string;
 }
 
-interface ChatProps {}
-
-export const Chat: React.FC<ChatProps> = () => {
+export const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
 
-  useEffect(() => {
-    fetch("/api/chat")
-      .then((res) => res.json())
-      .then((data) => setMessages(data));
-  }, []);
-
   const handleSend = async () => {
     if (!input.trim()) return;
-
     const timestamp = new Date().toISOString();
-    const userMsg: Message = { role: "user", message: input, timestamp };
-    await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userMsg),
-    });
+    const userMsg: Message = { role: "user", messages: input, timestamp };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
@@ -56,7 +42,7 @@ export const Chat: React.FC<ChatProps> = () => {
 
       const assistantMsg: Message = {
         role: "assistant",
-        message: reply,
+        messages: reply,
         timestamp: new Date().toISOString(),
       };
 
@@ -64,7 +50,7 @@ export const Chat: React.FC<ChatProps> = () => {
     } catch (err) {
       const errorMsg: Message = {
         role: "assistant",
-        message: "⚠️ Error: Failed to reach AI backend.",
+        messages: "⚠️ Error: Failed to reach AI backend.",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -77,7 +63,7 @@ export const Chat: React.FC<ChatProps> = () => {
       <div className="chat-container">
         {messages.map((msg, idx) => (
           <p key={idx} className={`chat-message ${msg.role}`}>
-            {msg.message}
+            {msg.messages}
           </p>
         ))}
       </div>
