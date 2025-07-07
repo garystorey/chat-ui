@@ -1,0 +1,146 @@
+.button {
+  --color: var(--gray1);
+  --border: currentColor;
+  --bg: buttonface;
+  color: var(--color);
+  border-color: var(--border);
+  background-color: var(--bg);
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 1px;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 0.5em;
+  transition: background-color 300ms ease-in-out;
+}
+.buttonVariantStandard {
+  --border: currentColor;
+  --bg: buttonface;
+  --color: var(--gray1);
+}
+
+.buttonVariantOutline {
+  --color: currentColor;
+  --border: currentColor;
+  --bg: transparent;
+}
+
+.buttonVariantOutline {
+  --border: currentColor;
+  --bg: transparent;
+}
+
+.buttonVariantText {
+  all: unset;
+  cursor: pointer;
+  border-color: transparent;
+  background-color: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  padding: initial;
+}
+
+.buttonColorPrimary.buttonVariantStandard {
+  color: var(--color);
+  --border: var(--primary);
+  --bg: var(--primary);
+}
+
+.buttonColorPrimary.buttonVariantOutline {
+  --color: var(--primary);
+  --border: var(--primary);
+  --bg: transparent;
+}
+
+.buttonColorPrimary.buttonVariantText {
+  --bg: transparent;
+  --color: var(--primary);
+  color: var(--color);
+  --border: transparent;
+}
+
+.buttonColorSecondary.buttonVariantStandard {
+  --bg: var(--secondary);
+  --border: var(--secondary);
+}
+.buttonColorSecondary.buttonVariantOutline {
+  --bg: transparent;
+  --color: var(--secondary);
+  --border: var(--secondary);
+}
+.buttonColorSecondary.buttonVariantText {
+  --bg: transparent;
+  --color: var(--secondary);
+  color: var(--color);
+  --border: transparent;
+}
+
+.buttonColorLink.buttonVariantStandard {
+  --bg: var(--blue);
+  --border: var(--blue);
+}
+.buttonColorLink.buttonVariantOutline {
+  --bg: transparent;
+  --color: var(--blue);
+  --border: var(--blue);
+}
+.buttonColorLink.buttonVariantText {
+  --bg: transparent;
+  --color: var(--blue);
+  color: var(--color);
+  --border: transparent;
+}
+
+.buttonColorText.buttonVariantStandard {
+  --bg: var(--gray6);
+}
+.buttonColorText.buttonVariantOutline {
+  --bg: transparent;
+}
+.buttonColorText.buttonVariantText {
+  --bg: transparent;
+  --border: transparent;
+}
+.buttonVariantStandard:hover {
+  color: var(--bg);
+  background-color: var(--color);
+}
+.buttonVariantOutline:hover {
+  color: inherit;
+  background-color: var(--color);
+}
+.buttonColorText.buttonVariantOutline:hover {
+  color: var(--gray1);
+  background-color: var(--gray6);
+}
+.buttonColorLink.buttonVariantText:hover {
+  text-decoration: underline;
+}
+.buttonVariantText:focus-within {
+  outline: 1px dashed var(--gray5);
+  border-width: 1px;
+}
+.buttonColorText.buttonVariantOutline:focus-within {
+  color: var(--gray6);
+  background-color: var(--gray2);
+}
+
+.buttonSizeFixed {
+  width: 12em;
+}
+.buttonSizeFull {
+  width: 100%;
+}
+
+.buttonSizeContent {
+  width: fit-content;
+}
+
+.button:disabled {
+  opacity: 80%;
+  pointer-events: none;
+}

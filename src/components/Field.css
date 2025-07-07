@@ -1,0 +1,70 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  align-self: stretch;
+  margin: 0;
+}
+
+.field-bottom-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.field-top-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column-reverse;
+  gap: 0.25rem;
+}
+
+.field.has-error .field-bottom-container {
+  flex-direction: column-reverse;
+}
+
+.field p {
+  color: var(--gray3);
+}
+.field label {
+  color: var(--gray1);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.field input,
+.field select,
+.field textarea {
+  accent-color: var(--primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25em;
+  border: 1px solid var(--gray6);
+  width: 100%;
+}
+
+.field-bottom-container p {
+  color: var(--gray6);
+  font-size: 0.85rem;
+}
+
+output {
+  color: var(--red);
+  display: none;
+}
+
+.field.has-error output {
+  display: flex;
+}
+
+.field.has-error p {
+  display: none;
+}
+
+.field + .field {
+  margin-bottom: 1rem;
+}

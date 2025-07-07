@@ -1,0 +1,66 @@
+.header {
+  --border: var(--gray4);
+  --color: inherit;
+  --size: 1rem;
+  --weight: normal;
+
+  color: var(--color);
+  font-weight: var(--weight);
+  font-size: var(--size);
+  border: 0;
+
+  line-height: 1;
+  letter-spacing: 0.5px;
+  margin: 1.5rem 0;
+}
+
+.headerSizeLarge {
+  --size: 1.75rem;
+  --weight: 600;
+}
+.headerSizeMedium {
+  --size: 1.5rem;
+  --weight: 500;
+}
+.headerSizeSmall {
+  --size: 1.25rem;
+  --weight: normal;
+  padding-bottom: 0.25rem;
+}
+.headerColorPrimary {
+  color: var(--primary);
+}
+.headerColorSecondary {
+  color: var(--secondary);
+}
+.headerColorLink {
+  color: var(--blue);
+}
+.headerColorText {
+  color: inherit;
+}
+
+.headerVariantUnderlined {
+  border-bottom: 1px solid var(--gray4);
+}
+
+.headerVariantCapitalized {
+  text-transform: uppercase;
+}
+
+.headerVariantCapsUnderlined {
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--gray4);
+}
+.headerTextAlignLeft {
+  text-align: left;
+}
+.headerTextAlignRight {
+  text-align: right;
+}
+.headerTextAlignCenter {
+  text-align: center;
+}
+.headerTextAlignIndent {
+  padding-left: 1rem;
+}
