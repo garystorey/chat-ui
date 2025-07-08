@@ -1,11 +1,11 @@
 {
   "sqltools.connections": [
     {
-      "previewLimit": 100,
+      "previewLimit": 50,
       "driver": "SQLite",
       "name": "Chat",
       "group": "Chat",
-      "database": "${workspaceFolder:waku_rsc}/chat.db"
+      "database": "${workspaceFolder:chat-ui}/chat.db"
     }
   ]
 }

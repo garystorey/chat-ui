@@ -1,18 +1,25 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { ChatStore } from "../store";
 import { Message } from "../types";
 
 import "highlight.js/styles/atom-one-dark.min.css";
 
-const store = new ChatStore();
-
 export const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to the bottom of the chat container when messages change
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [messages, isTyping]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -21,9 +28,9 @@ export const Chat: React.FC = () => {
       content: input,
       timestamp: new Date().toISOString(),
     };
-    store.save(userMsg);
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    setIsTyping(true);
 
     try {
       const response = await fetch(
@@ -37,7 +44,11 @@ export const Chat: React.FC = () => {
           body: JSON.stringify({
             messages: [
               ...messages.map(({ role, content }) => ({ role, content })),
-              { role: "user", content: input },
+              {
+                role: "user",
+                content: input,
+                timestamp: new Date().toISOString(),
+              },
             ],
             temperature: 0.7,
           }),
@@ -53,7 +64,16 @@ export const Chat: React.FC = () => {
         content: reply,
         timestamp: new Date().toISOString(),
       };
-      store.save(assistantMsg);
+
+      fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([{ role: "user", content: input }, assistantMsg]),
+      }).catch((err) =>
+        console.error("Failed to save assistant message:", err)
+      );
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -64,22 +84,33 @@ export const Chat: React.FC = () => {
       };
       setMessages((prev) => [...prev, errorMsg]);
       console.error("AI backend error:", err);
+    } finally {
+      setIsTyping(false);
     }
   };
 
   return (
-    <div className="container">
-      <div className="chat-container">
+    <main className="container">
+      <div className="chat-container" ref={chatContainerRef}>
         {messages.map((msg, idx) => (
-          <p key={idx} className={`chat-message ${msg.role}`}>
+          <div key={idx} className={`chat-message ${msg.role}`}>
             <Markdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}
             >
               {msg.content}
             </Markdown>
-          </p>
+          </div>
         ))}
+        {isTyping && (
+          <div className="chat-message assistant">
+            <div className="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="chat-input">
@@ -105,6 +136,6 @@ export const Chat: React.FC = () => {
           <button>Attach</button>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
