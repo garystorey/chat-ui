@@ -1,15 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import Markdown from "react-markdown";
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/atom-one-dark.min.css'; 
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
+import { ChatStore } from "../store";
+import { Message } from "../types";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  timestamp?: string;
-}
+import "highlight.js/styles/atom-one-dark.min.css";
+
+const store = new ChatStore();
 
 export const Chat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -22,6 +21,7 @@ export const Chat: React.FC = () => {
       content: input,
       timestamp: new Date().toISOString(),
     };
+    store.save(userMsg);
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
@@ -53,6 +53,7 @@ export const Chat: React.FC = () => {
         content: reply,
         timestamp: new Date().toISOString(),
       };
+      store.save(assistantMsg);
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {
@@ -71,8 +72,11 @@ export const Chat: React.FC = () => {
       <div className="chat-container">
         {messages.map((msg, idx) => (
           <p key={idx} className={`chat-message ${msg.role}`}>
-            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]} >
-            {msg.content}
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+            >
+              {msg.content}
             </Markdown>
           </p>
         ))}

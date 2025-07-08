@@ -1,12 +1,5 @@
 import Database from "better-sqlite3";
-
-export interface Message {
-  id?: number;
-  role: "user" | "assistant";
-  message: string;
-  timestamp: string;
-}
-
+import { Message } from "../types";
 export class ChatStore {
   private db: Database.Database;
 
@@ -29,7 +22,7 @@ export class ChatStore {
   save(msg: Message): void {
     this.db
       .prepare(`INSERT INTO chat (role, message, timestamp) VALUES (?, ?, ?)`)
-      .run(msg.role, msg.message, msg.timestamp);
+      .run(msg.role, msg.content, msg.timestamp);
   }
 
   getRecentMessages(n = 6): Message[] {
