@@ -20,7 +20,7 @@ export function List<ListItem>({
           typeof keyfield === "function"
             ? keyfield(item)
             : (item[keyfield] as string);
-        return <div key={key}>{as(item)}</div>;
+        return as({ ...item, key });
       })}
     </section>
   );

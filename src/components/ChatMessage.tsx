@@ -1,15 +1,10 @@
-import { ReactNode } from "react";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
+import Markdown from "markdown-to-jsx";
 import type { Message } from "../types";
 
 export const ChatMessage = ({ role, content }: Message) => (
-  <div className={`chat-message ${role}`}>
-    <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
-      {content}
-    </Markdown>
-  </div>
+  <span className={`chat-message ${role}`}>
+    <Markdown options={{ forceBlock: true }}>{content}</Markdown>
+  </span>
 );
 
 export default ChatMessage;

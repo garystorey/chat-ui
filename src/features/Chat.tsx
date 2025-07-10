@@ -22,21 +22,12 @@ export const Chat: React.FC = () => {
     <main className="container">
       <div className="chat-container" ref={chatContainerRef}>
         <Show when={messages.length > 0}>
-          <List<Message>
-            className="chat-messages"
-            items={messages}
-            keyfield="timestamp"
-            as={ChatMessage}
-          />
+          {messages.map((message: Message, index: number) => (
+            <ChatMessage key={index} {...message} />
+          ))}
           <Show when={isTyping}>
             <Thinking />
           </Show>
-        </Show>
-
-        <Show when={messages.length === 0}>
-          <div className="chat-message assistant">
-            <p>Welcome! How can I assist you today?</p>
-          </div>
         </Show>
       </div>
 
