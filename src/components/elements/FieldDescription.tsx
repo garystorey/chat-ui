@@ -1,12 +1,16 @@
 import { ComponentProps, PropsWithChildren, ReactElement } from "react";
 
-export type MessageProps = PropsWithChildren<{
+export type FieldDescriptionProps = PropsWithChildren<{
   error: ReactElement | string | null;
   id: string;
 }> &
   Omit<ComponentProps<"div">, "id">;
 
-export function Message({ error, children, id }: MessageProps) {
+export function FieldDescription({
+  error,
+  children,
+  id,
+}: FieldDescriptionProps) {
   return (
     <>
       <p className="field-description" id={`${id}-description`}>

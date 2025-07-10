@@ -1,4 +1,4 @@
-import { Message } from "./elements";
+import { FieldDescription } from "./elements";
 import {
   ChangeEvent,
   ComponentProps,
@@ -49,9 +49,9 @@ export function Field(props: FieldProps) {
         onChange={handleChange}
         aria-describedby={describedBy}
       />
-      <Message id={name} error={error}>
+      <FieldDescription id={name} error={error}>
         {children}
-      </Message>
+      </FieldDescription>
     </div>
   );
 }

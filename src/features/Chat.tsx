@@ -1,116 +1,43 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeHighlight from "rehype-highlight";
-import { Message } from "../types";
-
-import "highlight.js/styles/atom-one-dark.min.css";
+import React from "react";
+import { List, Show, Thinking, ChatMessage, Button } from "../components";
+import type { Message } from "../types";
+import { useChat } from "../hooks/useChat";
 
 export const Chat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { messages, setInput, input, isTyping, chatContainerRef, sendMessage } =
+    useChat();
 
-  useEffect(() => {
-    // Scroll to the bottom of the chat container when messages change
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-    }
-  }, [messages, isTyping]);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMsg: Message = {
-      role: "user",
-      content: input,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setIsTyping(true);
-
-    try {
-      const response = await fetch(
-        "http://192.168.86.31:1234/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // Add Authorization if needed
-          },
-          body: JSON.stringify({
-            messages: [
-              ...messages.map(({ role, content }) => ({ role, content })),
-              {
-                role: "user",
-                content: input,
-                timestamp: new Date().toISOString(),
-              },
-            ],
-            temperature: 0.7,
-          }),
-        }
-      );
-
-      const result = await response.json();
-      const reply =
-        result.choices?.[0]?.message?.content?.trim() || "[No response]";
-
-      const assistantMsg: Message = {
-        role: "assistant",
-        content: reply,
-        timestamp: new Date().toISOString(),
-      };
-
-      fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify([{ role: "user", content: input }, assistantMsg]),
-      }).catch((err) =>
-        console.error("Failed to save assistant message:", err)
-      );
-
-      setMessages((prev) => [...prev, assistantMsg]);
-    } catch (err) {
-      const errorMsg: Message = {
-        role: "assistant",
-        content: "⚠️ Error: Failed to reach AI backend.",
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-      console.error("AI backend error:", err);
-    } finally {
-      setIsTyping(false);
+  const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
     }
   };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
+    setInput(e.target.value);
 
   return (
     <main className="container">
       <div className="chat-container" ref={chatContainerRef}>
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`chat-message ${msg.role}`}>
-            <Markdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
-            >
-              {msg.content}
-            </Markdown>
-          </div>
-        ))}
-        {isTyping && (
+        <Show when={messages.length > 0}>
+          <List<Message>
+            className="chat-messages"
+            items={messages}
+            keyfield="timestamp"
+            as={ChatMessage}
+          />
+          <Show when={isTyping}>
+            <Thinking />
+          </Show>
+        </Show>
+
+        <Show when={messages.length === 0}>
           <div className="chat-message assistant">
-            <div className="typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
+            <p>Welcome! How can I assist you today?</p>
           </div>
-        )}
+        </Show>
       </div>
 
       <div className="chat-input">
@@ -121,19 +48,18 @@ export const Chat: React.FC = () => {
           spellCheck="true"
           autoComplete="off"
           autoCorrect="off"
-          onChange={(e) => setInput(e.target.value)}
+          onChange={handleChange}
           placeholder="Type your message..."
           value={input}
-          onKeyUp={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
+          onKeyUp={handleKeyUp}
         />
         <div className="input-actions">
-          <button onClick={handleSend}>Send</button>
-          <button>Attach</button>
+          <Button variant="standard" color="primary" onClick={sendMessage}>
+            Send
+          </Button>
+          <Button variant="outline" color="primary">
+            Attach
+          </Button>
         </div>
       </div>
     </main>
