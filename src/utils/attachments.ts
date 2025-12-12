@@ -117,6 +117,26 @@ export const normalizeMessageAttachments = (
   });
 };
 
+export const getImageAttachmentDataUrls = (
+  attachments: AttachmentRequest[]
+): Record<string, string> =>
+  attachments.reduce<Record<string, string>>((acc, attachment) => {
+    if (!attachment?.data || !attachment?.mime_type?.startsWith('image/')) {
+      return acc;
+    }
+
+    const isDataUrl = attachment.data.startsWith('data:');
+    const isHttpUrl = /^(https?:)?\/\//i.test(attachment.data);
+    const dataUrl = isDataUrl
+      ? attachment.data
+      : isHttpUrl
+        ? attachment.data
+        : `data:${attachment.mime_type};base64,${attachment.data}`;
+
+    acc[attachment.id] = dataUrl;
+    return acc;
+  }, {});
+
 const hasReadableFile = (
   attachment: Attachment
 ): attachment is Attachment & { file: FileLike } => {

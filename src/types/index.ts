@@ -76,6 +76,13 @@ export type ChatCompletionContentPart =
       type: 'input_text';
       text: string;
       attachments?: ChatCompletionAttachmentReference[];
+    }
+  | {
+      type: 'image_url';
+      image_url: {
+        url: string;
+        detail?: 'auto' | 'low' | 'high';
+      };
     };
 
 export type ChatCompletionMessage = {

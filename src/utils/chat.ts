@@ -32,25 +32,60 @@ export const getMessagePlainText = (message?: Message) => {
   return normalizeWhitespace(message.content);
 };
 
+type ToChatCompletionMessagesOptions = {
+  attachmentImageUrls?: Record<string, string>;
+  omitAttachmentReferences?: boolean;
+};
+
 export const toChatCompletionMessages = (
-  messages: Message[]
+  messages: Message[],
+  options?: ToChatCompletionMessagesOptions
 ): ChatCompletionMessage[] =>
   messages.map((message) => {
     const text = getMessagePlainText(message);
     const isUserMessage = message.sender === 'user';
-    const hasAttachments =
-      isUserMessage && Array.isArray(message.attachments) && message.attachments.length > 0;
+    const attachments =
+      !options?.omitAttachmentReferences &&
+      isUserMessage &&
+      Array.isArray(message.attachments)
+        ? message.attachments
+        : [];
 
-    const attachments = hasAttachments
-      ? message.attachments?.map((attachment) => ({ id: attachment.id })) ?? []
-      : undefined;
+    const attachmentRefs = attachments.map((attachment) => ({ id: attachment.id }));
+    const imageUrls = attachments
+      .map((attachment) => options?.attachmentImageUrls?.[attachment.id])
+      .filter((url): url is string => Boolean(url));
+
+    if (isUserMessage && imageUrls.length) {
+      const parts: ChatCompletionContentPart[] = [];
+
+      if (text) {
+        parts.push({ type: 'text', text });
+      }
+
+      imageUrls.forEach((url) =>
+        parts.push({
+          type: 'image_url',
+          image_url: { url },
+        })
+      );
+
+      if (!parts.length) {
+        parts.push({ type: 'text', text: '' });
+      }
+
+      return {
+        role: 'user',
+        content: parts,
+      };
+    }
 
     const content: ChatCompletionContentPart[] = isUserMessage
       ? [
           {
             type: 'input_text',
             text: text ?? '',
-            ...(attachments && attachments.length > 0 ? { attachments } : {}),
+            ...(attachmentRefs.length ? { attachments: attachmentRefs } : {}),
           },
         ]
       : [

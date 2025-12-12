@@ -86,6 +86,65 @@ describe('chat utilities', () => {
     ]);
   });
 
+  it('adds image_url parts when attachment URLs are provided', () => {
+    const messages: Message[] = [
+      {
+        id: '1',
+        sender: 'user',
+        content: 'Check this image',
+        attachments: [
+          { id: 'img-1', name: 'photo', size: 1, type: 'image/png' },
+        ],
+      },
+    ];
+
+    const completionMessages = toChatCompletionMessages(messages, {
+      attachmentImageUrls: { 'img-1': 'data:image/png;base64,abc123' },
+    });
+
+    expect(completionMessages).toEqual([
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Check this image' },
+          {
+            type: 'image_url',
+            image_url: { url: 'data:image/png;base64,abc123' },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('omits attachment references when requested', () => {
+    const messages: Message[] = [
+      {
+        id: '1',
+        sender: 'user',
+        content: 'No refs',
+        attachments: [
+          { id: 'att-1', name: 'first', size: 1, type: 'text/plain' },
+        ],
+      },
+    ];
+
+    const completionMessages = toChatCompletionMessages(messages, {
+      omitAttachmentReferences: true,
+    });
+
+    expect(completionMessages).toEqual([
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: 'No refs',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('collects content from completion messages regardless of shape', () => {
     expect(getChatCompletionContentText('ready')).toBe('ready');
     expect(
