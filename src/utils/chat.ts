@@ -59,8 +59,12 @@ export const toChatCompletionMessages = (
     if (isUserMessage && imageUrls.length) {
       const parts: ChatCompletionContentPart[] = [];
 
-      if (text) {
-        parts.push({ type: 'text', text });
+      if (text || attachmentRefs.length) {
+        parts.push({
+          type: 'input_text',
+          text: text ?? '',
+          ...(attachmentRefs.length ? { attachments: attachmentRefs } : {}),
+        });
       }
 
       imageUrls.forEach((url) =>

@@ -106,7 +106,46 @@ describe('chat utilities', () => {
       {
         role: 'user',
         content: [
-          { type: 'text', text: 'Check this image' },
+          {
+            type: 'input_text',
+            text: 'Check this image',
+            attachments: [{ id: 'img-1' }],
+          },
+          {
+            type: 'image_url',
+            image_url: { url: 'data:image/png;base64,abc123' },
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('retains non-image attachment references alongside image parts', () => {
+    const messages: Message[] = [
+      {
+        id: '1',
+        sender: 'user',
+        content: 'Mixed files',
+        attachments: [
+          { id: 'img-1', name: 'photo', size: 1, type: 'image/png' },
+          { id: 'doc-1', name: 'doc', size: 2, type: 'application/pdf' },
+        ],
+      },
+    ];
+
+    const completionMessages = toChatCompletionMessages(messages, {
+      attachmentImageUrls: { 'img-1': 'data:image/png;base64,abc123' },
+    });
+
+    expect(completionMessages).toEqual([
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: 'Mixed files',
+            attachments: [{ id: 'img-1' }, { id: 'doc-1' }],
+          },
           {
             type: 'image_url',
             image_url: { url: 'data:image/png;base64,abc123' },
