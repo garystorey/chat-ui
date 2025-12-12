@@ -35,6 +35,7 @@ export const getMessagePlainText = (message?: Message) => {
 type ToChatCompletionMessagesOptions = {
   attachmentImageUrls?: Record<string, string>;
   omitAttachmentReferences?: boolean;
+  omitAttachmentReferencesForIds?: Set<string>;
 };
 
 export const toChatCompletionMessages = (
@@ -48,7 +49,10 @@ export const toChatCompletionMessages = (
       !options?.omitAttachmentReferences &&
       isUserMessage &&
       Array.isArray(message.attachments)
-        ? message.attachments
+        ? message.attachments.filter(
+            (attachment) =>
+              !options?.omitAttachmentReferencesForIds?.has(attachment.id)
+          )
         : [];
 
     const attachmentRefs = attachments.map((attachment) => ({ id: attachment.id }));
