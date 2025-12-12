@@ -1,5 +1,6 @@
 import {
   ChangeEvent,
+  DragEvent,
   FormEvent,
   KeyboardEvent,
   forwardRef,
@@ -21,6 +22,15 @@ import List from "./List";
 import Show from "./Show";
 
 import "./UserInput.css";
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+]);
+const ACCEPTED_IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "webp"]);
 
 type UserInputProps = {
   value: string;
@@ -46,7 +56,19 @@ function AttachmentListItem({
 }: AttachmentListItemProps) {
   return (
     <div className="input-panel__attachment-item">
-      <span className="input-panel__attachment-name">{attachment.name}</span>
+      <div className="input-panel__attachment-thumbnail">
+        {attachment.previewUrl && (
+          <img
+            src={attachment.previewUrl}
+            alt={attachment.name}
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+      </div>
+      <div className="input-panel__attachment-meta">
+        <span className="input-panel__attachment-name">{attachment.name}</span>
+      </div>
       <button
         type="button"
         className="input-panel__attachment-remove"
@@ -74,6 +96,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [attachments, setAttachments] = useState<Attachment[]>([]);
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const [canRecord, setCanRecord] = useState(false);
     const [recordingStatus, setRecordingStatus] = useState("");
     const manualValueRef = useRef(value);
@@ -139,7 +162,13 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         );
 
         if (sent) {
+          attachments.forEach((attachment) => {
+            if (attachment.previewUrl) {
+              URL.revokeObjectURL(attachment.previewUrl);
+            }
+          });
           setAttachments([]);
+          setUploadError(null);
         }
 
         return sent;
@@ -181,6 +210,108 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       fileInputRef.current?.click();
     }, []);
 
+    const isImageFile = useCallback((file: File) => {
+      const extension = file.name.split(".").pop()?.toLowerCase();
+      return (
+        file.type.startsWith("image/") ||
+        (extension !== undefined && ACCEPTED_IMAGE_EXTENSIONS.has(extension))
+      );
+    }, []);
+
+    const getValidationError = useCallback(
+      (file: File) => {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+          return `"${file.name}" is too large. Maximum size is 5 MB.`;
+        }
+
+        if (!isImageFile(file)) {
+          return null;
+        }
+
+        const extension = file.name.split(".").pop()?.toLowerCase();
+        const hasValidType =
+          (extension && ACCEPTED_IMAGE_EXTENSIONS.has(extension)) ||
+          ACCEPTED_IMAGE_TYPES.has(file.type);
+
+        if (!hasValidType) {
+          return `"${file.name}" must be a PNG, JPG, or WEBP image.`;
+        }
+
+        return null;
+      },
+      [isImageFile]
+    );
+
+    const buildImageAttachments = useCallback(
+      (files: File[]): Attachment[] => {
+        const baseAttachments = buildAttachmentsFromFiles(files);
+
+        return baseAttachments.map((attachment, index) => ({
+          ...attachment,
+          previewUrl: URL.createObjectURL(files[index]),
+        }));
+      },
+      []
+    );
+
+    const extractFiles = useCallback((dataTransfer?: DataTransfer | null) => {
+      if (!dataTransfer) {
+        return [] as File[];
+      }
+
+      const items = dataTransfer.items;
+
+      if (items && items.length) {
+        return Array.from(items)
+          .map((item) => (item.kind === "file" ? item.getAsFile() : null))
+          .filter((file): file is File => Boolean(file));
+      }
+
+      return Array.from(dataTransfer.files ?? []);
+    }, []);
+
+    const handleFiles = useCallback(
+      (files: File[]) => {
+        if (!files.length) {
+          return;
+        }
+
+        const errors: string[] = [];
+        const validFiles: File[] = [];
+
+        files.forEach((file) => {
+          const error = getValidationError(file);
+          if (error) {
+            errors.push(error);
+            return;
+          }
+
+          validFiles.push(file);
+        });
+
+        if (errors.length) {
+          setUploadError(errors.join(" "));
+        } else {
+          setUploadError(null);
+        }
+
+        if (!validFiles.length) {
+          return;
+        }
+
+        const imageFiles = validFiles.filter(isImageFile);
+        const otherFiles = validFiles.filter((file) => !isImageFile(file));
+
+        const nextAttachments = [
+          ...buildImageAttachments(imageFiles),
+          ...buildAttachmentsFromFiles(otherFiles),
+        ];
+
+        setAttachments((current) => [...current, ...nextAttachments]);
+      },
+      [buildImageAttachments, getValidationError, isImageFile]
+    );
+
     const handleAttachmentChange = useCallback(
       (event: ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -188,22 +319,53 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           return;
         }
 
-        const selectedFiles = Array.from(files);
-
-        setAttachments((current) => [
-          ...current,
-          ...buildAttachmentsFromFiles(selectedFiles),
-        ]);
+        handleFiles(Array.from(files));
 
         event.target.value = "";
       },
-      []
+      [handleFiles]
+    );
+
+    const handleFileDrop = useCallback(
+      (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const files = extractFiles(event.dataTransfer);
+
+        if (!files.length) {
+          return;
+        }
+
+        handleFiles(files);
+      },
+      [extractFiles, handleFiles]
     );
 
     const handleRemoveAttachment = useCallback((targetId: string) => {
-      setAttachments((current) =>
-        current.filter((attachment) => attachment.id !== targetId)
-      );
+      setAttachments((current) => {
+        const target = current.find((attachment) => attachment.id === targetId);
+
+        if (target?.previewUrl) {
+          URL.revokeObjectURL(target.previewUrl);
+        }
+
+        return current.filter((attachment) => attachment.id !== targetId);
+      });
+    }, []);
+
+    const attachmentsRef = useRef<Attachment[]>(attachments);
+
+    useEffect(() => {
+      attachmentsRef.current = attachments;
+    }, [attachments]);
+
+    useEffect(() => {
+      return () => {
+        attachmentsRef.current.forEach((attachment) => {
+          if (attachment.previewUrl) {
+            URL.revokeObjectURL(attachment.previewUrl);
+          }
+        });
+      };
     }, []);
 
     const handleToggleRecording = useCallback(() => {
@@ -337,9 +499,35 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
+          <div
+            className="input-panel__dropzone"
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={handleFileDrop}
+          >
+            <div className="input-panel__dropzone-body">
+              <div className="input-panel__dropzone-copy">
+                <p className="input-panel__dropzone-title">Add attachments</p>
+                <p className="input-panel__dropzone-hint">
+                  Drag and drop files up to 5 MB. Image uploads show a preview.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="input-panel__dropzone-button"
+                onClick={handleAttachmentButtonClick}
+              >
+                Upload file
+              </button>
+            </div>
+          </div>
+          {uploadError && (
+            <p className="input-panel__upload-error" role="alert">
+              {uploadError}
+            </p>
+          )}
           <Show when={attachments.length > 0}>
             <List<Attachment>
-              className="input-panel__attachment-list"
+              className="input-panel__attachment-grid"
               items={attachments}
               keyfield="id"
               as={(a) => (
@@ -357,6 +545,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               className="input-panel__file-input"
               onChange={handleAttachmentChange}
               multiple
+              accept="*/*"
               tabIndex={-1}
               aria-hidden="true"
             />
