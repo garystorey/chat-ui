@@ -17,6 +17,7 @@ import type {
   Message,
   Attachment,
   AttachmentRequest,
+  ChatCompletionRequest,
 } from "./types";
 import {
   useConnectionListeners,
@@ -36,10 +37,17 @@ import {
   cloneMessages,
   createChatRecordFromMessages,
   getId,
+  getImageAttachmentDataUrls,
   toChatCompletionMessages,
 } from "./utils";
 
-import { ASSISTANT_ERROR_MESSAGE, DEFAULT_CHAT_MODEL, defaultChats, suggestions } from "./config";
+import {
+  ASSISTANT_ERROR_MESSAGE,
+  DEFAULT_CHAT_MODEL,
+  VISION_CHAT_MODEL,
+  defaultChats,
+  suggestions,
+} from "./config";
 
 import "./App.css";
 
@@ -61,6 +69,7 @@ const App = () => {
   ]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [visionWarning, setVisionWarning] = useState<string | null>(null);
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
@@ -181,6 +190,8 @@ const App = () => {
         return false;
       }
 
+      setVisionWarning(null);
+
       if (chatCompletionStatus === "error") {
         resetChatCompletion();
       }
@@ -236,6 +247,27 @@ const App = () => {
       };
 
       const conversationForRequest = [...messages, userMessage];
+      const imageAttachmentDataUrls = getImageAttachmentDataUrls(requestAttachments);
+      const hasVisionAttachments = Object.keys(imageAttachmentDataUrls).length > 0;
+      const requestModel =
+        hasVisionAttachments && VISION_CHAT_MODEL ? VISION_CHAT_MODEL : selectedModel;
+
+      const requestBody: ChatCompletionRequest = {
+        model: requestModel,
+        messages: toChatCompletionMessages(conversationForRequest, {
+          attachmentImageUrls: imageAttachmentDataUrls,
+        }),
+        stream: true,
+        ...(requestAttachments.length ? { attachments: requestAttachments } : {}),
+      };
+
+      const textOnlyBody: ChatCompletionRequest = {
+        model: selectedModel,
+        messages: toChatCompletionMessages(conversationForRequest, {
+          omitAttachmentReferences: true,
+        }),
+        stream: true,
+      };
       const updateAssistantMessage = (content: string) => {
         setMessages((current) => {
           let previewMessage: Message | undefined;
@@ -287,6 +319,8 @@ const App = () => {
       setInputValue("");
       setResponding(true);
 
+      let visionFallbackTriggered = false;
+
       const handleFinalAssistantReply = (finalAssistantReply: string) => {
         setMessages((current) => {
           let previewMessage: Message | undefined;
@@ -311,24 +345,39 @@ const App = () => {
         });
       };
 
-      sendChatCompletion({
-        body: {
-          model: selectedModel,
-          messages: toChatCompletionMessages(conversationForRequest),
-          stream: true,
-          ...(requestAttachments.length
-            ? { attachments: requestAttachments }
-            : {}),
-        },
-        chatId,
-        assistantMessageId,
-        onStreamUpdate: updateAssistantMessage,
-        onStreamComplete: handleFinalAssistantReply,
-        onError: handleCompletionError,
-        onSettled: () => {
-          setResponding(false);
-        },
-      });
+      const startChatCompletion = (
+        body: ChatCompletionRequest,
+        { allowVisionFallback }: { allowVisionFallback: boolean }
+      ) => {
+        sendChatCompletion({
+          body,
+          chatId,
+          assistantMessageId,
+          onStreamUpdate: updateAssistantMessage,
+          onStreamComplete: handleFinalAssistantReply,
+          onError: (error) => {
+            if (allowVisionFallback && hasVisionAttachments) {
+              visionFallbackTriggered = true;
+              setVisionWarning(
+                "Vision is unavailable. Your request was sent without images."
+              );
+              startChatCompletion(textOnlyBody, { allowVisionFallback: false });
+              return;
+            }
+
+            handleCompletionError(error);
+          },
+          onSettled: () => {
+            if (visionFallbackTriggered && allowVisionFallback) {
+              return;
+            }
+
+            setResponding(false);
+          },
+        });
+      };
+
+      startChatCompletion(requestBody, { allowVisionFallback: hasVisionAttachments });
 
       return true;
     },
@@ -344,6 +393,7 @@ const App = () => {
       setActiveChatId,
       setMessages,
       setResponding,
+      setVisionWarning,
       selectedModel,
       updateActiveChat,
     ]
@@ -512,6 +562,7 @@ const App = () => {
                   selectedModel={selectedModel}
                   onSelectModel={setSelectedModel}
                   isLoadingModels={isLoadingModels}
+                  notice={visionWarning}
                 />
               </div>
             <Show when={isNewChat}>

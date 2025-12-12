@@ -43,6 +43,7 @@ type UserInputProps = {
   selectedModel: string;
   onSelectModel: (model: string) => void;
   isLoadingModels: boolean;
+  notice?: string | null;
 };
 
 type AttachmentListItemProps = {
@@ -92,6 +93,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     selectedModel,
     onSelectModel,
     isLoadingModels,
+    notice,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -593,6 +595,11 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           {uploadError && (
             <p className="input-panel__upload-error" role="alert">
               {uploadError}
+            </p>
+          )}
+          {notice && (
+            <p className="input-panel__notice" role="status">
+              {notice}
             </p>
           )}
           <Show when={attachments.length > 0}>

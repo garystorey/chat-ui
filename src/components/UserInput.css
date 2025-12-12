@@ -148,6 +148,12 @@ body.chat-open .input-panel {
   font-size: 0.9rem;
 }
 
+.input-panel__notice {
+  margin: 0.35rem 0 0;
+  color: color-mix(in oklab, var(--warning), var(--text));
+  font-size: 0.9rem;
+}
+
 
 .input-panel__attachment-grid {
   list-style: none;
