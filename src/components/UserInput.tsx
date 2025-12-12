@@ -499,45 +499,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
-          <div
-            className="input-panel__dropzone"
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={handleFileDrop}
-          >
-            <div className="input-panel__dropzone-body">
-              <div className="input-panel__dropzone-copy">
-                <p className="input-panel__dropzone-title">Add attachments</p>
-                <p className="input-panel__dropzone-hint">
-                  Drag and drop files up to 5 MB. Image uploads show a preview.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="input-panel__dropzone-button"
-                onClick={handleAttachmentButtonClick}
-              >
-                Upload file
-              </button>
-            </div>
-          </div>
-          {uploadError && (
-            <p className="input-panel__upload-error" role="alert">
-              {uploadError}
-            </p>
-          )}
-          <Show when={attachments.length > 0}>
-            <List<Attachment>
-              className="input-panel__attachment-grid"
-              items={attachments}
-              keyfield="id"
-              as={(a) => (
-                <AttachmentListItem
-                  attachment={a}
-                  handleRemoveAttachment={handleRemoveAttachment}
-                />
-              )}
-            />
-          </Show>
           <div className="input-panel__controls">
             <input
               ref={fileInputRef}
@@ -566,15 +527,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               {isLoadingModels && <span className="input-panel__model-hint">Loading…</span>}
             </div>
             <div className="input-panel__actions">
-              <button
-                type="button"
-                className="input-panel__icon-button input-panel__icon-button--accent"
-                onClick={handleAttachmentButtonClick}
-                aria-label="Add attachment"
-                title="Add attachment"
-              >
-                <AttachmentIcon />
-              </button>
               <button
                 type="button"
                 className={micButtonClasses.join(" ")}
@@ -614,6 +566,48 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               </button>
             )}
           </div>
+          <div
+            className="input-panel__dropzone"
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={handleFileDrop}
+          >
+            <div className="input-panel__dropzone-body">
+              <div className="input-panel__dropzone-copy">
+                <p className="input-panel__dropzone-title">Add attachments</p>
+                <p className="input-panel__dropzone-hint">
+                  Drag and drop files up to 5 MB. Image uploads show a preview.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="input-panel__dropzone-button"
+                onClick={handleAttachmentButtonClick}
+                aria-label="Add attachment"
+                title="Add attachment"
+              >
+                <AttachmentIcon />
+                <span className="sr-only">Add attachment</span>
+              </button>
+            </div>
+          </div>
+          {uploadError && (
+            <p className="input-panel__upload-error" role="alert">
+              {uploadError}
+            </p>
+          )}
+          <Show when={attachments.length > 0}>
+            <List<Attachment>
+              className="input-panel__attachment-grid"
+              items={attachments}
+              keyfield="id"
+              as={(a) => (
+                <AttachmentListItem
+                  attachment={a}
+                  handleRemoveAttachment={handleRemoveAttachment}
+                />
+              )}
+            />
+          </Show>
           <div id="inputHint" className="sr-only">
             Press Enter to send and Shift+Enter for newline
           </div>
