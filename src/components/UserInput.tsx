@@ -23,6 +23,15 @@ import Show from "./Show";
 
 import "./UserInput.css";
 
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = new Set([
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+]);
+const ACCEPTED_IMAGE_EXTENSIONS = new Set(["png", "jpg", "jpeg", "webp"]);
+
 type UserInputProps = {
   value: string;
   onChange: (value: string) => void;
@@ -201,31 +210,37 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       fileInputRef.current?.click();
     }, []);
 
-    const getValidationError = useCallback((file: File) => {
-      const acceptedTypes = new Set([
-        "image/png",
-        "image/jpeg",
-        "image/jpg",
-        "image/webp",
-      ]);
-      const acceptedExtensions = new Set(["png", "jpg", "jpeg", "webp"]);
-      const maxSizeBytes = 5 * 1024 * 1024;
-
+    const isImageFile = useCallback((file: File) => {
       const extension = file.name.split(".").pop()?.toLowerCase();
-      const hasValidType =
-        (extension && acceptedExtensions.has(extension)) ||
-        acceptedTypes.has(file.type);
-
-      if (!hasValidType) {
-        return `"${file.name}" must be a PNG, JPG, or WEBP image.`;
-      }
-
-      if (file.size > maxSizeBytes) {
-        return `"${file.name}" is too large. Maximum size is 5 MB.`;
-      }
-
-      return null;
+      return (
+        file.type.startsWith("image/") ||
+        (extension !== undefined && ACCEPTED_IMAGE_EXTENSIONS.has(extension))
+      );
     }, []);
+
+    const getValidationError = useCallback(
+      (file: File) => {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+          return `"${file.name}" is too large. Maximum size is 5 MB.`;
+        }
+
+        if (!isImageFile(file)) {
+          return null;
+        }
+
+        const extension = file.name.split(".").pop()?.toLowerCase();
+        const hasValidType =
+          (extension && ACCEPTED_IMAGE_EXTENSIONS.has(extension)) ||
+          ACCEPTED_IMAGE_TYPES.has(file.type);
+
+        if (!hasValidType) {
+          return `"${file.name}" must be a PNG, JPG, or WEBP image.`;
+        }
+
+        return null;
+      },
+      [isImageFile]
+    );
 
     const buildImageAttachments = useCallback(
       (files: File[]): Attachment[] => {
@@ -284,11 +299,17 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           return;
         }
 
-        const nextAttachments = buildImageAttachments(validFiles);
+        const imageFiles = validFiles.filter(isImageFile);
+        const otherFiles = validFiles.filter((file) => !isImageFile(file));
+
+        const nextAttachments = [
+          ...buildImageAttachments(imageFiles),
+          ...buildAttachmentsFromFiles(otherFiles),
+        ];
 
         setAttachments((current) => [...current, ...nextAttachments]);
       },
-      [buildImageAttachments, getValidationError]
+      [buildImageAttachments, getValidationError, isImageFile]
     );
 
     const handleAttachmentChange = useCallback(
@@ -305,7 +326,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       [handleFiles]
     );
 
-    const handleImageDrop = useCallback(
+    const handleFileDrop = useCallback(
       (event: DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         const files = extractFiles(event.dataTransfer);
@@ -476,13 +497,13 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           <div
             className="input-panel__dropzone"
             onDragOver={(event) => event.preventDefault()}
-            onDrop={handleImageDrop}
+            onDrop={handleFileDrop}
           >
             <div className="input-panel__dropzone-body">
               <div className="input-panel__dropzone-copy">
-                <p className="input-panel__dropzone-title">Add images</p>
+                <p className="input-panel__dropzone-title">Add attachments</p>
                 <p className="input-panel__dropzone-hint">
-                  Drag and drop PNG, JPG, or WEBP files (max 5 MB each).
+                  Drag and drop files up to 5 MB. Image uploads show a preview.
                 </p>
               </div>
               <button
@@ -490,7 +511,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 className="input-panel__dropzone-button"
                 onClick={handleAttachmentButtonClick}
               >
-                Upload image
+                Upload file
               </button>
             </div>
           </div>
@@ -519,7 +540,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               className="input-panel__file-input"
               onChange={handleAttachmentChange}
               multiple
-              accept="image/png,image/jpeg,image/jpg,image/webp"
+              accept="*/*"
               tabIndex={-1}
               aria-hidden="true"
             />
