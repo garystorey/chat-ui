@@ -248,17 +248,28 @@ const App = () => {
 
       const conversationForRequest = [...messages, userMessage];
       const imageAttachmentDataUrls = getImageAttachmentDataUrls(requestAttachments);
-      const hasVisionAttachments = Object.keys(imageAttachmentDataUrls).length > 0;
+      const inlineImageAttachmentIds = new Set(
+        Object.keys(imageAttachmentDataUrls)
+      );
+      const hasVisionAttachments = inlineImageAttachmentIds.size > 0;
+      const attachmentsWithoutInlineImages = requestAttachments.filter(
+        (attachment) => !inlineImageAttachmentIds.has(attachment.id)
+      );
       const requestModel =
-        hasVisionAttachments && VISION_CHAT_MODEL ? VISION_CHAT_MODEL : selectedModel;
+        inlineImageAttachmentIds.size > 0 && VISION_CHAT_MODEL
+          ? VISION_CHAT_MODEL
+          : selectedModel;
 
       const requestBody: ChatCompletionRequest = {
         model: requestModel,
         messages: toChatCompletionMessages(conversationForRequest, {
           attachmentImageUrls: imageAttachmentDataUrls,
+          omitAttachmentReferencesForIds: inlineImageAttachmentIds,
         }),
         stream: true,
-        ...(requestAttachments.length ? { attachments: requestAttachments } : {}),
+        ...(attachmentsWithoutInlineImages.length
+          ? { attachments: attachmentsWithoutInlineImages }
+          : {}),
       };
 
       const textOnlyBody: ChatCompletionRequest = {
@@ -347,7 +358,10 @@ const App = () => {
 
       const startChatCompletion = (
         body: ChatCompletionRequest,
-        { allowVisionFallback }: { allowVisionFallback: boolean }
+        {
+          allowVisionFallback,
+          hasVisionAttachments: allowVisionFallbackAttachment,
+        }: { allowVisionFallback: boolean; hasVisionAttachments: boolean }
       ) => {
         sendChatCompletion({
           body,
@@ -356,12 +370,15 @@ const App = () => {
           onStreamUpdate: updateAssistantMessage,
           onStreamComplete: handleFinalAssistantReply,
           onError: (error) => {
-            if (allowVisionFallback && hasVisionAttachments) {
+            if (allowVisionFallback && allowVisionFallbackAttachment) {
               visionFallbackTriggered = true;
               setVisionWarning(
                 "Vision is unavailable. Your request was sent without images."
               );
-              startChatCompletion(textOnlyBody, { allowVisionFallback: false });
+              startChatCompletion(textOnlyBody, {
+                allowVisionFallback: false,
+                hasVisionAttachments: false,
+              });
               return;
             }
 
@@ -377,7 +394,10 @@ const App = () => {
         });
       };
 
-      startChatCompletion(requestBody, { allowVisionFallback: hasVisionAttachments });
+      startChatCompletion(requestBody, {
+        allowVisionFallback: hasVisionAttachments,
+        hasVisionAttachments,
+      });
 
       return true;
     },
