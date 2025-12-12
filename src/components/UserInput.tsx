@@ -352,16 +352,21 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       });
     }, []);
 
-    useEffect(
-      () => () => {
-        attachments.forEach((attachment) => {
+    const attachmentsRef = useRef<Attachment[]>(attachments);
+
+    useEffect(() => {
+      attachmentsRef.current = attachments;
+    }, [attachments]);
+
+    useEffect(() => {
+      return () => {
+        attachmentsRef.current.forEach((attachment) => {
           if (attachment.previewUrl) {
             URL.revokeObjectURL(attachment.previewUrl);
           }
         });
-      },
-      [attachments]
-    );
+      };
+    }, []);
 
     const handleToggleRecording = useCallback(() => {
       if (isResponding || !canRecord) {
