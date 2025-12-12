@@ -13,6 +13,7 @@ export type Attachment = {
   size: number;
   type: string;
   file?: File;
+  previewUrl?: string;
 };
 
 export type Message = {
