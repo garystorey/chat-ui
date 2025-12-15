@@ -3,9 +3,9 @@
   width: 300px;
   padding: 1.35rem;
   border-radius: clamp(1rem, 3vw, 1.6rem);
-  border: 1px solid color-mix(in oklab, var(--panel-border) 85%, transparent);
-  background: var(--panel-solid);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 78%, transparent);
+  background: linear-gradient(165deg, color-mix(in oklab, var(--panel) 92%, var(--brand-shell) 8%) 0%, color-mix(in oklab, var(--panel-solid) 88%, var(--brand-shell) 12%) 100%);
+  box-shadow: var(--shadow-soft), 0 32px 70px rgba(12, 15, 22, 0.22);
   transition: width var(--duration-md) var(--ease-out),
     transform var(--duration-md) var(--ease-out);
   display: flex;
@@ -13,6 +13,7 @@
   height: 100%;
   overflow-x: hidden;
   position: relative;
+  backdrop-filter: blur(12px);
 }
 
 .sidebar::before {
@@ -52,10 +53,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.7rem;
-  border: 1px solid color-mix(in oklab, var(--panel-border) 75%, transparent);
-  background: color-mix(in oklab, var(--panel) 88%, transparent 12%);
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  background: color-mix(in oklab, var(--panel) 90%, transparent 10%);
   color: var(--text);
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -63,6 +64,7 @@
   cursor: pointer;
   appearance: none;
   text-align: left;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.05);
 }
 
 .sidebar__status-dot {
@@ -70,10 +72,13 @@
   height: 0.8rem;
   border-radius: 999px;
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 70%, transparent);
+  position: relative;
 }
 
 .sidebar__status-dot--online {
   background: #2ecc71;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 70%, transparent), 0 0 0 0 rgba(46, 204, 113, 0.4);
+  animation: statusPulse 2.4s ease-in-out infinite;
 }
 
 .sidebar__status-dot--offline {
@@ -99,7 +104,7 @@
 .sidebar__toggle {
   background: color-mix(in oklab, var(--panel-solid) 90%, var(--brand-shell) 10%);
   border: 1px solid color-mix(in oklab, var(--panel-border) 80%, transparent);
-  border-radius: 0.5rem;
+  border-radius: 0.65rem;
   color: var(--text);
   padding: 0.35rem 0.55rem;
   display: inline-flex;
@@ -136,7 +141,7 @@
   border: none;
   border-radius: 0.85rem;
   color: var(--accent-button-text);
-  padding: 0.75rem 0.95rem;
+  padding: 0.85rem 1rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -173,6 +178,8 @@
   background: color-mix(in oklab, var(--input-bg) 92%, var(--panel-solid) 8%);
   color: var(--text);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: border-color var(--duration-sm) var(--ease-out),
+    box-shadow var(--duration-sm) var(--ease-out);
 }
 
 .sidebar__search-icon {
@@ -191,6 +198,7 @@
 
 .sidebar__search input:focus {
   outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .sidebar__chats {
@@ -231,7 +239,7 @@
   text-align: left;
   background: color-mix(in oklab, var(--panel) 88%, transparent 12%);
   border: 1px solid color-mix(in oklab, var(--panel-border) 65%, transparent);
-  border-radius: 0.9rem;
+  border-radius: 0.95rem;
   padding: 0.7rem 2.35rem 0.7rem 0.85rem;
   color: inherit;
   cursor: pointer;
@@ -358,6 +366,21 @@
   white-space: normal;
   text-align: center;
   font-size: 0.7rem;
+}
+
+@keyframes statusPulse {
+  0% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 70%, transparent),
+      0 0 0 0 rgba(46, 204, 113, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 70%, transparent),
+      0 0 0 10px rgba(46, 204, 113, 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 70%, transparent),
+      0 0 0 0 rgba(46, 204, 113, 0.08);
+  }
 }
 
 @media (max-width: 900px) {
