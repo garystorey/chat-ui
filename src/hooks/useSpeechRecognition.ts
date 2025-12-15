@@ -11,10 +11,33 @@ interface UseSpeechRecognitionOptions {
   silenceTimeoutMs?: number;
 }
 
-type SpeechRecognitionConstructor = new () => SpeechRecognition;
+type SpeechRecognitionResultLike = {
+  isFinal: boolean;
+  [index: number]: { transcript?: string };
+};
+
+type SpeechRecognitionEventLike = {
+  resultIndex: number;
+  results: SpeechRecognitionResultLike[];
+};
+
+type SpeechRecognitionErrorEventLike = { error: string };
+
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
 type SpeechRecognitionWithVendor = SpeechRecognitionConstructor & {
-  new (): SpeechRecognition;
+  new (): SpeechRecognitionLike;
 };
 
 const getSpeechRecognitionConstructor = (): SpeechRecognitionWithVendor | null => {
@@ -23,10 +46,12 @@ const getSpeechRecognitionConstructor = (): SpeechRecognitionWithVendor | null =
   }
 
   const speechRecognition = (window as Window & {
+    SpeechRecognition?: SpeechRecognitionWithVendor;
     webkitSpeechRecognition?: SpeechRecognitionWithVendor;
   }).SpeechRecognition;
 
   const webkitSpeechRecognition = (window as Window & {
+    SpeechRecognition?: SpeechRecognitionWithVendor;
     webkitSpeechRecognition?: SpeechRecognitionWithVendor;
   }).webkitSpeechRecognition;
 
@@ -42,7 +67,7 @@ const useSpeechRecognition = ({
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const finalTranscriptRef = useRef('');
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,7 +113,7 @@ const useSpeechRecognition = ({
   }, [autoStop, silenceTimeoutMs, stop]);
 
   const handleResult = useCallback(
-    (event: SpeechRecognitionEvent) => {
+    (event: SpeechRecognitionEventLike) => {
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
@@ -110,7 +135,7 @@ const useSpeechRecognition = ({
     [scheduleAutoStop],
   );
 
-  const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
+  const handleError = useCallback((event: SpeechRecognitionErrorEventLike) => {
     setError(event.error);
     resetState();
     recognitionRef.current = null;
@@ -144,7 +169,14 @@ const useSpeechRecognition = ({
     finalTranscriptRef.current = '';
     setTranscript('');
 
-    const recognition = new SpeechRecognitionConstructor();
+    const SpeechRecognitionCtor = SpeechRecognitionConstructor;
+
+    if (!SpeechRecognitionCtor) {
+      setError('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    const recognition = new SpeechRecognitionCtor();
     recognition.lang = locale ?? recognition.lang;
     recognition.interimResults = true;
     recognition.continuous = true;

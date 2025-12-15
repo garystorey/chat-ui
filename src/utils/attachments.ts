@@ -23,12 +23,12 @@ const readFileAsArrayBuffer = async (file: FileLike): Promise<ArrayBuffer> => {
       const reader = new FileReader();
       reader.onerror = () => reject(reader.error ?? new Error('Unable to read file.'));
       reader.onload = () => resolve(reader.result as ArrayBuffer);
-      reader.readAsArrayBuffer(file as Blob);
+      reader.readAsArrayBuffer(file as unknown as Blob);
     });
   }
 
   if (typeof Response === 'function') {
-    const response = new Response(file);
+    const response = new Response(file as unknown as BodyInit);
     return response.arrayBuffer();
   }
 
