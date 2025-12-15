@@ -1,15 +1,15 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import * as idModule from '../../src/utils/id';
 import {
   arrayBufferToBase64,
   encodeFileToBase64,
   buildAttachmentsFromFiles,
   normalizeMessageAttachments,
-  buildAttachmentRequestPayload,
+  ingestAttachments,
   formatFileSize,
   getAttachmentDisplayType,
 } from '../../src/utils/attachments';
-import type { Attachment } from '../../src/types';
+import type { Attachment, AttachmentIngestionState } from '../../src/types';
 
 vi.mock('../../src/utils/id', () => ({
   getId: vi.fn(() => 'mock-id'),
@@ -20,6 +20,10 @@ const mockedGetId = vi.mocked(idModule.getId);
 describe('attachments utilities', () => {
   beforeEach(() => {
     mockedGetId.mockClear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('arrayBufferToBase64', () => {
@@ -97,30 +101,53 @@ describe('attachments utilities', () => {
   it('builds attachment request payloads only from entries that contain a File', async () => {
     mockedGetId.mockReturnValue('generated');
     const file = new File(['payload'], 'payload.json', { type: 'application/json' });
+    const statusUpdates: Record<string, AttachmentIngestionState> = {};
 
     const attachments: Attachment[] = [
       { id: 'keep', name: 'keep.json', size: file.size, type: 'application/json', file },
-      { id: 'skip', name: 'skip.bin', size: 10, type: 'application/octet-stream' },
     ];
 
-    const payload = await buildAttachmentRequestPayload(attachments);
+    const uploadResponse = new Response(JSON.stringify({ document_id: 'doc-123' }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
+    const embeddingResponse = new Response(JSON.stringify({ embedding_model: 'test-embed' }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    });
 
-    expect(payload).toEqual([
+    const fetchMock = vi.spyOn(globalThis, 'fetch');
+    fetchMock
+      .mockResolvedValueOnce(uploadResponse)
+      .mockResolvedValueOnce(embeddingResponse);
+
+    const ingested = await ingestAttachments(attachments, {
+      onStatusUpdate: (id, state) => {
+        statusUpdates[id] = state;
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(ingested).toEqual([
       {
         id: 'keep',
-        filename: 'keep.json',
-        mime_type: 'application/json',
-        data: globalThis.btoa('payload'),
+        name: 'keep.json',
+        size: file.size,
+        type: 'application/json',
+        documentId: 'doc-123',
+        chunkCount: 1,
+        embeddingModel: 'test-embed',
       },
     ]);
+    expect(statusUpdates['keep']?.status).toBe('complete');
   });
 
-  it('returns an empty attachment request payload when no files are present', async () => {
-    const payload = await buildAttachmentRequestPayload([
+  it('returns an empty ingestion response when no files are present', async () => {
+    const result = await ingestAttachments([
       { id: 'one', name: 'Readme', size: 0, type: '' },
     ]);
 
-    expect(payload).toEqual([]);
+    expect(result).toEqual([]);
   });
 
   it('formats file sizes for various units and guards invalid values', () => {
