@@ -1,9 +1,8 @@
 import { getId } from './id';
-import type { AttachmentRequest, Attachment } from '../types';
-
+import { buildRequest, parseJson } from './request';
+import type { Attachment, AttachmentIngestionState } from '../types';
 
 const BASE64_CHUNK_SIZE = 0x8000;
-
 type FileLike = Pick<File, 'name' | 'type'> & {
   arrayBuffer?: () => Promise<ArrayBuffer>;
   text?: () => Promise<string>;
@@ -31,28 +30,6 @@ const readFileAsArrayBuffer = async (file: FileLike): Promise<ArrayBuffer> => {
   if (typeof Response === 'function') {
     const response = new Response(file);
     return response.arrayBuffer();
-  }
-
-  throw new Error('File reading is not supported in this environment.');
-};
-
-const readFileAsText = async (file: FileLike): Promise<string> => {
-  if (typeof file.text === 'function') {
-    return file.text();
-  }
-
-  if (typeof FileReader !== 'undefined') {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(reader.error ?? new Error('Unable to read file.'));
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsText(file as Blob);
-    });
-  }
-
-  if (typeof Response === 'function') {
-    const response = new Response(file);
-    return response.text();
   }
 
   throw new Error('File reading is not supported in this environment.');
@@ -133,38 +110,97 @@ const hasReadableFile = (
   return isFileLike(candidate);
 };
 
-export const buildAttachmentRequestPayload = async (
-  attachments: Attachment[]
-): Promise<AttachmentRequest[]> => {
-  const attachmentsWithFile = attachments.filter(hasReadableFile);
+type IngestAttachmentOptions = {
+  onStatusUpdate?: (id: string, state: AttachmentIngestionState) => void;
+};
 
+const uploadFile = async (attachment: Attachment & { file: FileLike }, attachmentId: string) => {
+  const filename = attachment.name ?? attachment.file.name ?? attachmentId;
+  const mimeType =
+    attachment.type || (attachment.file as { type?: string }).type || 'application/octet-stream';
+  const formData = new FormData();
+  formData.append('file', attachment.file as Blob, filename);
+  formData.append('purpose', 'assistants');
+  formData.append('mime_type', mimeType);
+
+  const { url, requestHeaders, method } = buildRequest({
+    path: '/v1/files',
+    method: 'POST',
+    body: formData,
+  });
+
+  const response = await fetch(url, {
+    method,
+    body: formData,
+    headers: requestHeaders,
+  });
+
+  if (!response.ok) {
+    throw new Error(`File upload failed (${response.status})`);
+  }
+
+  const data = await parseJson(response).catch(() => null);
+  const fileId =
+    (data && typeof (data as { file_id?: unknown }).file_id === 'string'
+      ? (data as { file_id: string }).file_id
+      : null) ||
+    (data && typeof (data as { id?: unknown }).id === 'string'
+      ? (data as { id: string }).id
+      : null) ||
+    attachmentId;
+
+  return { fileId };
+};
+
+const normalizeFileAttachment = (attachment: Attachment, fileId: string): Attachment => ({
+  id: attachment.id ?? getId(),
+  name: attachment.name,
+  size: attachment.size,
+  type: attachment.type,
+  fileId,
+});
+
+export const ingestAttachments = async (
+  attachments: Attachment[],
+  { onStatusUpdate }: IngestAttachmentOptions = {}
+): Promise<Attachment[]> => {
+  const attachmentsWithFile = attachments.filter(hasReadableFile);
   if (!attachmentsWithFile.length) {
     return [];
   }
 
-  return Promise.all(
-    attachmentsWithFile.map(async (attachment) => ({
-      id: attachment.id ?? getId(),
-      filename: attachment.name ?? attachment.file.name,
-      mime_type:
-        attachment.type || attachment.file.type || 'application/octet-stream',
-      data: await encodeFileToBase64(attachment.file),
-    }))
-  );
-};
+  const ingested: Attachment[] = [];
+  const errors: string[] = [];
 
-export const buildAttachmentPromptText = (attachments: Attachment[]): string => {
-  if (!attachments.length) {
-    return '';
+  for (const attachment of attachmentsWithFile) {
+    const attachmentId = attachment.id ?? getId();
+    const updateStatus = (state: AttachmentIngestionState) =>
+      onStatusUpdate?.(attachmentId, state);
+
+    updateStatus({ status: 'uploading', message: 'Uploading attachment…' });
+
+    try {
+      const uploadResult = await uploadFile(attachment, attachmentId);
+      const normalized = normalizeFileAttachment(attachment, uploadResult.fileId);
+
+      ingested.push(normalized);
+      updateStatus({ status: 'complete', message: 'Ready for chat' });
+    } catch (error) {
+      console.error('Attachment ingestion failed', error);
+      errors.push(attachmentId);
+      updateStatus({
+        status: 'error',
+        message: 'Unable to process attachment',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
-  return attachments
-    .map((attachment, index) => {
-      const filename =
-        attachment.name ?? attachment.file?.name ?? `Attachment ${index + 1}`;
-      return `attachment ${filename} content added`;
-    })
-    .join('\n');
+  if (errors.length) {
+    throw new Error('One or more attachments failed to ingest');
+  }
+
+  return ingested;
 };
 
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];

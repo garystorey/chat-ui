@@ -98,6 +98,25 @@ body.chat-open .input-panel {
   white-space: nowrap;
 }
 
+.input-panel__attachment-status {
+  font-size: 0.8rem;
+  color: color-mix(in oklab, var(--text-subtle) 92%, var(--accent) 8%);
+}
+
+.input-panel__attachment-status--uploading,
+.input-panel__attachment-status--embedding {
+  color: color-mix(in oklab, var(--accent) 72%, var(--text-subtle) 28%);
+}
+
+.input-panel__attachment-status--complete {
+  color: color-mix(in oklab, var(--success-strong, #1c9d6f) 82%, var(--text) 18%);
+}
+
+.input-panel__attachment-status--error {
+  color: color-mix(in oklab, var(--danger, #d14343) 88%, var(--text) 12%);
+  font-weight: 600;
+}
+
 .input-panel__attachment-remove {
   background: none;
   border: none;

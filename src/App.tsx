@@ -16,7 +16,7 @@ import type {
   ChatSummary,
   Message,
   Attachment,
-  AttachmentRequest,
+  AttachmentIngestionState,
 } from "./types";
 import {
   useConnectionListeners,
@@ -30,12 +30,11 @@ import {
   useChatCompletionStream,
 } from "./hooks";
 import {
-  buildAttachmentRequestPayload,
-  buildAttachmentPromptText,
   buildChatPreview,
   cloneMessages,
   createChatRecordFromMessages,
   getId,
+  ingestAttachments,
   toChatCompletionMessages,
 } from "./utils";
 
@@ -61,6 +60,7 @@ const App = () => {
   ]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [attachmentIngestion, setAttachmentIngestion] = useState<Record<string, AttachmentIngestionState>>({});
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
@@ -190,21 +190,32 @@ const App = () => {
       }
 
       let messageAttachments: Attachment[] = [];
-      let requestAttachments: AttachmentRequest[] = [];
-      let attachmentPrompt = "";
 
       if (attachments.length) {
+        setAttachmentIngestion({});
+
         try {
-          requestAttachments = await buildAttachmentRequestPayload(attachments);
-          attachmentPrompt = buildAttachmentPromptText(attachments);
+          messageAttachments = await ingestAttachments(attachments, {
+            onStatusUpdate: (id, state) =>
+              setAttachmentIngestion((current) => ({ ...current, [id]: state })),
+          });
         } catch (error) {
-          console.error("Unable to read attachments", error);
+          console.error("Unable to ingest attachments", error);
+          setAttachmentIngestion((current) => ({
+            ...current,
+            ...attachments.reduce(
+              (acc, attachment) => ({
+                ...acc,
+                [attachment.id]: current[attachment.id] ?? {
+                  status: "error",
+                  message: "Unable to process attachment",
+                },
+              }),
+              {}
+            ),
+          }));
           return false;
         }
-
-        messageAttachments = attachments.map<Attachment>(({ file, ...metadata }) => ({
-          ...metadata,
-        }));
       }
 
       const chatId = activeChatId ?? getId();
@@ -213,16 +224,10 @@ const App = () => {
         setActiveChatId(chatId);
       }
 
-      const contentWithAttachments = attachmentPrompt
-        ? text
-          ? `${text}\n${attachmentPrompt}`
-          : attachmentPrompt
-        : text;
-
       const userMessage: Message = {
         id: getId(),
         sender: "user",
-        content: contentWithAttachments,
+        content: text,
         ...(messageAttachments.length
           ? { attachments: messageAttachments }
           : {}),
@@ -316,9 +321,6 @@ const App = () => {
           model: selectedModel,
           messages: toChatCompletionMessages(conversationForRequest),
           stream: true,
-          ...(requestAttachments.length
-            ? { attachments: requestAttachments }
-            : {}),
         },
         chatId,
         assistantMessageId,
@@ -508,6 +510,7 @@ const App = () => {
                   onSend={handleSend}
                   onStop={cancelPendingResponse}
                   isResponding={isResponding}
+                  attachmentStatuses={attachmentIngestion}
                   availableModels={availableModels}
                   selectedModel={selectedModel}
                   onSelectModel={setSelectedModel}

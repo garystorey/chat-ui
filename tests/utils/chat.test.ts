@@ -55,7 +55,13 @@ describe('chat utilities', () => {
         sender: 'user',
         content: 'Hello',
         attachments: [
-          { id: 'att-1', name: 'first', size: 1, type: 'text/plain' },
+          {
+            id: 'att-1',
+            name: 'first',
+            size: 1,
+            type: 'text/plain',
+            fileId: 'file-1',
+          },
         ],
       },
       { id: '2', sender: 'bot', content: 'Hi there' },
@@ -70,7 +76,15 @@ describe('chat utilities', () => {
           {
             type: 'input_text',
             text: 'Hello',
-            attachments: [{ id: 'att-1' }],
+            attachments: [
+              {
+                id: 'file-1',
+                file_id: 'file-1',
+                filename: 'first',
+                mime_type: 'text/plain',
+                size: 1,
+              },
+            ],
           },
         ],
       },

@@ -42,7 +42,13 @@ export const toChatCompletionMessages = (
       isUserMessage && Array.isArray(message.attachments) && message.attachments.length > 0;
 
     const attachments = hasAttachments
-      ? message.attachments?.map((attachment) => ({ id: attachment.id })) ?? []
+      ? message.attachments?.map((attachment) => ({
+          id: attachment.fileId ?? attachment.id,
+          file_id: attachment.fileId ?? attachment.id,
+          filename: attachment.name,
+          mime_type: attachment.type,
+          size: attachment.size,
+        })) ?? []
       : undefined;
 
     const content: ChatCompletionContentPart[] = isUserMessage

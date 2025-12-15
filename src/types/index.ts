@@ -12,8 +12,16 @@ export type Attachment = {
   name: string;
   size: number;
   type: string;
+  fileId?: string;
   file?: File;
 };
+
+export type AttachmentIngestionState =
+  | { status: 'pending'; message?: string }
+  | { status: 'uploading'; message?: string }
+  | { status: 'embedding'; message?: string }
+  | { status: 'complete'; message?: string }
+  | { status: 'error'; message?: string; error?: string };
 
 export type Message = {
   id: string;
@@ -64,7 +72,13 @@ export type ApiStreamRequestOptions<TMessage, TResponse> = {
 
 export type ChatCompletionRole = 'system' | 'user' | 'assistant';
 
-export type ChatCompletionAttachmentReference = { id: string };
+export type ChatCompletionAttachmentReference = {
+  id: string;
+  file_id?: string;
+  filename?: string;
+  mime_type?: string;
+  size?: number;
+};
 
 export type ChatCompletionContentPart =
   | {
