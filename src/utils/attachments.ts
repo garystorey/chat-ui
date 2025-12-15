@@ -1,8 +1,10 @@
 import { getId } from './id';
-import type { AttachmentRequest, Attachment } from '../types';
-
+import { buildRequest, parseJson } from './request';
+import type { Attachment, AttachmentIngestionState } from '../types';
 
 const BASE64_CHUNK_SIZE = 0x8000;
+const TEXT_CHUNK_SIZE = 800;
+const TEXT_CHUNK_OVERLAP = 120;
 
 type FileLike = Pick<File, 'name' | 'type'> & {
   arrayBuffer?: () => Promise<ArrayBuffer>;
@@ -133,38 +135,175 @@ const hasReadableFile = (
   return isFileLike(candidate);
 };
 
-export const buildAttachmentRequestPayload = async (
-  attachments: Attachment[]
-): Promise<AttachmentRequest[]> => {
-  const attachmentsWithFile = attachments.filter(hasReadableFile);
+type IngestAttachmentOptions = {
+  onStatusUpdate?: (id: string, state: AttachmentIngestionState) => void;
+};
 
+type DocumentIngestionMetadata = {
+  documentId: string;
+  chunkCount?: number;
+  embeddingModel?: string;
+};
+
+const createTextChunks = (content: string) => {
+  const sanitized = content.trim();
+  if (!sanitized) {
+    return [];
+  }
+
+  const chunks: string[] = [];
+  for (let index = 0; index < sanitized.length; index += TEXT_CHUNK_SIZE - TEXT_CHUNK_OVERLAP) {
+    const chunk = sanitized.slice(index, index + TEXT_CHUNK_SIZE).trim();
+    if (chunk) {
+      chunks.push(chunk);
+    }
+  }
+
+  return chunks;
+};
+
+const uploadDocument = async (
+  attachment: Attachment & { file: FileLike },
+  attachmentId: string
+) => {
+  const filename = attachment.name ?? attachment.file.name ?? attachmentId;
+  const mimeType =
+    attachment.type || (attachment.file as { type?: string }).type || 'application/octet-stream';
+  const formData = new FormData();
+  formData.append('file', attachment.file as Blob, filename);
+
+  const { url, requestHeaders, method } = buildRequest({
+    path: '/api/rag/documents',
+    method: 'POST',
+    body: formData,
+  });
+
+  const response = await fetch(url, {
+    method,
+    body: formData,
+    headers: requestHeaders,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Document upload failed (${response.status})`);
+  }
+
+  const data = await parseJson(response).catch(() => null);
+  const documentId =
+    (data && typeof (data as { document_id?: unknown }).document_id === 'string'
+      ? (data as { document_id: string }).document_id
+      : null) ||
+    (data && typeof (data as { id?: unknown }).id === 'string'
+      ? (data as { id: string }).id
+      : null) ||
+    attachmentId;
+
+  return { documentId };
+};
+
+const embedDocument = async (
+  documentId: string,
+  attachment: Attachment & { file: FileLike }
+): Promise<DocumentIngestionMetadata> => {
+  let text: string;
+  try {
+    text = await readFileAsText(attachment.file);
+  } catch (error) {
+    console.warn('Attachment is not readable as text; skipping embeddings', error);
+    return { documentId };
+  }
+
+  const chunks = createTextChunks(text);
+  if (!chunks.length) {
+    return { documentId };
+  }
+
+  const { url, requestHeaders, requestBody, method } = buildRequest({
+    path: '/api/rag/embeddings',
+    method: 'POST',
+    body: { document_id: documentId, chunks },
+  });
+
+  const response = await fetch(url, {
+    method,
+    headers: requestHeaders,
+    body: requestBody,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Embedding request failed (${response.status})`);
+  }
+
+  const data = await parseJson(response).catch(() => null);
+  const embeddingModel =
+    data && typeof (data as { embedding_model?: unknown }).embedding_model === 'string'
+      ? (data as { embedding_model: string }).embedding_model
+      : undefined;
+
+  return {
+    documentId,
+    chunkCount: chunks.length,
+    embeddingModel,
+  };
+};
+
+const normalizeDocumentAttachment = (
+  attachment: Attachment,
+  metadata: DocumentIngestionMetadata
+): Attachment => ({
+  id: attachment.id ?? getId(),
+  name: attachment.name,
+  size: attachment.size,
+  type: attachment.type,
+  documentId: metadata.documentId,
+  chunkCount: metadata.chunkCount,
+  embeddingModel: metadata.embeddingModel,
+});
+
+export const ingestAttachments = async (
+  attachments: Attachment[],
+  { onStatusUpdate }: IngestAttachmentOptions = {}
+): Promise<Attachment[]> => {
+  const attachmentsWithFile = attachments.filter(hasReadableFile);
   if (!attachmentsWithFile.length) {
     return [];
   }
 
-  return Promise.all(
-    attachmentsWithFile.map(async (attachment) => ({
-      id: attachment.id ?? getId(),
-      filename: attachment.name ?? attachment.file.name,
-      mime_type:
-        attachment.type || attachment.file.type || 'application/octet-stream',
-      data: await encodeFileToBase64(attachment.file),
-    }))
-  );
-};
+  const ingested: Attachment[] = [];
+  const errors: string[] = [];
 
-export const buildAttachmentPromptText = (attachments: Attachment[]): string => {
-  if (!attachments.length) {
-    return '';
+  for (const attachment of attachmentsWithFile) {
+    const attachmentId = attachment.id ?? getId();
+    const updateStatus = (state: AttachmentIngestionState) =>
+      onStatusUpdate?.(attachmentId, state);
+
+    updateStatus({ status: 'uploading', message: 'Uploading document…' });
+
+    try {
+      const uploadResult = await uploadDocument(attachment, attachmentId);
+      updateStatus({ status: 'embedding', message: 'Generating embeddings…' });
+
+      const embeddingMetadata = await embedDocument(uploadResult.documentId, attachment);
+      const normalized = normalizeDocumentAttachment(attachment, embeddingMetadata);
+
+      ingested.push(normalized);
+      updateStatus({ status: 'complete', message: 'Ready for chat' });
+    } catch (error) {
+      console.error('Attachment ingestion failed', error);
+      errors.push(attachmentId);
+      updateStatus({
+        status: 'error',
+        message: 'Unable to process attachment',
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
-  return attachments
-    .map((attachment, index) => {
-      const filename =
-        attachment.name ?? attachment.file?.name ?? `Attachment ${index + 1}`;
-      return `attachment ${filename} content added`;
-    })
-    .join('\n');
+  if (errors.length) {
+    throw new Error('One or more attachments failed to ingest');
+  }
+
+  return ingested;
 };
 
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];

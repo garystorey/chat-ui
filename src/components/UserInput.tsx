@@ -15,7 +15,11 @@ import {
   trimTrailingTranscript,
   buildAttachmentsFromFiles,
 } from "../utils";
-import { Attachment, UserInputSendPayload } from "../types";
+import {
+  Attachment,
+  AttachmentIngestionState,
+  UserInputSendPayload,
+} from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
 import List from "./List";
 import Show from "./Show";
@@ -28,6 +32,7 @@ type UserInputProps = {
   onSend: (payload: UserInputSendPayload) => Promise<boolean> | boolean;
   onStop: () => void;
   isResponding: boolean;
+  attachmentStatuses?: Record<string, AttachmentIngestionState>;
   autoSendOnSpeechEnd?: boolean;
   availableModels: string[];
   selectedModel: string;
@@ -38,15 +43,27 @@ type UserInputProps = {
 type AttachmentListItemProps = {
   attachment: Attachment;
   handleRemoveAttachment: (id: string) => void;
+  status?: AttachmentIngestionState;
 };
 
 function AttachmentListItem({
   attachment,
   handleRemoveAttachment,
+  status,
 }: AttachmentListItemProps) {
   return (
     <div className="input-panel__attachment-item">
       <span className="input-panel__attachment-name">{attachment.name}</span>
+      {status && (
+        <span
+          className={`input-panel__attachment-status input-panel__attachment-status--${status.status}`}
+          aria-live="polite"
+          role="status"
+        >
+          {status.message || status.status}
+          {status.status === "error" && status.error ? `: ${status.error}` : ""}
+        </span>
+      )}
       <button
         type="button"
         className="input-panel__attachment-remove"
@@ -65,6 +82,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     onSend,
     onStop,
     isResponding,
+    attachmentStatuses,
     autoSendOnSpeechEnd = false,
     availableModels,
     selectedModel,
@@ -346,6 +364,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 <AttachmentListItem
                   attachment={a}
                   handleRemoveAttachment={handleRemoveAttachment}
+                  status={attachmentStatuses?.[a.id]}
                 />
               )}
             />
