@@ -60,7 +60,7 @@ describe('chat utilities', () => {
             name: 'first',
             size: 1,
             type: 'text/plain',
-            documentId: 'doc-1',
+            fileId: 'file-1',
           },
         ],
       },
@@ -78,8 +78,8 @@ describe('chat utilities', () => {
             text: 'Hello',
             attachments: [
               {
-                id: 'doc-1',
-                document_id: 'doc-1',
+                id: 'file-1',
+                file_id: 'file-1',
                 filename: 'first',
                 mime_type: 'text/plain',
                 size: 1,

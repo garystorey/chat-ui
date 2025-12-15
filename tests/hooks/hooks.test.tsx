@@ -10,13 +10,13 @@ import useUnmount from '../../src/hooks/useUnmount';
 
 const setMockMatchMedia = (matches: boolean) => {
   const listeners = new Set<(event: MediaQueryListEvent) => void>();
-  const mediaQueryList: MediaQueryList = {
+  const mediaQueryList: MediaQueryList & { matches: boolean } = {
     matches,
     media: '(prefers-reduced-motion: reduce)',
-    addEventListener: (_event, listener) => {
+    addEventListener: (_event: string, listener: EventListenerOrEventListenerObject) => {
       listeners.add(listener as (event: MediaQueryListEvent) => void);
     },
-    removeEventListener: (_event, listener) => {
+    removeEventListener: (_event: string, listener: EventListenerOrEventListenerObject) => {
       listeners.delete(listener as (event: MediaQueryListEvent) => void);
     },
     addListener: (_listener: (this: MediaQueryList, ev: MediaQueryListEvent) => any) => {

@@ -12,9 +12,7 @@ export type Attachment = {
   name: string;
   size: number;
   type: string;
-  documentId?: string;
-  chunkCount?: number;
-  embeddingModel?: string;
+  fileId?: string;
   file?: File;
 };
 
@@ -76,7 +74,7 @@ export type ChatCompletionRole = 'system' | 'user' | 'assistant';
 
 export type ChatCompletionAttachmentReference = {
   id: string;
-  document_id?: string;
+  file_id?: string;
   filename?: string;
   mime_type?: string;
   size?: number;

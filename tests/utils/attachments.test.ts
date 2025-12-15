@@ -107,19 +107,12 @@ describe('attachments utilities', () => {
       { id: 'keep', name: 'keep.json', size: file.size, type: 'application/json', file },
     ];
 
-    const uploadResponse = new Response(JSON.stringify({ document_id: 'doc-123' }), {
+    const uploadResponse = new Response(JSON.stringify({ id: 'file-123' }), {
       status: 200,
       headers: { 'content-type': 'application/json' },
     });
-    const embeddingResponse = new Response(JSON.stringify({ embedding_model: 'test-embed' }), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    });
-
     const fetchMock = vi.spyOn(globalThis, 'fetch');
-    fetchMock
-      .mockResolvedValueOnce(uploadResponse)
-      .mockResolvedValueOnce(embeddingResponse);
+    fetchMock.mockResolvedValueOnce(uploadResponse);
 
     const ingested = await ingestAttachments(attachments, {
       onStatusUpdate: (id, state) => {
@@ -127,16 +120,14 @@ describe('attachments utilities', () => {
       },
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(ingested).toEqual([
       {
         id: 'keep',
         name: 'keep.json',
         size: file.size,
         type: 'application/json',
-        documentId: 'doc-123',
-        chunkCount: 1,
-        embeddingModel: 'test-embed',
+        fileId: 'file-123',
       },
     ]);
     expect(statusUpdates['keep']?.status).toBe('complete');

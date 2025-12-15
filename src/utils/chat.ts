@@ -43,8 +43,8 @@ export const toChatCompletionMessages = (
 
     const attachments = hasAttachments
       ? message.attachments?.map((attachment) => ({
-          id: attachment.documentId ?? attachment.id,
-          document_id: attachment.documentId ?? attachment.id,
+          id: attachment.fileId ?? attachment.id,
+          file_id: attachment.fileId ?? attachment.id,
           filename: attachment.name,
           mime_type: attachment.type,
           size: attachment.size,

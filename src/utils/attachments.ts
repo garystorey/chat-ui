@@ -3,9 +3,6 @@ import { buildRequest, parseJson } from './request';
 import type { Attachment, AttachmentIngestionState } from '../types';
 
 const BASE64_CHUNK_SIZE = 0x8000;
-const TEXT_CHUNK_SIZE = 800;
-const TEXT_CHUNK_OVERLAP = 120;
-
 type FileLike = Pick<File, 'name' | 'type'> & {
   arrayBuffer?: () => Promise<ArrayBuffer>;
   text?: () => Promise<string>;
@@ -26,35 +23,13 @@ const readFileAsArrayBuffer = async (file: FileLike): Promise<ArrayBuffer> => {
       const reader = new FileReader();
       reader.onerror = () => reject(reader.error ?? new Error('Unable to read file.'));
       reader.onload = () => resolve(reader.result as ArrayBuffer);
-      reader.readAsArrayBuffer(file as Blob);
+      reader.readAsArrayBuffer(file as unknown as Blob);
     });
   }
 
   if (typeof Response === 'function') {
-    const response = new Response(file);
+    const response = new Response(file as unknown as BodyInit);
     return response.arrayBuffer();
-  }
-
-  throw new Error('File reading is not supported in this environment.');
-};
-
-const readFileAsText = async (file: FileLike): Promise<string> => {
-  if (typeof file.text === 'function') {
-    return file.text();
-  }
-
-  if (typeof FileReader !== 'undefined') {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(reader.error ?? new Error('Unable to read file.'));
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsText(file as Blob);
-    });
-  }
-
-  if (typeof Response === 'function') {
-    const response = new Response(file);
-    return response.text();
   }
 
   throw new Error('File reading is not supported in this environment.');
@@ -139,41 +114,17 @@ type IngestAttachmentOptions = {
   onStatusUpdate?: (id: string, state: AttachmentIngestionState) => void;
 };
 
-type DocumentIngestionMetadata = {
-  documentId: string;
-  chunkCount?: number;
-  embeddingModel?: string;
-};
-
-const createTextChunks = (content: string) => {
-  const sanitized = content.trim();
-  if (!sanitized) {
-    return [];
-  }
-
-  const chunks: string[] = [];
-  for (let index = 0; index < sanitized.length; index += TEXT_CHUNK_SIZE - TEXT_CHUNK_OVERLAP) {
-    const chunk = sanitized.slice(index, index + TEXT_CHUNK_SIZE).trim();
-    if (chunk) {
-      chunks.push(chunk);
-    }
-  }
-
-  return chunks;
-};
-
-const uploadDocument = async (
-  attachment: Attachment & { file: FileLike },
-  attachmentId: string
-) => {
+const uploadFile = async (attachment: Attachment & { file: FileLike }, attachmentId: string) => {
   const filename = attachment.name ?? attachment.file.name ?? attachmentId;
   const mimeType =
     attachment.type || (attachment.file as { type?: string }).type || 'application/octet-stream';
   const formData = new FormData();
   formData.append('file', attachment.file as Blob, filename);
+  formData.append('purpose', 'assistants');
+  formData.append('mime_type', mimeType);
 
   const { url, requestHeaders, method } = buildRequest({
-    path: '/api/rag/documents',
+    path: '/v1/files',
     method: 'POST',
     body: formData,
   });
@@ -185,79 +136,28 @@ const uploadDocument = async (
   });
 
   if (!response.ok) {
-    throw new Error(`Document upload failed (${response.status})`);
+    throw new Error(`File upload failed (${response.status})`);
   }
 
   const data = await parseJson(response).catch(() => null);
-  const documentId =
-    (data && typeof (data as { document_id?: unknown }).document_id === 'string'
-      ? (data as { document_id: string }).document_id
+  const fileId =
+    (data && typeof (data as { file_id?: unknown }).file_id === 'string'
+      ? (data as { file_id: string }).file_id
       : null) ||
     (data && typeof (data as { id?: unknown }).id === 'string'
       ? (data as { id: string }).id
       : null) ||
     attachmentId;
 
-  return { documentId };
+  return { fileId };
 };
 
-const embedDocument = async (
-  documentId: string,
-  attachment: Attachment & { file: FileLike }
-): Promise<DocumentIngestionMetadata> => {
-  let text: string;
-  try {
-    text = await readFileAsText(attachment.file);
-  } catch (error) {
-    console.warn('Attachment is not readable as text; skipping embeddings', error);
-    return { documentId };
-  }
-
-  const chunks = createTextChunks(text);
-  if (!chunks.length) {
-    return { documentId };
-  }
-
-  const { url, requestHeaders, requestBody, method } = buildRequest({
-    path: '/api/rag/embeddings',
-    method: 'POST',
-    body: { document_id: documentId, chunks },
-  });
-
-  const response = await fetch(url, {
-    method,
-    headers: requestHeaders,
-    body: requestBody,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Embedding request failed (${response.status})`);
-  }
-
-  const data = await parseJson(response).catch(() => null);
-  const embeddingModel =
-    data && typeof (data as { embedding_model?: unknown }).embedding_model === 'string'
-      ? (data as { embedding_model: string }).embedding_model
-      : undefined;
-
-  return {
-    documentId,
-    chunkCount: chunks.length,
-    embeddingModel,
-  };
-};
-
-const normalizeDocumentAttachment = (
-  attachment: Attachment,
-  metadata: DocumentIngestionMetadata
-): Attachment => ({
+const normalizeFileAttachment = (attachment: Attachment, fileId: string): Attachment => ({
   id: attachment.id ?? getId(),
   name: attachment.name,
   size: attachment.size,
   type: attachment.type,
-  documentId: metadata.documentId,
-  chunkCount: metadata.chunkCount,
-  embeddingModel: metadata.embeddingModel,
+  fileId,
 });
 
 export const ingestAttachments = async (
@@ -277,14 +177,11 @@ export const ingestAttachments = async (
     const updateStatus = (state: AttachmentIngestionState) =>
       onStatusUpdate?.(attachmentId, state);
 
-    updateStatus({ status: 'uploading', message: 'Uploading document…' });
+    updateStatus({ status: 'uploading', message: 'Uploading attachment…' });
 
     try {
-      const uploadResult = await uploadDocument(attachment, attachmentId);
-      updateStatus({ status: 'embedding', message: 'Generating embeddings…' });
-
-      const embeddingMetadata = await embedDocument(uploadResult.documentId, attachment);
-      const normalized = normalizeDocumentAttachment(attachment, embeddingMetadata);
+      const uploadResult = await uploadFile(attachment, attachmentId);
+      const normalized = normalizeFileAttachment(attachment, uploadResult.fileId);
 
       ingested.push(normalized);
       updateStatus({ status: 'complete', message: 'Ready for chat' });
