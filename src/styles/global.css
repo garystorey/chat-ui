@@ -41,17 +41,17 @@
   --shadow-strong: 0 28px 70px rgba(15, 18, 24, 0.12);
 
   /* default to light theme values */
-  --bg: var(--brand-sand);
-  --panel: color-mix(in oklab, #ffffff 88%, var(--brand-shell) 12%);
-  --panel-solid: #ffffff;
-  --panel-border: rgba(31, 34, 41, 0.1);
-  --input-bg: rgba(255, 247, 243, 0.94);
-  --text: var(--brand-ink);
-  --muted: #5f636a;
-  --user-msg-bg: var(--user-msg-bg-light);
-  --user-msg-text: var(--user-msg-text-light);
-  --shadow: 0 18px 40px rgba(17, 19, 24, 0.12);
-  --divider: rgba(31, 34, 41, 0.12);
+  --bg: #0f1928;
+  --panel: #132136;
+  --panel-solid: #15273f;
+  --panel-border: rgba(255, 255, 255, 0.06);
+  --input-bg: #0f1c31;
+  --text: #e9edf5;
+  --muted: #9bb0c9;
+  --user-msg-bg: color-mix(in oklab, var(--accent) 78%, #1a1f2c 22%);
+  --user-msg-text: #fff7f2;
+  --shadow: 0 14px 38px rgba(5, 8, 15, 0.35);
+  --divider: rgba(255, 255, 255, 0.08);
 }
 
 html,
@@ -77,22 +77,23 @@ body {
   flex-direction: column;
   align-items: stretch;
   min-height: 100dvh;
-  padding: 1.75rem 1.25rem;
+  padding: 1.75rem 1.5rem;
   padding-bottom: calc(2rem + env(safe-area-inset-bottom));
   font-size: 1rem;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   background-image: radial-gradient(
-      38rem 38rem at 18% 0%,
-      color-mix(in oklab, var(--accent) 16%, transparent) 0%,
-      transparent 62%
+      20rem 20rem at 12% -8%,
+      color-mix(in oklab, #233857 65%, transparent) 0%,
+      transparent 60%
     ),
     radial-gradient(
-      24rem 24rem at 88% 10%,
-      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
-      transparent 68%
-    );
+      28rem 28rem at 86% 0%,
+      color-mix(in oklab, #1b2d45 70%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, #0c1422 0%, #0f1928 26%, #0f1928 100%);
 }
 
 body::before,
@@ -106,33 +107,33 @@ body::after {
 
 body::before {
   background: radial-gradient(
-      circle at 14% 18%,
-      color-mix(in oklab, var(--accent) 16%, transparent) 0%,
-      transparent 28%
+      circle at 16% 8%,
+      color-mix(in oklab, var(--accent) 10%, transparent) 0%,
+      transparent 32%
     ),
     radial-gradient(
-      circle at 86% -4%,
-      color-mix(in oklab, var(--brand-shell) 16%, transparent) 0%,
-      transparent 34%
+      circle at 82% -12%,
+      color-mix(in oklab, #1a2a40 40%, transparent) 0%,
+      transparent 42%
     );
-  filter: blur(68px);
-  opacity: 0.65;
+  filter: blur(72px);
+  opacity: 0.55;
   transform: translateZ(0);
 }
 
 body::after {
   background: linear-gradient(
-      120deg,
-      color-mix(in oklab, var(--panel-border) 35%, transparent) 0%,
-      transparent 24%
+      130deg,
+      color-mix(in oklab, var(--panel-border) 26%, transparent) 0%,
+      transparent 22%
     ),
     linear-gradient(
-      300deg,
-      color-mix(in oklab, var(--panel-border) 28%, transparent) 0%,
-      transparent 26%
+      280deg,
+      color-mix(in oklab, var(--panel-border) 24%, transparent) 0%,
+      transparent 24%
     );
-  opacity: 0.5;
-  mix-blend-mode: soft-light;
+  opacity: 0.35;
+  mix-blend-mode: screen;
 }
 
 #root {
@@ -141,41 +142,36 @@ body::after {
 }
 
 body.light {
-  --bg: var(--brand-sand);
-  --panel: color-mix(in oklab, #ffffff 90%, var(--brand-shell) 10%);
+  --bg: #e9edf5;
+  --panel: #ffffff;
   --panel-solid: #ffffff;
-  --panel-border: rgba(31, 34, 41, 0.12);
-  --input-bg: rgba(255, 247, 243, 0.96);
-  --text: var(--brand-ink);
-  --muted: #686b72;
-  --user-msg-bg: var(--user-msg-bg-light);
-  --user-msg-text: var(--user-msg-text-light);
-  --shadow: 0 18px 42px rgba(17, 19, 24, 0.12);
-  --shadow-soft: 0 16px 36px rgba(24, 27, 34, 0.12);
+  --panel-border: rgba(9, 18, 35, 0.08);
+  --input-bg: #f7f8fb;
+  --text: #1f2430;
+  --muted: #5a6272;
+  --user-msg-bg: color-mix(in oklab, var(--accent) 25%, #fff7f2 75%);
+  --user-msg-text: #2b1c12;
+  --shadow: 0 12px 30px rgba(12, 18, 32, 0.12);
+  --shadow-soft: 0 14px 32px rgba(12, 18, 32, 0.1);
   --shadow-strong: 0 32px 78px rgba(24, 27, 34, 0.14);
   --accent-button-text: #ffffff;
   --accent-contrast: #4b1f0b;
   --icon-strong: color-mix(in oklab, var(--text) 78%, white 22%);
   --divider: rgba(31, 34, 41, 0.12);
-  --glow: 0 28px 48px rgba(241, 90, 34, 0.12);
+  --glow: 0 22px 46px rgba(241, 90, 34, 0.14);
 
   background-color: var(--bg);
   background-image: radial-gradient(
-      42rem 42rem at -12% -8%,
-      color-mix(in oklab, var(--accent) 14%, transparent) 0%,
-      transparent 70%
+      28rem 28rem at -10% -12%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 72%
     ),
     radial-gradient(
-      34rem 34rem at 110% 12%,
+      32rem 32rem at 110% 6%,
       color-mix(in oklab, var(--accent) 10%, transparent) 0%,
-      transparent 68%
+      transparent 70%
     ),
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--brand-shell) 72%, transparent) 0%,
-      transparent 52%,
-      color-mix(in oklab, var(--brand-shell) 82%, transparent) 100%
-    );
+    linear-gradient(180deg, #eef1f6 0%, #e9edf5 22%, #e9edf5 100%);
 }
 
 body.dark {

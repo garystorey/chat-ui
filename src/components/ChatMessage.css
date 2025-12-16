@@ -1,45 +1,33 @@
 .message {
   width: 94%;
-  padding: 1.1rem 1.4rem;
-  border-radius: 1.05rem;
-  margin: 0.5rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  margin: 0.4rem 0;
   font-size: 1rem;
   line-height: 1.6;
   word-wrap: break-word;
-  border: 1px solid color-mix(in oklab, var(--panel-border) 60%, var(--accent) 40%);
+  border: 1px solid var(--panel-border);
   animation: messageIn var(--duration-md) var(--ease-out) both;
-  background: linear-gradient(150deg, color-mix(in oklab, var(--panel-solid) 86%, var(--brand-shell) 14%), color-mix(in oklab, var(--panel-solid) 92%, var(--brand-shell) 8%));
+  background: color-mix(in oklab, var(--panel) 92%, transparent 8%);
   color: var(--text);
-  box-shadow: 0 18px 32px rgba(17, 19, 24, 0.16);
-  backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
   position: relative;
   overflow: hidden;
 }
 
 .message--user {
-  background: linear-gradient(135deg, color-mix(in oklab, var(--user-msg-bg) 78%, white 22%), var(--user-msg-bg));
+  background: linear-gradient(135deg, color-mix(in oklab, var(--user-msg-bg) 78%, #ffe2d0 22%), var(--user-msg-bg));
   color: var(--user-msg-text);
   margin-left: auto;
-  border-bottom-right-radius: 6px;
-  box-shadow: 0 18px 36px rgba(241, 90, 34, 0.22);
-  border-color: color-mix(in oklab, var(--accent) 46%, transparent);
-  isolation: isolate;
+  border-bottom-right-radius: 0.5rem;
+  box-shadow: 0 14px 28px rgba(241, 90, 34, 0.2);
+  border-color: color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
 .message--bot {
   margin-right: auto;
-  border-bottom-left-radius: 6px;
-  background: linear-gradient(180deg, color-mix(in oklab, var(--panel-solid) 90%, var(--brand-shell) 10%), color-mix(in oklab, var(--panel-solid) 86%, var(--brand-shell) 14%));
-}
-
-.message::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 12% 10%, color-mix(in oklab, var(--accent) 14%, transparent) 0%, transparent 35%),
-    radial-gradient(circle at 85% 20%, color-mix(in oklab, var(--accent) 12%, transparent) 0%, transparent 36%);
-  opacity: 0.35;
+  border-bottom-left-radius: 0.5rem;
+  background: color-mix(in oklab, var(--panel) 96%, #0f1928 4%);
 }
 
 .message__body {
