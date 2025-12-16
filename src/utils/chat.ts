@@ -6,6 +6,7 @@ import type {
   ChatCompletionChoice,
   ChatCompletionContentPart,
   ChatCompletionStreamResponse,
+  ChatCompletionAttachmentReference,
 } from '../types';
 import { getId } from './id';
 import { getPlainTextFromHtml, normalizeWhitespace, truncate } from './text';
@@ -42,13 +43,22 @@ export const toChatCompletionMessages = (
       isUserMessage && Array.isArray(message.attachments) && message.attachments.length > 0;
 
     const attachments = hasAttachments
-      ? message.attachments?.map((attachment) => ({
-          id: attachment.fileId ?? attachment.id,
-          file_id: attachment.fileId ?? attachment.id,
-          filename: attachment.name,
-          mime_type: attachment.type,
-          size: attachment.size,
-        })) ?? []
+      ? (message.attachments
+          ?.map<ChatCompletionAttachmentReference | null>((attachment) => {
+            const fileId = attachment.fileId ?? attachment.id;
+            if (!fileId) {
+              return null;
+            }
+
+            return {
+              id: fileId,
+              file_id: fileId,
+              filename: attachment.name,
+              mime_type: attachment.type,
+              size: attachment.size,
+            };
+          })
+          .filter(Boolean) as ChatCompletionAttachmentReference[]) ?? []
       : undefined;
 
     const content: ChatCompletionContentPart[] = isUserMessage
@@ -71,6 +81,26 @@ export const toChatCompletionMessages = (
       content,
     };
   });
+
+export const buildChatCompletionAttachments = (
+  messages: Message[]
+): ChatCompletionAttachmentReference[] => {
+  const seen = new Set<string>();
+
+  return messages.reduce<ChatCompletionAttachmentReference[]>((acc, message) => {
+    message.attachments?.forEach((attachment) => {
+      const fileId = attachment.fileId ?? attachment.id;
+      if (!fileId || seen.has(fileId)) {
+        return;
+      }
+
+      seen.add(fileId);
+      acc.push({ file_id: fileId });
+    });
+
+    return acc;
+  }, []);
+};
 
 export const getChatCompletionContentText = (
   content: ChatCompletionMessage['content'] | undefined
