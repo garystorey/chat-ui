@@ -83,7 +83,56 @@ body {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  background-image: radial-gradient(
+      38rem 38rem at 18% 0%,
+      color-mix(in oklab, var(--accent) 16%, transparent) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      24rem 24rem at 88% 10%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 68%
+    );
+}
 
+body::before,
+body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background: radial-gradient(
+      circle at 14% 18%,
+      color-mix(in oklab, var(--accent) 16%, transparent) 0%,
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 86% -4%,
+      color-mix(in oklab, var(--brand-shell) 16%, transparent) 0%,
+      transparent 34%
+    );
+  filter: blur(68px);
+  opacity: 0.65;
+  transform: translateZ(0);
+}
+
+body::after {
+  background: linear-gradient(
+      120deg,
+      color-mix(in oklab, var(--panel-border) 35%, transparent) 0%,
+      transparent 24%
+    ),
+    linear-gradient(
+      300deg,
+      color-mix(in oklab, var(--panel-border) 28%, transparent) 0%,
+      transparent 26%
+    );
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
 }
 
 #root {
@@ -110,23 +159,23 @@ body.light {
   --divider: rgba(31, 34, 41, 0.12);
   --glow: 0 28px 48px rgba(241, 90, 34, 0.12);
 
+  background-color: var(--bg);
   background-image: radial-gradient(
-      44rem 44rem at -16% -12%,
-      color-mix(in oklab, var(--accent) 20%, transparent) 0%,
+      42rem 42rem at -12% -8%,
+      color-mix(in oklab, var(--accent) 14%, transparent) 0%,
       transparent 70%
     ),
     radial-gradient(
-      34rem 34rem at 120% 12%,
-      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      34rem 34rem at 110% 12%,
+      color-mix(in oklab, var(--accent) 10%, transparent) 0%,
       transparent 68%
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, var(--brand-shell) 68%, transparent) 0%,
-      transparent 50%,
-      color-mix(in oklab, var(--brand-shell) 75%, transparent) 100%
+      color-mix(in oklab, var(--brand-shell) 72%, transparent) 0%,
+      transparent 52%,
+      color-mix(in oklab, var(--brand-shell) 82%, transparent) 100%
     );
-  background-color: var(--bg);
 }
 
 body.dark {
@@ -146,6 +195,24 @@ body.dark {
   --accent-contrast: color-mix(in oklab, var(--accent) 70%, #fff0e6 30%);
   --divider: rgba(255, 255, 255, 0.12);
   --icon-strong: color-mix(in oklab, var(--text) 92%, white 8%);
+
+  background-color: var(--bg);
+  background-image: radial-gradient(
+      46rem 46rem at -12% -6%,
+      color-mix(in oklab, var(--accent) 20%, transparent) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      32rem 32rem at 120% 14%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, #0e1016 65%, transparent) 0%,
+      transparent 55%,
+      color-mix(in oklab, #0e1016 75%, transparent) 100%
+    );
 }
 
 @media (prefers-reduced-motion: reduce) {

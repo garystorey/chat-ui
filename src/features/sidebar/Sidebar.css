@@ -2,10 +2,10 @@
   flex-shrink: 0;
   width: 300px;
   padding: 1.35rem;
-  border-radius: clamp(1rem, 3vw, 1.6rem);
-  border: 1px solid color-mix(in oklab, var(--panel-border) 78%, transparent);
-  background: linear-gradient(165deg, color-mix(in oklab, var(--panel) 92%, var(--brand-shell) 8%) 0%, color-mix(in oklab, var(--panel-solid) 88%, var(--brand-shell) 12%) 100%);
-  box-shadow: var(--shadow-soft), 0 32px 70px rgba(12, 15, 22, 0.22);
+  border-radius: clamp(1rem, 3vw, 1.65rem);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 65%, var(--accent) 35%);
+  background: linear-gradient(165deg, color-mix(in oklab, var(--panel) 88%, var(--brand-shell) 12%) 0%, color-mix(in oklab, var(--panel-solid) 86%, var(--brand-shell) 14%) 100%);
+  box-shadow: 0 26px 66px rgba(12, 15, 22, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transition: width var(--duration-md) var(--ease-out),
     transform var(--duration-md) var(--ease-out);
   display: flex;
@@ -21,8 +21,19 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 16%, transparent) 0%, transparent 35%, transparent 100%);
-  opacity: 0.18;
+  background: linear-gradient(185deg, color-mix(in oklab, var(--accent) 16%, transparent) 0%, transparent 38%, transparent 100%);
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  inset: auto 10% -28% 10%;
+  height: 40%;
+  background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--accent) 18%, transparent) 0%, transparent 55%);
+  filter: blur(48px);
+  opacity: 0.6;
   pointer-events: none;
 }
 
@@ -55,8 +66,8 @@
   gap: 0.55rem;
   padding: 0.55rem 0.85rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
-  background: color-mix(in oklab, var(--panel) 90%, transparent 10%);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 60%, var(--accent) 40%);
+  background: linear-gradient(120deg, color-mix(in oklab, var(--panel) 88%, var(--brand-shell) 12%), color-mix(in oklab, var(--panel-solid) 82%, var(--brand-shell) 18%));
   color: var(--text);
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -97,8 +108,8 @@
 
 .sidebar__status:not(:disabled):hover,
 .sidebar__status:not(:disabled):focus-visible {
-  background: color-mix(in oklab, var(--panel) 92%, var(--accent) 8%);
-  border-color: color-mix(in oklab, var(--panel-border) 80%, var(--accent) 20%);
+  background: color-mix(in oklab, var(--panel) 88%, var(--accent) 12%);
+  border-color: color-mix(in oklab, var(--panel-border) 65%, var(--accent) 35%);
 }
 
 .sidebar__toggle {
@@ -174,8 +185,8 @@
   gap: 0.6rem;
   padding: 0.6rem 0.85rem;
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
-  background: color-mix(in oklab, var(--input-bg) 92%, var(--panel-solid) 8%);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 62%, var(--accent) 18%);
+  background: linear-gradient(120deg, color-mix(in oklab, var(--input-bg) 88%, var(--panel-solid) 12%), color-mix(in oklab, var(--input-bg) 82%, transparent 18%));
   color: var(--text);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: border-color var(--duration-sm) var(--ease-out),

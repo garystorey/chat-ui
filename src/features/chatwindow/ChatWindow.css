@@ -3,13 +3,17 @@
   width: 100%;
   max-width: var(--max-chat-width);
   margin: 0 auto;
-  border-radius: 1.25rem;
-  background: linear-gradient(180deg, color-mix(in oklab, var(--panel-solid) 88%, var(--brand-shell) 12%), color-mix(in oklab, var(--panel-solid) 94%, var(--brand-shell) 6%));
+  border-radius: 1.35rem;
+  background: linear-gradient(
+    175deg,
+    color-mix(in oklab, var(--panel-solid) 86%, var(--brand-shell) 14%),
+    color-mix(in oklab, var(--panel-solid) 92%, var(--brand-shell) 8%)
+  );
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid color-mix(in oklab, var(--panel-border) 82%, transparent);
-  box-shadow: var(--shadow-soft);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 60%, var(--accent) 40%);
+  box-shadow: 0 24px 60px rgba(12, 15, 22, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   padding: 0;
   pointer-events: none;
   opacity: 0;
@@ -20,7 +24,7 @@
   max-height: 0;
   flex: 0 0 auto;
   position: relative;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px) saturate(120%);
 }
 
 .chat-window::before {
@@ -28,8 +32,13 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 16%, transparent) 0%, transparent 45%, transparent 100%);
-  opacity: 0.12;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--accent) 18%, transparent) 0%,
+    transparent 52%,
+    transparent 100%
+  );
+  opacity: 0.14;
   pointer-events: none;
 }
 
@@ -44,7 +53,7 @@
   transform: none;
   padding: 1.65rem 1.75rem;
   border-width: 1px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 24px 60px rgba(12, 15, 22, 0.24);
   max-height: none;
   flex: 1 1 auto;
   min-height: 0;
@@ -88,5 +97,3 @@
   transform: translateY(-2px);
   box-shadow: 0 16px 30px rgba(15, 18, 24, 0.12);
 }
-
-
