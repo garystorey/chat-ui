@@ -63,7 +63,6 @@ const Sidebar = ({
     >
       <div className="sidebar__inner">
         <div className="sidebar__header">
-
           <button
             type="button"
             className="sidebar__status"
@@ -93,8 +92,6 @@ const Sidebar = ({
             </span>
           </button>
 
-          <ThemeToggle />
-          
           <button
             type="button"
             className="sidebar__toggle"
@@ -105,6 +102,12 @@ const Sidebar = ({
             <span aria-hidden="true">{collapsed ? "<" : ">"}</span>
           </button>
         </div>
+
+        <Show when={!collapsed}>
+          <div className="sidebar__theme">
+            <ThemeToggle />
+          </div>
+        </Show>
         <div className="sidebar__actions">
           <button type="button" className="sidebar__action" onClick={onNewChat}>
             <span className="sidebar__action-icon" aria-hidden="true">
