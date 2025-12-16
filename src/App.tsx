@@ -15,8 +15,6 @@ import type {
   UserInputSendPayload,
   ChatSummary,
   Message,
-  Attachment,
-  AttachmentRequest,
 } from "./types";
 import {
   useConnectionListeners,
@@ -30,8 +28,6 @@ import {
   useChatCompletionStream,
 } from "./hooks";
 import {
-  buildAttachmentRequestPayload,
-  buildAttachmentPromptText,
   buildChatPreview,
   cloneMessages,
   createChatRecordFromMessages,
@@ -206,8 +202,8 @@ const App = () => {
   }, [activeChatId, messages]);
 
   const handleSend = useCallback(
-    async ({ text, attachments }: UserInputSendPayload) => {
-      if (!text && attachments.length === 0) {
+    async ({ text }: UserInputSendPayload) => {
+      if (!text) {
         return false;
       }
 
@@ -223,56 +219,16 @@ const App = () => {
         setChatOpen(true);
       }
 
-      const messageAttachments = attachments.map((attachment) => ({ ...attachment }));
-      const conversationAttachments = [
-        ...messageAttachments,
-        ...messages.flatMap((message) => message.attachments ?? []),
-      ];
-
-      const uniqueConversationAttachments = Array.from(
-        conversationAttachments.reduce((map, attachment) => {
-          map.set(attachment.id, attachment);
-          return map;
-        }, new Map<string, Attachment>()).values()
-      );
-
-      let requestAttachments: AttachmentRequest[] = [];
-      let attachmentPrompt = "";
-
-      if (uniqueConversationAttachments.length) {
-        try {
-          requestAttachments = await buildAttachmentRequestPayload(
-            uniqueConversationAttachments
-          );
-
-          if (attachments.length) {
-            attachmentPrompt = buildAttachmentPromptText(attachments);
-          }
-        } catch (error) {
-          console.error("Unable to read attachments", error);
-          return false;
-        }
-      }
-
       const chatId = activeChatId ?? getId();
 
       if (!activeChatId) {
         setActiveChatId(chatId);
       }
 
-      const contentWithAttachments = attachmentPrompt
-        ? text
-          ? `${text}\n${attachmentPrompt}`
-          : attachmentPrompt
-        : text;
-
       const userMessage: Message = {
         id: getId(),
         sender: "user",
-        content: contentWithAttachments,
-        ...(messageAttachments.length
-          ? { attachments: messageAttachments }
-          : {}),
+        content: text,
       };
 
       const assistantMessageId = getId();
@@ -311,9 +267,6 @@ const App = () => {
           model: selectedModel,
           messages: toChatCompletionMessages(conversationForRequest),
           stream: true,
-          ...(requestAttachments.length
-            ? { attachments: requestAttachments }
-            : {}),
         },
         chatId,
         assistantMessageId,

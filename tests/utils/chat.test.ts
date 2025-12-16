@@ -16,13 +16,12 @@ vi.mock('../../src/utils/id', () => ({
 }));
 
 describe('chat utilities', () => {
-  it('deep clones messages including nested attachments', () => {
+  it('deep clones messages', () => {
     const messages: Message[] = [
       {
         id: '1',
         sender: 'user',
         content: 'Hi',
-        attachments: [{ id: 'a', name: 'file', size: 1, type: 'text/plain' }],
       },
     ];
 
@@ -30,10 +29,7 @@ describe('chat utilities', () => {
 
     expect(clone).not.toBe(messages);
     expect(clone[0]).not.toBe(messages[0]);
-    expect(clone[0].attachments![0]).not.toBe(messages[0].attachments![0]);
-
-    clone[0].attachments![0].name = 'changed';
-    expect(messages[0].attachments![0].name).toBe('file');
+    expect(clone).toEqual(messages);
   });
 
   it('derives plain text from HTML content and normalizes whitespace', () => {
@@ -48,15 +44,12 @@ describe('chat utilities', () => {
     expect(getMessagePlainText(undefined)).toBe('');
   });
 
-  it('transforms messages into chat completion payloads with attachments', () => {
+  it('transforms messages into chat completion payloads', () => {
     const messages: Message[] = [
       {
         id: '1',
         sender: 'user',
         content: 'Hello',
-        attachments: [
-          { id: 'att-1', name: 'first', size: 1, type: 'text/plain' },
-        ],
       },
       { id: '2', sender: 'bot', content: 'Hi there' },
     ];
@@ -70,7 +63,6 @@ describe('chat utilities', () => {
           {
             type: 'input_text',
             text: 'Hello',
-            attachments: [{ id: 'att-1' }],
           },
         ],
       },

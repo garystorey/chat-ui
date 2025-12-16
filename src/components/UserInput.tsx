@@ -9,17 +9,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { AttachmentIcon, MicIcon, SendIcon, StopIcon } from "./icons";
-import {
-  combineValueWithTranscript,
-  trimTrailingTranscript,
-  buildAttachmentsFromFiles,
-} from "../utils";
-import { Attachment, UserInputSendPayload } from "../types";
+import { MicIcon, SendIcon, StopIcon } from "./icons";
+import { combineValueWithTranscript, trimTrailingTranscript } from "../utils";
+import { UserInputSendPayload } from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
-import List from "./List";
-import Show from "./Show";
-
 import "./UserInput.css";
 
 type UserInputProps = {
@@ -35,29 +28,6 @@ type UserInputProps = {
   isLoadingModels: boolean;
 };
 
-type AttachmentListItemProps = {
-  attachment: Attachment;
-  handleRemoveAttachment: (id: string) => void;
-};
-
-function AttachmentListItem({
-  attachment,
-  handleRemoveAttachment,
-}: AttachmentListItemProps) {
-  return (
-    <div className="input-panel__attachment-item">
-      <span className="input-panel__attachment-name">{attachment.name}</span>
-      <button
-        type="button"
-        className="input-panel__attachment-remove"
-        onClick={() => handleRemoveAttachment(attachment.id)}
-      >
-        &times; <span className="sr-only">Remove {attachment.name}</span>
-      </button>
-    </div>
-  );
-}
-
 const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
   ({
     value,
@@ -72,8 +42,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     isLoadingModels,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [canRecord, setCanRecord] = useState(false);
     const [recordingStatus, setRecordingStatus] = useState("");
     const manualValueRef = useRef(value);
@@ -127,24 +95,17 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         const messageText = overrideText ?? value;
         const trimmed = messageText.trim();
 
-        if (!trimmed && attachments.length === 0) {
+        if (!trimmed) {
           return false;
         }
 
-        const sent = await Promise.resolve(
+        return Promise.resolve(
           onSend({
             text: trimmed,
-            attachments,
           })
         );
-
-        if (sent) {
-          setAttachments([]);
-        }
-
-        return sent;
       },
-      [attachments, onSend, value]
+      [onSend, value]
     );
 
     const handleSubmit = useCallback(
@@ -176,35 +137,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       },
       [onChange]
     );
-
-    const handleAttachmentButtonClick = useCallback(() => {
-      fileInputRef.current?.click();
-    }, []);
-
-    const handleAttachmentChange = useCallback(
-      (event: ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (!files?.length) {
-          return;
-        }
-
-        const selectedFiles = Array.from(files);
-
-        setAttachments((current) => [
-          ...current,
-          ...buildAttachmentsFromFiles(selectedFiles),
-        ]);
-
-        event.target.value = "";
-      },
-      []
-    );
-
-    const handleRemoveAttachment = useCallback((targetId: string) => {
-      setAttachments((current) =>
-        current.filter((attachment) => attachment.id !== targetId)
-      );
-    }, []);
 
     const handleToggleRecording = useCallback(() => {
       if (isResponding || !canRecord) {
@@ -337,29 +269,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
-          <Show when={attachments.length > 0}>
-            <List<Attachment>
-              className="input-panel__attachment-list"
-              items={attachments}
-              keyfield="id"
-              as={(a) => (
-                <AttachmentListItem
-                  attachment={a}
-                  handleRemoveAttachment={handleRemoveAttachment}
-                />
-              )}
-            />
-          </Show>
           <div className="input-panel__controls">
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="input-panel__file-input"
-              onChange={handleAttachmentChange}
-              multiple
-              tabIndex={-1}
-              aria-hidden="true"
-            />
             <div className="input-panel__model-select">
               <select
                 id="modelSelect"
@@ -377,15 +287,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               {isLoadingModels && <span className="input-panel__model-hint">Loading…</span>}
             </div>
             <div className="input-panel__actions">
-              <button
-                type="button"
-                className="input-panel__icon-button input-panel__icon-button--accent"
-                onClick={handleAttachmentButtonClick}
-                aria-label="Add attachment"
-                title="Add attachment"
-              >
-                <AttachmentIcon />
-              </button>
               <button
                 type="button"
                 className={micButtonClasses.join(" ")}

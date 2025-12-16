@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
-import type { Attachment, Message } from '../../src/types';
+import type { Message } from '../../src/types';
 import ChatMessage from '../../src/components/ChatMessage';
 
 afterEach(() => {
@@ -11,7 +11,6 @@ const baseMessage: Message = {
   id: 'msg-1',
   sender: 'user',
   content: 'Hello world',
-  attachments: [],
 };
 
 describe('ChatMessage', () => {
@@ -43,26 +42,5 @@ describe('ChatMessage', () => {
     render(<ChatMessage message={htmlMessage} />);
 
     expect(screen.getByTestId('trusted')).toHaveTextContent('Trusted content');
-  });
-
-  it('renders attachments that require normalization', () => {
-    const rawAttachments = {
-      first: { name: 'Plan.txt', size: 1024, type: 'text/plain' },
-    } satisfies Record<string, Partial<Attachment>>;
-
-    render(
-      <ChatMessage
-        message={{
-          ...baseMessage,
-          id: 'msg-with-attachments',
-          attachments: rawAttachments as unknown as Attachment[],
-        }}
-      />
-    );
-
-    expect(
-      screen.getByRole('list', { name: 'Message attachments' })
-    ).toBeInTheDocument();
-    expect(screen.getByText('Plan.txt')).toBeInTheDocument();
   });
 });

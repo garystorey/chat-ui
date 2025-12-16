@@ -1,26 +1,10 @@
 export type Theme = 'light' | 'dark';
 
-export type AttachmentRequest = {
-  id: string;
-  filename: string;
-  mime_type: string;
-  data: string;
-};
-
-export type Attachment = {
-  id: string;
-  name: string;
-  size: number;
-  type: string;
-  file?: File;
-};
-
 export type Message = {
   id: string;
   sender: 'user' | 'bot';
   content: string;
   renderAsHtml?: boolean;
-  attachments?: Attachment[];
 };
 
 export type PreviewChat = {
@@ -39,7 +23,6 @@ export type ChatSummary = {
 
 export type UserInputSendPayload = {
   text: string;
-  attachments: Attachment[];
 };
 
 export type ApiRequestOptions = {
@@ -64,8 +47,6 @@ export type ApiStreamRequestOptions<TMessage, TResponse> = {
 
 export type ChatCompletionRole = 'system' | 'user' | 'assistant';
 
-export type ChatCompletionAttachmentReference = { id: string };
-
 export type ChatCompletionContentPart =
   | {
       type: 'text' | 'output_text';
@@ -74,7 +55,6 @@ export type ChatCompletionContentPart =
   | {
       type: 'input_text';
       text: string;
-      attachments?: ChatCompletionAttachmentReference[];
     };
 
 export type ChatCompletionMessage = {
@@ -86,7 +66,6 @@ export type ChatCompletionRequest = {
   model: string;
   messages: ChatCompletionMessage[];
   stream?: boolean;
-  attachments?: AttachmentRequest[];
   [key: string]: unknown;
 };
 
