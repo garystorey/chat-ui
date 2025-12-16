@@ -223,22 +223,35 @@ const App = () => {
         setChatOpen(true);
       }
 
-      let messageAttachments: Attachment[] = [];
+      const messageAttachments = attachments.map((attachment) => ({ ...attachment }));
+      const conversationAttachments = [
+        ...messageAttachments,
+        ...messages.flatMap((message) => message.attachments ?? []),
+      ];
+
+      const uniqueConversationAttachments = Array.from(
+        conversationAttachments.reduce((map, attachment) => {
+          map.set(attachment.id, attachment);
+          return map;
+        }, new Map<string, Attachment>()).values()
+      );
+
       let requestAttachments: AttachmentRequest[] = [];
       let attachmentPrompt = "";
 
-      if (attachments.length) {
+      if (uniqueConversationAttachments.length) {
         try {
-          requestAttachments = await buildAttachmentRequestPayload(attachments);
-          attachmentPrompt = buildAttachmentPromptText(attachments);
+          requestAttachments = await buildAttachmentRequestPayload(
+            uniqueConversationAttachments
+          );
+
+          if (attachments.length) {
+            attachmentPrompt = buildAttachmentPromptText(attachments);
+          }
         } catch (error) {
           console.error("Unable to read attachments", error);
           return false;
         }
-
-        messageAttachments = attachments.map<Attachment>(({ file, ...metadata }) => ({
-          ...metadata,
-        }));
       }
 
       const chatId = activeChatId ?? getId();
