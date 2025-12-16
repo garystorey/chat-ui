@@ -73,8 +73,8 @@ export type ApiStreamRequestOptions<TMessage, TResponse> = {
 export type ChatCompletionRole = 'system' | 'user' | 'assistant';
 
 export type ChatCompletionAttachmentReference = {
-  id: string;
-  file_id?: string;
+  id?: string;
+  file_id: string;
   filename?: string;
   mime_type?: string;
   size?: number;
@@ -96,11 +96,15 @@ export type ChatCompletionMessage = {
   content: string | ChatCompletionContentPart[];
 };
 
+export type ChatCompletionRequestAttachment = {
+  file_id: string;
+};
+
 export type ChatCompletionRequest = {
   model: string;
   messages: ChatCompletionMessage[];
   stream?: boolean;
-  attachments?: AttachmentRequest[];
+  attachments?: ChatCompletionRequestAttachment[];
   [key: string]: unknown;
 };
 

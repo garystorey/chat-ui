@@ -36,6 +36,7 @@ import {
   getId,
   ingestAttachments,
   toChatCompletionMessages,
+  buildChatCompletionAttachments,
 } from "./utils";
 
 import { ASSISTANT_ERROR_MESSAGE, DEFAULT_CHAT_MODEL, defaultChats, suggestions } from "./config";
@@ -241,6 +242,7 @@ const App = () => {
       };
 
       const conversationForRequest = [...messages, userMessage];
+      const requestAttachments = buildChatCompletionAttachments(conversationForRequest);
       const updateAssistantMessage = (content: string) => {
         setMessages((current) => {
           let previewMessage: Message | undefined;
@@ -321,6 +323,9 @@ const App = () => {
           model: selectedModel,
           messages: toChatCompletionMessages(conversationForRequest),
           stream: true,
+          ...(requestAttachments.length
+            ? { attachments: requestAttachments }
+            : {}),
         },
         chatId,
         assistantMessageId,
