@@ -1,4 +1,19 @@
-export type Theme = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark';
+
+export type ThemeId =
+  | 'dava-orange'
+  | 'dragula'
+  | 'ayu'
+  | 'one-dark-pro'
+  | 'cappuccino'
+  | 'owl'
+  | 'monokai-pro'
+  | 'github';
+
+export type ThemePreference = {
+  id: ThemeId;
+  mode: ThemeMode;
+};
 
 export type Message = {
   id: string;
