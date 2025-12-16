@@ -1,6 +1,6 @@
 import { useCallback, useEffect, type SetStateAction } from "react";
 
-import { API_BASE_URL } from "../config";
+import { buildRequest } from "../utils";
 import useLatestRef from "./useLatestRef";
 
 export type ConnectionStatus = "online" | "offline";
@@ -11,10 +11,9 @@ type UseConnectionListenersProps = {
 };
 
 const checkApiAvailability = async (signal?: AbortSignal) => {
-  const pingTarget = API_BASE_URL && API_BASE_URL.length > 0 ? API_BASE_URL : "/v1/models";
-
   try {
-    const response = await fetch(pingTarget, { method: "HEAD", signal });
+    const { url, requestHeaders } = buildRequest({ path: "/v1/models", method: "GET" });
+    const response = await fetch(url, { method: "GET", headers: requestHeaders, signal });
     if (response.ok) {
       return true;
     }
