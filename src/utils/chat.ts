@@ -13,11 +13,6 @@ import { getPlainTextFromHtml, normalizeWhitespace, truncate } from './text';
 export const cloneMessages = (items: Message[]): Message[] =>
   items.map((item) => ({
     ...item,
-    ...(Array.isArray(item.attachments)
-      ? {
-          attachments: item.attachments.map((attachment) => ({ ...attachment })),
-        }
-      : {}),
   }));
 
 export const getMessagePlainText = (message?: Message) => {
@@ -38,19 +33,11 @@ export const toChatCompletionMessages = (
   messages.map((message) => {
     const text = getMessagePlainText(message);
     const isUserMessage = message.sender === 'user';
-    const hasAttachments =
-      isUserMessage && Array.isArray(message.attachments) && message.attachments.length > 0;
-
-    const attachments = hasAttachments
-      ? message.attachments?.map((attachment) => ({ id: attachment.id })) ?? []
-      : undefined;
-
     const content: ChatCompletionContentPart[] = isUserMessage
       ? [
           {
             type: 'input_text',
             text: text ?? '',
-            ...(attachments && attachments.length > 0 ? { attachments } : {}),
           },
         ]
       : [
