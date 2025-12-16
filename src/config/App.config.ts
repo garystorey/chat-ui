@@ -1,5 +1,9 @@
+const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
-export const API_BASE_URL= 'http://192.168.86.24:1234'
+// Use a relative base URL by default so local development can rely on the
+// Vite dev server proxy, avoiding CORS errors when the API does not include
+// the correct headers. Set VITE_API_BASE_URL to override this value.
+export const API_BASE_URL = envApiBaseUrl && envApiBaseUrl.length > 0 ? envApiBaseUrl : '';
 export const CHAT_COMPLETION_PATH = '/v1/chat/completions';
 export const DEFAULT_CHAT_MODEL = 'gpt-4o-mini';
 export const ASSISTANT_ERROR_MESSAGE =
