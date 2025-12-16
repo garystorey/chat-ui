@@ -61,13 +61,6 @@
   overflow-y: auto;
   scrollbar-width: thin;
   position: relative;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    black 24px,
-    black calc(100% - 24px),
-    transparent 100%
-  );
   list-style: none;
 }
 
@@ -82,22 +75,7 @@
 
 .chat-window__messages::before,
 .chat-window__messages::after {
-  content: '';
-  position: sticky;
-  display: block;
-  height: 18px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.chat-window__messages::before {
-  top: 0;
-  background: linear-gradient(180deg, var(--panel-solid), transparent);
-}
-
-.chat-window__messages::after {
-  bottom: 0;
-  background: linear-gradient(0deg, var(--panel-solid), transparent);
+  content: none;
 }
 
 .chat-window__messages li {
