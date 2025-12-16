@@ -1,4 +1,3 @@
-export { default as AttachmentView } from './AttachmentView';
 export { default as Card } from './Card';
 export { default as ChatList } from './ChatList';
 export { default as ChatListItem } from './ChatListItem';

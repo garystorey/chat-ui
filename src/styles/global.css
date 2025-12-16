@@ -2,26 +2,6 @@
   --max-chat-width: 120ch;
   --chat-open-height: 65vh;
   --bubble-radius: 0.75rem;
-  /* Endava-inspired palette */
-  --brand-orange: #f15a22;
-  --brand-orange-dark: #c94716;
-  --brand-ink: #1f1f24;
-  --brand-sand: #f5efe8;
-  --brand-shell: #fff8f3;
-
-  --accent: var(--brand-orange);
-  --accent-strong: var(--brand-orange-dark);
-  --accent-cta-start: #ff8c55;
-  --accent-cta-end: #f15a22;
-  --accent-cta-text: #ffffff;
-  --accent-button-text: #ffffff;
-  --accent-contrast: color-mix(in oklab, var(--accent) 62%, #4c1e07 38%);
-  --icon-strong: color-mix(in oklab, var(--text) 82%, white 18%);
-
-  --user-msg-bg-dark: #2c1f18;
-  --user-msg-bg-light: #fff1e6;
-  --user-msg-text-dark: #fff8f4;
-  --user-msg-text-light: #3c2417;
 
   --font-body: 'Source Sans 3', Inter, 'Segoe UI', Roboto, system-ui,
     -apple-system, 'Helvetica Neue', Arial, sans-serif;
@@ -33,25 +13,64 @@
   --duration-sm: 160ms;
   --duration-md: 220ms;
 
-  --glow: 0 28px 48px rgba(241, 90, 34, 0.12),
-    0 0 0px rgba(241, 90, 34, 0.1);
+  --accent: #f15a22;
+  --accent-strong: #c94716;
+  --accent-cta-start: #ff8c55;
+  --accent-cta-end: #f15a22;
+  --accent-cta-text: #ffffff;
+  --accent-button-text: #ffffff;
+  --accent-contrast: #4c1e07;
+  --brand-shell: #fff8f3;
+
+  --user-msg-bg-light: #fff1e6;
+  --user-msg-bg-dark: #2c1f18;
+  --user-msg-text-dark: #fff8f4;
+  --user-msg-text-light: #3c2417;
+
+  --bg-light: #e9edf5;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(9, 18, 35, 0.08);
+  --input-bg-light: #f7f8fb;
+  --text-light: #1f2430;
+  --muted-light: #5a6272;
+  --divider-light: rgba(31, 34, 41, 0.12);
+  --shadow-light: 0 12px 30px rgba(12, 18, 32, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(12, 18, 32, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(24, 27, 34, 0.14);
+  --glow-light: 0 22px 46px rgba(241, 90, 34, 0.14);
+
+  --bg-dark: #1f2229;
+  --panel-dark: rgba(34, 39, 48, 0.92);
+  --panel-solid-dark: #252a33;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: rgba(38, 44, 54, 0.95);
+  --text-dark: #f7f8fb;
+  --muted-dark: #b3bac5;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(2, 4, 8, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(2, 4, 8, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(2, 4, 8, 0.6);
+  --glow-dark: 0 28px 48px rgba(241, 90, 34, 0.12);
+
+  --bg: var(--bg-dark);
+  --panel: var(--panel-dark);
+  --panel-solid: var(--panel-solid-dark);
+  --panel-border: var(--panel-border-dark);
+  --input-bg: var(--input-bg-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+  --user-msg-bg: var(--user-msg-bg-dark);
+  --user-msg-text: var(--user-msg-text-dark);
+  --shadow: var(--shadow-dark);
+  --shadow-soft: var(--shadow-soft-dark);
+  --shadow-strong: var(--shadow-strong-dark);
+  --divider: var(--divider-dark);
+  --glow: var(--glow-dark);
+  --icon-strong: color-mix(in oklab, var(--text) 92%, white 8%);
+
   --focus-ring: 0 0 0 2px rgba(255, 248, 243, 0.9),
     0 0 0 4px color-mix(in oklab, var(--accent) 85%, transparent);
-  --shadow-soft: 0 12px 28px rgba(15, 18, 24, 0.1);
-  --shadow-strong: 0 28px 70px rgba(15, 18, 24, 0.12);
-
-  /* default to light theme values */
-  --bg: var(--brand-sand);
-  --panel: color-mix(in oklab, #ffffff 88%, var(--brand-shell) 12%);
-  --panel-solid: #ffffff;
-  --panel-border: rgba(31, 34, 41, 0.1);
-  --input-bg: rgba(255, 247, 243, 0.94);
-  --text: var(--brand-ink);
-  --muted: #5f636a;
-  --user-msg-bg: var(--user-msg-bg-light);
-  --user-msg-text: var(--user-msg-text-light);
-  --shadow: 0 18px 40px rgba(17, 19, 24, 0.12);
-  --divider: rgba(31, 34, 41, 0.12);
 }
 
 html,
@@ -77,13 +96,63 @@ body {
   flex-direction: column;
   align-items: stretch;
   min-height: 100dvh;
-  padding: 1.75rem 1.25rem;
+  padding: 1.75rem 1.5rem;
   padding-bottom: calc(2rem + env(safe-area-inset-bottom));
   font-size: 1rem;
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  background-image: radial-gradient(
+      20rem 20rem at 12% -8%,
+      color-mix(in oklab, #233857 65%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      28rem 28rem at 86% 0%,
+      color-mix(in oklab, #1b2d45 70%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, #0c1422 0%, #0f1928 26%, #0f1928 100%);
+}
 
+body::before,
+body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background: radial-gradient(
+      circle at 16% 8%,
+      color-mix(in oklab, var(--accent) 10%, transparent) 0%,
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 82% -12%,
+      color-mix(in oklab, #1a2a40 40%, transparent) 0%,
+      transparent 42%
+    );
+  filter: blur(72px);
+  opacity: 0.55;
+  transform: translateZ(0);
+}
+
+body::after {
+  background: linear-gradient(
+      130deg,
+      color-mix(in oklab, var(--panel-border) 26%, transparent) 0%,
+      transparent 22%
+    ),
+    linear-gradient(
+      280deg,
+      color-mix(in oklab, var(--panel-border) 24%, transparent) 0%,
+      transparent 24%
+    );
+  opacity: 0.35;
+  mix-blend-mode: screen;
 }
 
 #root {
@@ -92,60 +161,364 @@ body {
 }
 
 body.light {
-  --bg: var(--brand-sand);
-  --panel: color-mix(in oklab, #ffffff 90%, var(--brand-shell) 10%);
-  --panel-solid: #ffffff;
-  --panel-border: rgba(31, 34, 41, 0.12);
-  --input-bg: rgba(255, 247, 243, 0.96);
-  --text: var(--brand-ink);
-  --muted: #686b72;
+  --bg: var(--bg-light);
+  --panel: var(--panel-light);
+  --panel-solid: var(--panel-solid-light);
+  --panel-border: var(--panel-border-light);
+  --input-bg: var(--input-bg-light);
+  --text: var(--text-light);
+  --muted: var(--muted-light);
   --user-msg-bg: var(--user-msg-bg-light);
   --user-msg-text: var(--user-msg-text-light);
-  --shadow: 0 18px 42px rgba(17, 19, 24, 0.12);
-  --shadow-soft: 0 16px 36px rgba(24, 27, 34, 0.12);
-  --shadow-strong: 0 32px 78px rgba(24, 27, 34, 0.14);
-  --accent-button-text: #ffffff;
-  --accent-contrast: #4b1f0b;
+  --shadow: var(--shadow-light);
+  --shadow-soft: var(--shadow-soft-light);
+  --shadow-strong: var(--shadow-strong-light);
+  --divider: var(--divider-light);
+  --glow: var(--glow-light);
   --icon-strong: color-mix(in oklab, var(--text) 78%, white 22%);
-  --divider: rgba(31, 34, 41, 0.12);
-  --glow: 0 28px 48px rgba(241, 90, 34, 0.12);
 
+  background-color: var(--bg);
   background-image: radial-gradient(
-      44rem 44rem at -16% -12%,
-      color-mix(in oklab, var(--accent) 20%, transparent) 0%,
-      transparent 70%
+      28rem 28rem at -10% -12%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 72%
     ),
     radial-gradient(
-      34rem 34rem at 120% 12%,
-      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
-      transparent 68%
+      32rem 32rem at 110% 6%,
+      color-mix(in oklab, var(--accent) 10%, transparent) 0%,
+      transparent 70%
     ),
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--brand-shell) 68%, transparent) 0%,
-      transparent 50%,
-      color-mix(in oklab, var(--brand-shell) 75%, transparent) 100%
-    );
-  background-color: var(--bg);
+    linear-gradient(180deg, color-mix(in oklab, var(--bg) 88%, white 12%) 0%, var(--bg) 22%, var(--bg) 100%);
 }
 
 body.dark {
-  --bg: #1f2229;
-  --panel: rgba(34, 39, 48, 0.92);
-  --panel-solid: #252a33;
-  --panel-border: rgba(255, 255, 255, 0.08);
-  --input-bg: rgba(38, 44, 54, 0.95);
-  --text: #f7f8fb;
-  --muted: #b3bac5;
-  --user-msg-bg: color-mix(in oklab, var(--accent) 64%, var(--user-msg-bg-dark) 36%);
+  --bg: var(--bg-dark);
+  --panel: var(--panel-dark);
+  --panel-solid: var(--panel-solid-dark);
+  --panel-border: var(--panel-border-dark);
+  --input-bg: var(--input-bg-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+  --user-msg-bg: var(--user-msg-bg-dark);
   --user-msg-text: var(--user-msg-text-dark);
-  --shadow: 0 18px 45px rgba(2, 4, 8, 0.55);
-  --shadow-soft: 0 20px 48px rgba(2, 4, 8, 0.45);
-  --shadow-strong: 0 40px 90px rgba(2, 4, 8, 0.6);
-  --accent-button-text: #ffffff;
-  --accent-contrast: color-mix(in oklab, var(--accent) 70%, #fff0e6 30%);
-  --divider: rgba(255, 255, 255, 0.12);
+  --shadow: var(--shadow-dark);
+  --shadow-soft: var(--shadow-soft-dark);
+  --shadow-strong: var(--shadow-strong-dark);
+  --divider: var(--divider-dark);
+  --glow: var(--glow-dark);
   --icon-strong: color-mix(in oklab, var(--text) 92%, white 8%);
+
+  background-color: var(--bg);
+  background-image: radial-gradient(
+      46rem 46rem at -12% -6%,
+      color-mix(in oklab, var(--accent) 20%, transparent) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      32rem 32rem at 120% 14%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, color-mix(in oklab, var(--bg) 68%, #0e1016 32%) 65%, transparent) 0%,
+      transparent 55%,
+      color-mix(in oklab, var(--bg) 78%, transparent) 100%
+    );
+}
+
+body[data-theme='dragula'] {
+  --accent: #7fe059;
+  --accent-strong: #4bbf36;
+  --accent-cta-start: #b2ff92;
+  --accent-cta-end: #5acb46;
+  --accent-cta-text: #082010;
+  --accent-button-text: #0a1b0f;
+  --accent-contrast: #0f2e1b;
+  --brand-shell: #f0fff5;
+
+  --user-msg-bg-light: #d7f5e1;
+  --user-msg-text-light: #0c1c12;
+  --user-msg-bg-dark: #143521;
+  --user-msg-text-dark: #e6f7ec;
+
+  --bg-light: #f3fbf7;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(6, 35, 21, 0.1);
+  --input-bg-light: #edf7f0;
+  --text-light: #0f1d16;
+  --muted-light: #3f5148;
+  --divider-light: rgba(12, 46, 27, 0.12);
+  --shadow-light: 0 12px 30px rgba(12, 30, 19, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(12, 30, 19, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(12, 30, 19, 0.14);
+  --glow-light: 0 22px 46px rgba(90, 203, 70, 0.2);
+
+  --bg-dark: #0f1a12;
+  --panel-dark: #14251a;
+  --panel-solid-dark: #15281c;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: #0f1f16;
+  --text-dark: #e5f2e9;
+  --muted-dark: #a7c3b2;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(2, 6, 4, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(2, 6, 4, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(2, 6, 4, 0.6);
+  --glow-dark: 0 28px 48px rgba(90, 203, 70, 0.18);
+}
+
+body[data-theme='ayu'] {
+  --accent: #f6b73c;
+  --accent-strong: #d48a1f;
+  --accent-cta-start: #ffd188;
+  --accent-cta-end: #f6b73c;
+  --accent-cta-text: #2d1c08;
+  --accent-button-text: #2d1c08;
+  --accent-contrast: #3b2505;
+  --brand-shell: #fff6e6;
+
+  --user-msg-bg-light: #ffe8c7;
+  --user-msg-text-light: #241c0f;
+  --user-msg-bg-dark: #2a1f0f;
+  --user-msg-text-dark: #fff4df;
+
+  --bg-light: #fdf5e3;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(38, 26, 6, 0.1);
+  --input-bg-light: #f8f1e1;
+  --text-light: #161a1e;
+  --muted-light: #3d403c;
+  --divider-light: rgba(38, 26, 6, 0.14);
+  --shadow-light: 0 12px 30px rgba(32, 26, 12, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(32, 26, 12, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(32, 26, 12, 0.14);
+  --glow-light: 0 22px 46px rgba(246, 183, 60, 0.18);
+
+  --bg-dark: #0b0e14;
+  --panel-dark: #111723;
+  --panel-solid-dark: #111723;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: #0d1118;
+  --text-dark: #e6e1cf;
+  --muted-dark: #a3a7b1;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(6, 8, 12, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(6, 8, 12, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(6, 8, 12, 0.6);
+  --glow-dark: 0 28px 48px rgba(246, 183, 60, 0.18);
+}
+
+body[data-theme='one-dark-pro'] {
+  --accent: #61afef;
+  --accent-strong: #2f7ac4;
+  --accent-cta-start: #89c2ff;
+  --accent-cta-end: #528bff;
+  --accent-cta-text: #0b1726;
+  --accent-button-text: #0b1726;
+  --accent-contrast: #0e2a52;
+  --brand-shell: #eaf2ff;
+
+  --user-msg-bg-light: #dfeafe;
+  --user-msg-text-light: #0f1b2c;
+  --user-msg-bg-dark: #20344d;
+  --user-msg-text-dark: #e9f4ff;
+
+  --bg-light: #f5f7fb;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(8, 16, 30, 0.1);
+  --input-bg-light: #eef2f8;
+  --text-light: #1c1f26;
+  --muted-light: #4a4f58;
+  --divider-light: rgba(15, 23, 42, 0.12);
+  --shadow-light: 0 12px 30px rgba(12, 18, 32, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(12, 18, 32, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(12, 18, 32, 0.14);
+  --glow-light: 0 22px 46px rgba(82, 139, 255, 0.2);
+
+  --bg-dark: #161a23;
+  --panel-dark: #1f2430;
+  --panel-solid-dark: #1f2430;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: #131722;
+  --text-dark: #e6edf3;
+  --muted-dark: #9ea7b8;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(5, 7, 12, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(5, 7, 12, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(5, 7, 12, 0.6);
+  --glow-dark: 0 28px 48px rgba(82, 139, 255, 0.22);
+}
+
+body[data-theme='cappuccino'] {
+  --accent: #d7827e;
+  --accent-strong: #c05c60;
+  --accent-cta-start: #f0a8a6;
+  --accent-cta-end: #d7827e;
+  --accent-cta-text: #351016;
+  --accent-button-text: #351016;
+  --accent-contrast: #5d1c23;
+  --brand-shell: #fff3f1;
+
+  --user-msg-bg-light: #f6e7e5;
+  --user-msg-text-light: #402121;
+  --user-msg-bg-dark: #3b2f45;
+  --user-msg-text-dark: #ffecef;
+
+  --bg-light: #eff1f5;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(33, 25, 28, 0.1);
+  --input-bg-light: #f5f1f3;
+  --text-light: #4c4f69;
+  --muted-light: #6c6f85;
+  --divider-light: rgba(33, 25, 28, 0.12);
+  --shadow-light: 0 12px 30px rgba(36, 28, 30, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(36, 28, 30, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(36, 28, 30, 0.14);
+  --glow-light: 0 22px 46px rgba(215, 130, 126, 0.18);
+
+  --bg-dark: #1e1e2e;
+  --panel-dark: #26283a;
+  --panel-solid-dark: #26283a;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: #202132;
+  --text-dark: #f2d5cf;
+  --muted-dark: #c6a0a8;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(6, 6, 10, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(6, 6, 10, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(6, 6, 10, 0.6);
+  --glow-dark: 0 28px 48px rgba(215, 130, 126, 0.22);
+}
+
+body[data-theme='owl'] {
+  --accent: #82aaff;
+  --accent-strong: #3b6ce5;
+  --accent-cta-start: #a8c7ff;
+  --accent-cta-end: #5680ff;
+  --accent-cta-text: #0d1b3d;
+  --accent-button-text: #0d1b3d;
+  --accent-contrast: #0f1f4d;
+  --brand-shell: #eef2ff;
+
+  --user-msg-bg-light: #e2e8ff;
+  --user-msg-text-light: #0f172a;
+  --user-msg-bg-dark: #132b4a;
+  --user-msg-text-dark: #eaf2ff;
+
+  --bg-light: #f7f8ff;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(8, 18, 48, 0.1);
+  --input-bg-light: #f1f4ff;
+  --text-light: #0f172a;
+  --muted-light: #4b5563;
+  --divider-light: rgba(8, 18, 48, 0.12);
+  --shadow-light: 0 12px 30px rgba(12, 17, 36, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(12, 17, 36, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(12, 17, 36, 0.14);
+  --glow-light: 0 22px 46px rgba(86, 128, 255, 0.2);
+
+  --bg-dark: #0b1625;
+  --panel-dark: #102038;
+  --panel-solid-dark: #102038;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: #0b1326;
+  --text-dark: #e8ecf5;
+  --muted-dark: #98a7c1;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(5, 7, 12, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(5, 7, 12, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(5, 7, 12, 0.6);
+  --glow-dark: 0 28px 48px rgba(86, 128, 255, 0.22);
+}
+
+body[data-theme='monokai-pro'] {
+  --accent: #e25b45;
+  --accent-strong: #c83f2d;
+  --accent-cta-start: #ffb472;
+  --accent-cta-end: #e25b45;
+  --accent-cta-text: #2c0c04;
+  --accent-button-text: #2c0c04;
+  --accent-contrast: #2e0904;
+  --brand-shell: #fff3ec;
+
+  --user-msg-bg-light: #ffe4d5;
+  --user-msg-text-light: #2d2a2e;
+  --user-msg-bg-dark: #423a46;
+  --user-msg-text-dark: #fffaf2;
+
+  --bg-light: #fdf9f3;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(44, 38, 36, 0.1);
+  --input-bg-light: #f6f1eb;
+  --text-light: #2d2a2e;
+  --muted-light: #5b5560;
+  --divider-light: rgba(44, 38, 36, 0.12);
+  --shadow-light: 0 12px 30px rgba(36, 26, 18, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(36, 26, 18, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(36, 26, 18, 0.14);
+  --glow-light: 0 22px 46px rgba(226, 91, 69, 0.2);
+
+  --bg-dark: #2d2a2e;
+  --panel-dark: #332f36;
+  --panel-solid-dark: #332f36;
+  --panel-border-dark: rgba(255, 255, 255, 0.08);
+  --input-bg-dark: #27242a;
+  --text-dark: #f8f8f2;
+  --muted-dark: #c3b8c4;
+  --divider-dark: rgba(255, 255, 255, 0.12);
+  --shadow-dark: 0 18px 45px rgba(10, 6, 8, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(10, 6, 8, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(10, 6, 8, 0.6);
+  --glow-dark: 0 28px 48px rgba(226, 91, 69, 0.22);
+}
+
+body[data-theme='github'] {
+  --accent: #0969da;
+  --accent-strong: #0550ae;
+  --accent-cta-start: #2188ff;
+  --accent-cta-end: #0969da;
+  --accent-cta-text: #ffffff;
+  --accent-button-text: #ffffff;
+  --accent-contrast: #072f66;
+  --brand-shell: #f6f8fa;
+
+  --user-msg-bg-light: #e8f1ff;
+  --user-msg-text-light: #0a2346;
+  --user-msg-bg-dark: #0f2d5c;
+  --user-msg-text-dark: #e7f1ff;
+
+  --bg-light: #ffffff;
+  --panel-light: #f6f8fa;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(27, 31, 35, 0.12);
+  --input-bg-light: #f6f8fa;
+  --text-light: #24292f;
+  --muted-light: #57606a;
+  --divider-light: rgba(27, 31, 35, 0.12);
+  --shadow-light: 0 12px 30px rgba(27, 31, 35, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(27, 31, 35, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(27, 31, 35, 0.14);
+  --glow-light: 0 22px 46px rgba(9, 105, 218, 0.2);
+
+  --bg-dark: #0d1117;
+  --panel-dark: #161b22;
+  --panel-solid-dark: #161b22;
+  --panel-border-dark: rgba(240, 246, 252, 0.12);
+  --input-bg-dark: #0d1117;
+  --text-dark: #c9d1d9;
+  --muted-dark: #8b949e;
+  --divider-dark: rgba(240, 246, 252, 0.12);
+  --shadow-dark: 0 18px 45px rgba(3, 6, 10, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(3, 6, 10, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(3, 6, 10, 0.6);
+  --glow-dark: 0 28px 48px rgba(9, 105, 218, 0.22);
 }
 
 @media (prefers-reduced-motion: reduce) {
