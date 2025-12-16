@@ -428,7 +428,7 @@ const App = () => {
 
   return (
     <article className="app">
-      <a href="#messages" className="skip-link" onClick={handleSkipToMessages}>
+      <a href="#messages" className="sr-only skip-link" onClick={handleSkipToMessages}>
         Skip to conversation
       </a>
       <Sidebar

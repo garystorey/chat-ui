@@ -14,7 +14,7 @@ const ThemeToggle = () => {
 
   return (
     <div className="theme-toggle" role="group" aria-label="Appearance settings">
-      <label className="theme-toggle__label" htmlFor="theme-selector">
+      <label className="sr-only theme-toggle__label" htmlFor="theme-selector">
         Theme
       </label>
 
