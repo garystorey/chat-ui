@@ -140,6 +140,40 @@ const App = () => {
     [setChatHistory]
   );
 
+  const updateAssistantMessageContent = useCallback(
+    (
+      assistantMessageId: string,
+      chatId: string,
+      nextContent: string,
+      { skipIfUnchanged = false } = {}
+    ) => {
+      setMessages((current) => {
+        let previewMessage: Message | undefined;
+        const next = current.map((message) => {
+          if (message.id !== assistantMessageId) {
+            return message;
+          }
+
+          if (skipIfUnchanged && message.content === nextContent) {
+            previewMessage = message;
+            return message;
+          }
+
+          const updated = { ...message, content: nextContent };
+          previewMessage = updated;
+          return updated;
+        });
+
+        if (previewMessage) {
+          updateActiveChat(next, chatId, previewMessage);
+        }
+
+        return next;
+      });
+    },
+    [setMessages, updateActiveChat]
+  );
+
   const archiveCurrentConversation = useCallback(() => {
     if (messages.length === 0) {
       return;
@@ -236,46 +270,13 @@ const App = () => {
       };
 
       const conversationForRequest = [...messages, userMessage];
-      const updateAssistantMessage = (content: string) => {
-        setMessages((current) => {
-          let previewMessage: Message | undefined;
-          const next = current.map((message) => {
-            if (message.id === assistantMessageId) {
-              const updated = { ...message, content };
-              previewMessage = updated;
-              return updated;
-            }
-            return message;
-          });
-
-          if (previewMessage) {
-            updateActiveChat(next, chatId, previewMessage);
-          }
-
-          return next;
-        });
-      };
-
       const handleCompletionError = (error: unknown) => {
         console.error("Chat completion request failed", error);
-
-        setMessages((current) => {
-          let previewMessage: Message | undefined;
-          const next = current.map((message) => {
-            if (message.id === assistantMessageId) {
-              const updated = { ...message, content: ASSISTANT_ERROR_MESSAGE };
-              previewMessage = updated;
-              return updated;
-            }
-            return message;
-          });
-
-          if (previewMessage) {
-            updateActiveChat(next, chatId, previewMessage);
-          }
-
-          return next;
-        });
+        updateAssistantMessageContent(
+          assistantMessageId,
+          chatId,
+          ASSISTANT_ERROR_MESSAGE
+        );
       };
 
       setMessages((current) => {
@@ -287,29 +288,10 @@ const App = () => {
       setInputValue("");
       setResponding(true);
 
-      const handleFinalAssistantReply = (finalAssistantReply: string) => {
-        setMessages((current) => {
-          let previewMessage: Message | undefined;
-          const next = current.map((message) => {
-            if (message.id === assistantMessageId) {
-              if (message.content === finalAssistantReply) {
-                previewMessage = message;
-                return message;
-              }
-              const updated = { ...message, content: finalAssistantReply };
-              previewMessage = updated;
-              return updated;
-            }
-            return message;
-          });
-
-          if (previewMessage) {
-            updateActiveChat(next, chatId, previewMessage);
-          }
-
-          return next;
+      const handleFinalAssistantReply = (finalAssistantReply: string) =>
+        updateAssistantMessageContent(assistantMessageId, chatId, finalAssistantReply, {
+          skipIfUnchanged: true,
         });
-      };
 
       sendChatCompletion({
         body: {
@@ -322,7 +304,8 @@ const App = () => {
         },
         chatId,
         assistantMessageId,
-        onStreamUpdate: updateAssistantMessage,
+        onStreamUpdate: (content) =>
+          updateAssistantMessageContent(assistantMessageId, chatId, content),
         onStreamComplete: handleFinalAssistantReply,
         onError: handleCompletionError,
         onSettled: () => {
@@ -346,6 +329,7 @@ const App = () => {
       setResponding,
       selectedModel,
       updateActiveChat,
+      updateAssistantMessageContent,
     ]
   );
 
