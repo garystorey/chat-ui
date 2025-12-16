@@ -55,16 +55,38 @@
 
 .message pre {
   overflow: auto;
-  padding: 0.75rem;
+  padding: 2.25rem 0.75rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--panel-border);
   background: color-mix(in oklab, var(--input-bg) 92%, transparent);
+  position: relative;
 }
 
 .message code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Fira Code', monospace;
   font-size: 0.95rem;
+}
+
+.message .copy-code-btn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: color-mix(in oklab, var(--panel) 96%, #0f1928 4%);
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color var(--duration-sm) var(--ease-out),
+    color var(--duration-sm) var(--ease-out);
+}
+
+.message .copy-code-btn:hover,
+.message .copy-code-btn:focus-visible {
+  background: color-mix(in oklab, var(--accent) 14%, var(--panel) 86%);
+  color: color-mix(in oklab, var(--text) 94%, white 6%);
 }
 
 .message-heading {
