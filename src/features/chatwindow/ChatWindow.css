@@ -3,57 +3,31 @@
   width: 100%;
   max-width: var(--max-chat-width);
   margin: 0 auto;
-  border-radius: 1.35rem;
-  background: linear-gradient(
-    175deg,
-    color-mix(in oklab, var(--panel-solid) 86%, var(--brand-shell) 14%),
-    color-mix(in oklab, var(--panel-solid) 92%, var(--brand-shell) 8%)
-  );
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid color-mix(in oklab, var(--panel-border) 60%, var(--accent) 40%);
-  box-shadow: 0 24px 60px rgba(12, 15, 22, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow-soft);
   padding: 0;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(10px);
   transition: opacity var(--duration-md) var(--ease-out),
-    transform var(--duration-md) var(--ease-out),
-    box-shadow var(--duration-md) var(--ease-out);
+    transform var(--duration-md) var(--ease-out);
   max-height: 0;
   flex: 0 0 auto;
   position: relative;
-  backdrop-filter: blur(14px) saturate(120%);
-}
-
-.chat-window::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--accent) 18%, transparent) 0%,
-    transparent 52%,
-    transparent 100%
-  );
-  opacity: 0.14;
-  pointer-events: none;
-}
-
-.chat-window > * {
-  position: relative;
-  z-index: 1;
+  backdrop-filter: blur(6px);
 }
 
 .chat-window--open {
   pointer-events: auto;
   opacity: 1;
   transform: none;
-  padding: 1.65rem 1.75rem;
+  padding: 1.25rem 1.35rem;
   border-width: 1px;
-  box-shadow: 0 24px 60px rgba(12, 15, 22, 0.24);
   max-height: none;
   flex: 1 1 auto;
   min-height: 0;
@@ -66,7 +40,7 @@
   flex: 1 1 auto;
   min-height: 0;
   margin: 0;
-  padding: 0.5rem 0.5rem 0.75rem;
+  padding: 0.25rem 0.25rem 0.5rem;
   overflow-y: auto;
   scrollbar-width: thin;
   position: relative;
