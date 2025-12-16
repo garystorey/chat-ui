@@ -1,6 +1,6 @@
 .sidebar {
   flex-shrink: 0;
-  width: 300px;
+  width: 320px;
   padding: 1.25rem 1.3rem;
   border-radius: clamp(0.9rem, 3vw, 1.25rem);
   border: 1px solid var(--panel-border);
