@@ -3,9 +3,12 @@
   flex: 1 1 auto;
   display: flex;
   align-items: stretch;
-  gap: 1.5rem;
+  gap: 1.75rem;
   width: 100%;
   min-height: 0;
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .chat-wrapper {
@@ -13,21 +16,33 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 2rem 2.25rem;
+  padding: 2.15rem 2.35rem;
   background: linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--panel) 92%, var(--brand-shell) 8%) 0%,
-      color-mix(in oklab, var(--panel-solid) 80%, var(--brand-shell) 20%) 100%
+        140deg,
+        color-mix(in oklab, var(--panel) 82%, var(--brand-shell) 18%) 0%,
+        color-mix(in oklab, var(--panel-solid) 78%, var(--brand-shell) 22%) 52%,
+        color-mix(in oklab, var(--panel) 86%, transparent 14%) 100%
+      ),
+    radial-gradient(
+      circle at 18% 10%,
+      color-mix(in oklab, var(--accent) 15%, transparent) 0%,
+      transparent 38%
     ),
-    color-mix(in oklab, var(--panel) 90%, transparent 10%);
-  border-radius: clamp(1rem, 3vw, 1.6rem);
-  border: 1px solid color-mix(in oklab, var(--panel-border) 75%, transparent);
-  box-shadow: var(--shadow-soft), 0 30px 70px rgba(12, 15, 22, 0.2);
+    radial-gradient(
+      circle at 82% 0%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 40%
+    );
+  border-radius: clamp(1.1rem, 3vw, 1.7rem);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 65%, var(--accent) 35%);
+  box-shadow: 0 28px 70px rgba(12, 15, 22, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   position: relative;
   min-height: 0;
   overflow: hidden;
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px) saturate(125%);
   animation: floatIn 480ms var(--ease-out) 40ms both;
+  isolation: isolate;
 }
 
 .chat-wrapper::before {
@@ -35,20 +50,40 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(120deg, color-mix(in oklab, var(--accent) 28%, transparent) 0%, transparent 35%, transparent 68%, color-mix(in oklab, var(--accent) 18%, transparent) 100%);
-  opacity: 0.18;
+  background: linear-gradient(
+    115deg,
+    color-mix(in oklab, var(--accent) 18%, transparent) 0%,
+    transparent 36%,
+    color-mix(in oklab, var(--accent) 10%, transparent) 60%,
+    transparent 100%
+  );
+  opacity: 0.22;
   pointer-events: none;
+  mix-blend-mode: screen;
 }
 
 .chat-wrapper::after {
   content: '';
   position: absolute;
-  inset: -30% -10% auto -10%;
-  height: 52%;
-  background: radial-gradient(circle at 10% 10%, color-mix(in oklab, var(--accent) 18%, transparent) 0%, transparent 45%),
-    radial-gradient(circle at 80% 0%, color-mix(in oklab, var(--accent) 14%, transparent) 0%, transparent 45%);
+  inset: -35% -10% auto -16%;
+  height: 58%;
+  background: radial-gradient(
+      circle at 16% 12%,
+      color-mix(in oklab, var(--accent) 16%, transparent) 0%,
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 86% 12%,
+      color-mix(in oklab, var(--accent) 12%, transparent) 0%,
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 50% 20%,
+      color-mix(in oklab, var(--brand-shell) 20%, transparent) 0%,
+      transparent 45%
+    );
   opacity: 0.9;
-  filter: blur(44px);
+  filter: blur(52px);
   pointer-events: none;
   transform: translateZ(0);
 }
@@ -69,10 +104,11 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.25rem;
   min-height: 0;
   justify-content: center;
   align-items: stretch;
+  padding: 0.25rem;
 }
 
 .chat-main__inline-input {
@@ -89,11 +125,11 @@
 
 .suggestions__list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.35rem;
   list-style: none;
   margin: 0;
-  padding: 0.5rem;
+  padding: 0.65rem;
 }
 
 .suggestions--hidden {
