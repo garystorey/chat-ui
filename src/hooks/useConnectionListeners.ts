@@ -11,13 +11,15 @@ type UseConnectionListenersProps = {
 };
 
 const checkApiAvailability = async (signal?: AbortSignal) => {
+  const pingTarget = API_BASE_URL && API_BASE_URL.length > 0 ? API_BASE_URL : "/v1/models";
+
   try {
-    const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
+    const response = await fetch(pingTarget, { method: "HEAD", signal });
     if (response.ok) {
       return true;
     }
 
-    if (response.status >= 400 && response.status < 600) {
+    if (response.status >= 400 && response.status < 500) {
       return true;
     }
 
