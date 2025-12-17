@@ -1,3 +1,4 @@
+import hljs from 'highlight.js';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Message } from '../types';
 import { renderMarkdown } from '../utils';
@@ -24,6 +25,11 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     const cleanupTasks: Array<() => void> = [];
 
     preElements.forEach((pre) => {
+      const codeElement = pre.querySelector('code');
+      if (codeElement && !codeElement.classList.contains('hljs')) {
+        hljs.highlightElement(codeElement as HTMLElement);
+      }
+
       if (pre.querySelector('.copy-code-btn')) return;
 
       pre.classList.add('code-block');
