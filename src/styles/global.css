@@ -521,6 +521,258 @@ body[data-theme='github'] {
   --glow-dark: 0 28px 48px rgba(9, 105, 218, 0.22);
 }
 
+body[data-theme='solarized'] {
+  --accent: #268bd2;
+  --accent-strong: #1b6c9e;
+  --accent-cta-start: #5fb3ff;
+  --accent-cta-end: #268bd2;
+  --accent-cta-text: #04121d;
+  --accent-button-text: #04121d;
+  --accent-contrast: #0c2c3d;
+  --brand-shell: #fdf6e3;
+
+  --user-msg-bg-light: #eee8d5;
+  --user-msg-text-light: #073642;
+  --user-msg-bg-dark: #0f2a33;
+  --user-msg-text-dark: #e4e1c9;
+
+  --bg-light: #fdf6e3;
+  --panel-light: #ffffff;
+  --panel-solid-light: #fffef8;
+  --panel-border-light: rgba(7, 54, 66, 0.12);
+  --input-bg-light: #f6efdb;
+  --text-light: #073642;
+  --muted-light: #586e75;
+  --divider-light: rgba(7, 54, 66, 0.14);
+  --shadow-light: 0 12px 30px rgba(7, 22, 32, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(7, 22, 32, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(7, 22, 32, 0.14);
+  --glow-light: 0 22px 46px rgba(38, 139, 210, 0.18);
+
+  --bg-dark: #002b36;
+  --panel-dark: #073642;
+  --panel-solid-dark: #073642;
+  --panel-border-dark: rgba(238, 232, 213, 0.12);
+  --input-bg-dark: #012733;
+  --text-dark: #eee8d5;
+  --muted-dark: #93a1a1;
+  --divider-dark: rgba(238, 232, 213, 0.14);
+  --shadow-dark: 0 18px 45px rgba(0, 9, 14, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(0, 9, 14, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(0, 9, 14, 0.6);
+  --glow-dark: 0 28px 48px rgba(38, 139, 210, 0.22);
+}
+
+body[data-theme='nord'] {
+  --accent: #88c0d0;
+  --accent-strong: #5e94a6;
+  --accent-cta-start: #b5e4f2;
+  --accent-cta-end: #88c0d0;
+  --accent-cta-text: #0c1c24;
+  --accent-button-text: #0c1c24;
+  --accent-contrast: #1f3c4a;
+  --brand-shell: #eceff4;
+
+  --user-msg-bg-light: #d8dee9;
+  --user-msg-text-light: #2e3440;
+  --user-msg-bg-dark: #2e3440;
+  --user-msg-text-dark: #e5e9f0;
+
+  --bg-light: #eceff4;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(46, 52, 64, 0.12);
+  --input-bg-light: #e6ebf3;
+  --text-light: #2e3440;
+  --muted-light: #4c566a;
+  --divider-light: rgba(46, 52, 64, 0.14);
+  --shadow-light: 0 12px 30px rgba(25, 31, 44, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(25, 31, 44, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(25, 31, 44, 0.14);
+  --glow-light: 0 22px 46px rgba(136, 192, 208, 0.18);
+
+  --bg-dark: #2e3440;
+  --panel-dark: #3b4252;
+  --panel-solid-dark: #3b4252;
+  --panel-border-dark: rgba(229, 233, 240, 0.12);
+  --input-bg-dark: #292f3c;
+  --text-dark: #e5e9f0;
+  --muted-dark: #bfc6d4;
+  --divider-dark: rgba(229, 233, 240, 0.12);
+  --shadow-dark: 0 18px 45px rgba(8, 10, 18, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(8, 10, 18, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(8, 10, 18, 0.6);
+  --glow-dark: 0 28px 48px rgba(136, 192, 208, 0.22);
+}
+
+body[data-theme='tokyo-night'] {
+  --accent: #7aa2f7;
+  --accent-strong: #4d72d5;
+  --accent-cta-start: #a5c3ff;
+  --accent-cta-end: #7aa2f7;
+  --accent-cta-text: #0d183a;
+  --accent-button-text: #0d183a;
+  --accent-contrast: #1c2f65;
+  --brand-shell: #e8ebfa;
+
+  --user-msg-bg-light: #dfe4fb;
+  --user-msg-text-light: #0f1630;
+  --user-msg-bg-dark: #1f243b;
+  --user-msg-text-dark: #e6e8ff;
+
+  --bg-light: #e7e9f7;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(15, 22, 48, 0.12);
+  --input-bg-light: #f0f2fb;
+  --text-light: #0f1630;
+  --muted-light: #3f4565;
+  --divider-light: rgba(15, 22, 48, 0.14);
+  --shadow-light: 0 12px 30px rgba(12, 16, 38, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(12, 16, 38, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(12, 16, 38, 0.14);
+  --glow-light: 0 22px 46px rgba(122, 162, 247, 0.2);
+
+  --bg-dark: #1a1b26;
+  --panel-dark: #1f2335;
+  --panel-solid-dark: #1f2335;
+  --panel-border-dark: rgba(230, 232, 255, 0.12);
+  --input-bg-dark: #181a2a;
+  --text-dark: #c0caf5;
+  --muted-dark: #9aa5ce;
+  --divider-dark: rgba(192, 202, 245, 0.14);
+  --shadow-dark: 0 18px 45px rgba(3, 4, 10, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(3, 4, 10, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(3, 4, 10, 0.6);
+  --glow-dark: 0 28px 48px rgba(122, 162, 247, 0.24);
+}
+
+body[data-theme='material-theme'] {
+  --accent: #80cbc4;
+  --accent-strong: #4aa69c;
+  --accent-cta-start: #b0e7df;
+  --accent-cta-end: #80cbc4;
+  --accent-cta-text: #0a1917;
+  --accent-button-text: #0a1917;
+  --accent-contrast: #1d4a45;
+  --brand-shell: #eef7f5;
+
+  --user-msg-bg-light: #e2f0ed;
+  --user-msg-text-light: #12302d;
+  --user-msg-bg-dark: #2d3547;
+  --user-msg-text-dark: #e8f5f3;
+
+  --bg-light: #f6f7fb;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(18, 32, 45, 0.1);
+  --input-bg-light: #f0f2f8;
+  --text-light: #1c2333;
+  --muted-light: #4b566a;
+  --divider-light: rgba(18, 32, 45, 0.12);
+  --shadow-light: 0 12px 30px rgba(20, 24, 32, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(20, 24, 32, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(20, 24, 32, 0.14);
+  --glow-light: 0 22px 46px rgba(128, 203, 196, 0.18);
+
+  --bg-dark: #292d3e;
+  --panel-dark: #32374c;
+  --panel-solid-dark: #32374c;
+  --panel-border-dark: rgba(232, 245, 243, 0.12);
+  --input-bg-dark: #262a39;
+  --text-dark: #e8f5f3;
+  --muted-dark: #b5c6c4;
+  --divider-dark: rgba(232, 245, 243, 0.12);
+  --shadow-dark: 0 18px 45px rgba(6, 7, 10, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(6, 7, 10, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(6, 7, 10, 0.6);
+  --glow-dark: 0 28px 48px rgba(128, 203, 196, 0.22);
+}
+
+body[data-theme='gruvbox'] {
+  --accent: #fabd2f;
+  --accent-strong: #d79921;
+  --accent-cta-start: #ffd87a;
+  --accent-cta-end: #fabd2f;
+  --accent-cta-text: #3b2a05;
+  --accent-button-text: #3b2a05;
+  --accent-contrast: #4f3205;
+  --brand-shell: #fbf1c7;
+
+  --user-msg-bg-light: #f2e5bc;
+  --user-msg-text-light: #3c3836;
+  --user-msg-bg-dark: #3c3836;
+  --user-msg-text-dark: #ebdbb2;
+
+  --bg-light: #fbf1c7;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(60, 56, 54, 0.12);
+  --input-bg-light: #f3e7c3;
+  --text-light: #3c3836;
+  --muted-light: #6f5f44;
+  --divider-light: rgba(60, 56, 54, 0.14);
+  --shadow-light: 0 12px 30px rgba(45, 38, 26, 0.12);
+  --shadow-soft-light: 0 14px 32px rgba(45, 38, 26, 0.1);
+  --shadow-strong-light: 0 32px 78px rgba(45, 38, 26, 0.14);
+  --glow-light: 0 22px 46px rgba(250, 189, 47, 0.2);
+
+  --bg-dark: #282828;
+  --panel-dark: #32302f;
+  --panel-solid-dark: #32302f;
+  --panel-border-dark: rgba(235, 219, 178, 0.12);
+  --input-bg-dark: #1f1f1c;
+  --text-dark: #ebdbb2;
+  --muted-dark: #c2ab83;
+  --divider-dark: rgba(235, 219, 178, 0.12);
+  --shadow-dark: 0 18px 45px rgba(6, 5, 3, 0.55);
+  --shadow-soft-dark: 0 20px 48px rgba(6, 5, 3, 0.45);
+  --shadow-strong-dark: 0 40px 90px rgba(6, 5, 3, 0.6);
+  --glow-dark: 0 28px 48px rgba(250, 189, 47, 0.22);
+}
+
+body[data-theme='high-contrast'] {
+  --accent: #005fcc;
+  --accent-strong: #004099;
+  --accent-cta-start: #0077ff;
+  --accent-cta-end: #005fcc;
+  --accent-cta-text: #ffffff;
+  --accent-button-text: #ffffff;
+  --accent-contrast: #00204d;
+  --brand-shell: #ffffff;
+
+  --user-msg-bg-light: #ffffff;
+  --user-msg-text-light: #000000;
+  --user-msg-bg-dark: #000000;
+  --user-msg-text-dark: #ffffff;
+
+  --bg-light: #ffffff;
+  --panel-light: #ffffff;
+  --panel-solid-light: #ffffff;
+  --panel-border-light: rgba(0, 0, 0, 0.85);
+  --input-bg-light: #ffffff;
+  --text-light: #000000;
+  --muted-light: #1a1a1a;
+  --divider-light: rgba(0, 0, 0, 0.85);
+  --shadow-light: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-soft-light: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-strong-light: 0 0 0 rgba(0, 0, 0, 0);
+  --glow-light: 0 0 0 rgba(0, 0, 0, 0);
+
+  --bg-dark: #000000;
+  --panel-dark: #000000;
+  --panel-solid-dark: #000000;
+  --panel-border-dark: rgba(255, 255, 255, 0.9);
+  --input-bg-dark: #000000;
+  --text-dark: #ffffff;
+  --muted-dark: #f2f2f2;
+  --divider-dark: rgba(255, 255, 255, 0.9);
+  --shadow-dark: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-soft-dark: 0 0 0 rgba(0, 0, 0, 0);
+  --shadow-strong-dark: 0 0 0 rgba(0, 0, 0, 0);
+  --glow-dark: 0 0 0 rgba(0, 0, 0, 0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
