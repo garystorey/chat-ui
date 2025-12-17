@@ -6,9 +6,10 @@ import './ChatMessage.css';
 
 type ChatMessageProps = {
   message: Message;
+  isStreaming?: boolean;
 };
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
+const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const content = useMemo(() => {
     if (message.renderAsHtml) {
@@ -18,6 +19,8 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   }, [message.content, message.renderAsHtml]);
 
   useEffect(() => {
+    if (isStreaming) return;
+
     const container = bodyRef.current;
     if (!container) return;
 
@@ -63,7 +66,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     return () => {
       cleanupTasks.forEach((cleanup) => cleanup());
     };
-  }, [content]);
+  }, [content, isStreaming]);
 
   const ariaLabel = message.sender === 'user' ? 'User message' : 'Assistant message';
 
