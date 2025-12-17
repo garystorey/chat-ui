@@ -8,7 +8,13 @@ export type ThemeId =
   | 'cappuccino'
   | 'owl'
   | 'monokai-pro'
-  | 'github';
+  | 'github'
+  | 'solarized'
+  | 'nord'
+  | 'tokyo-night'
+  | 'material-theme'
+  | 'gruvbox'
+  | 'high-contrast';
 
 export type ThemePreference = {
   id: ThemeId;

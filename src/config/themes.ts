@@ -14,4 +14,10 @@ export const THEME_OPTIONS: ThemeOption[] = [
   { id: 'owl', label: 'Night Owl / Light Owl' },
   { id: 'monokai-pro', label: 'Monokai Pro' },
   { id: 'github', label: 'GitHub' },
+  { id: 'solarized', label: 'Solarized' },
+  { id: 'nord', label: 'Nord' },
+  { id: 'tokyo-night', label: 'Tokyo Night' },
+  { id: 'material-theme', label: 'Material Theme' },
+  { id: 'gruvbox', label: 'Gruvbox' },
+  { id: 'high-contrast', label: 'High Contrast' },
 ];
