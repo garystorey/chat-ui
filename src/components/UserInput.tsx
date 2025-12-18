@@ -26,6 +26,7 @@ type UserInputProps = {
   selectedModel: string;
   onSelectModel: (model: string) => void;
   isLoadingModels: boolean;
+  showModelSelect?: boolean;
 };
 
 const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
@@ -40,6 +41,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     selectedModel,
     onSelectModel,
     isLoadingModels,
+    showModelSelect = true,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [canRecord, setCanRecord] = useState(false);
@@ -244,7 +246,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       micButtonClasses.push("input-panel__icon-button--recording");
     }
 
-    const showModelSelect = availableModels.length > 0;
+    const hasModelOptions = showModelSelect && availableModels.length > 0;
 
     return (
       <form
@@ -271,22 +273,39 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
+          <div className="input-panel__attachments" aria-live="polite">
+            <div className="input-panel__attachments-header">
+              <span className="input-panel__attachments-title">Attachments</span>
+              <span className="input-panel__attachments-hint sr-only">
+                Drag and drop files to add them. Attachment upload is coming soon.
+              </span>
+            </div>
+            <div className="input-panel__attachments-dropzone" role="presentation">
+              <span className="input-panel__attachments-empty sr-only">
+                No attachments yet
+              </span>
+            </div>
+          </div>
           <div className="input-panel__controls">
             {showModelSelect && (
               <div className="input-panel__model-select">
-                <select
-                  id="modelSelect"
-                  aria-label="Model"
-                  value={selectedModel}
-                  onChange={handleModelChange}
-                  disabled={isResponding || isLoadingModels}
-                >
-                  {availableModels.map((model) => (
-                    <option key={model} value={model}>
-                      {model}
-                    </option>
-                  ))}
-                </select>
+                {hasModelOptions ? (
+                  <select
+                    id="modelSelect"
+                    aria-label="Model"
+                    value={selectedModel}
+                    onChange={handleModelChange}
+                    disabled={isResponding || isLoadingModels}
+                  >
+                    {availableModels.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="input-panel__model-hint">Model list unavailable</span>
+                )}
                 {isLoadingModels && <span className="input-panel__model-hint">Loading…</span>}
               </div>
             )}

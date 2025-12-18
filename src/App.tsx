@@ -7,8 +7,8 @@ import {
   type MouseEvent,
 } from "react";
 import { messagesAtom, respondingAtom } from "./atoms";
-import { Show, UserInput, Suggestions } from "./components";
-import { ChatWindow, Sidebar } from "./features/";
+import { ChatList, Show, Suggestions, ThemeToggle, UserInput } from "./components";
+import { ChatWindow } from "./features/";
 import type { ConnectionStatus } from "./hooks/useConnectionListeners";
 
 import type {
@@ -38,13 +38,13 @@ import {
 import { ASSISTANT_ERROR_MESSAGE, DEFAULT_CHAT_MODEL, defaultChats, suggestions } from "./config";
 
 import "./App.css";
+import "./features/sidebar/Sidebar.css";
 
 const App = () => {
   const [messages, setMessages] = useAtom(messagesAtom);
   const [isResponding, setResponding] = useAtom(respondingAtom);
   const [inputValue, setInputValue] = useState("");
   const [isChatOpen, setChatOpen] = useState(false);
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>(() =>
     [...defaultChats].sort((a, b) => b.updatedAt - a.updatedAt)
   );
@@ -55,6 +55,10 @@ const App = () => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [activeHomeTab, setActiveHomeTab] = useState<"suggestions" | "recent">(
+    "suggestions"
+  );
+  const [searchTerm, setSearchTerm] = useState("");
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
@@ -316,6 +320,27 @@ const App = () => {
     [handleSuggestionSelect]
   );
 
+  const filteredChats = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      return chatHistory;
+    }
+
+    return chatHistory.filter((chat) => {
+      const titleMatch = chat.title.toLowerCase().includes(term);
+      const previewMatch = chat.preview.toLowerCase().includes(term);
+      return titleMatch || previewMatch;
+    });
+  }, [chatHistory, searchTerm]);
+
+  const statusLabel = {
+    connecting: "Connecting",
+    online: "Online",
+    offline: "Offline",
+  }[connectionStatus];
+
+  const hasHeaderModelOptions = availableModels.length > 0;
+
   const handleNewChat = useCallback(() => {
     cancelPendingResponse();
     archiveCurrentConversation();
@@ -323,14 +348,12 @@ const App = () => {
     setActiveChatId(null);
     setInputValue("");
     setChatOpen(false);
-    setSidebarCollapsed(false);
   }, [
     archiveCurrentConversation,
     cancelPendingResponse,
     setChatOpen,
     setInputValue,
     setMessages,
-    setSidebarCollapsed,
   ]);
 
   const handleSelectChat = useCallback(
@@ -388,7 +411,6 @@ const App = () => {
         setActiveChatId(null);
         setMessages([]);
         setChatOpen(false);
-        setSidebarCollapsed(false);
         setInputValue("");
       }
     },
@@ -399,15 +421,8 @@ const App = () => {
       setChatOpen,
       setInputValue,
       setMessages,
-      setSidebarCollapsed,
     ]
   );
-
-  const suggestionsClasses = ["suggestions"];
-
-  if (isChatOpen) {
-    suggestionsClasses.push("suggestions--hidden");
-  }
 
   const handleSkipToMessages = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
@@ -420,26 +435,57 @@ const App = () => {
     []
   );
 
-  const handleToggleSidebar = useCallback(() => {
-    setSidebarCollapsed((previous) => !previous);
-  }, [setSidebarCollapsed]);
-
   return (
     <article className="app">
       <a href="#messages" className="sr-only skip-link" onClick={handleSkipToMessages}>
         Skip to conversation
       </a>
-      <Sidebar
-        collapsed={isSidebarCollapsed}
-        onToggle={handleToggleSidebar}
-        chats={chatHistory}
-        activeChatId={activeChatId}
-        connectionStatus={connectionStatus}
-        onRetryConnection={retryConnection}
-        onSelectChat={handleSelectChat}
-        onNewChat={handleNewChat}
-        onRemoveChat={handleRemoveChat}
-      />
+      <header className="app__topbar" aria-label="Chat controls">
+        <div className="app__topbar-left">
+          <button type="button" className="app__new-chat" onClick={handleNewChat}>
+            New Chat
+          </button>
+        </div>
+        <div className="app__topbar-right">
+          <button
+            type="button"
+            className="app__status"
+            role="status"
+            aria-live="polite"
+            aria-label={`Connection status: ${statusLabel}. Click to retry connection.`}
+            title={`Connection status: ${statusLabel}. Click to retry connection.`}
+            onClick={retryConnection}
+          >
+            <span className={`app__status-dot app__status-dot--${connectionStatus}`} aria-hidden="true" />
+            <span className="app__status-label">{statusLabel}</span>
+          </button>
+          <div className="app__model-select">
+            {hasHeaderModelOptions ? (
+              <label className="app__model-select-control" htmlFor="headerModelSelect">
+                <span className="app__model-label sr-only">Model</span>
+                <select
+                  id="headerModelSelect"
+                  value={selectedModel}
+                  onChange={(event) => setSelectedModel(event.target.value)}
+                  disabled={isResponding || isLoadingModels}
+                  aria-label="Select model"
+                >
+                  {availableModels.map((model) => (
+                    <option key={model} value={model}>
+                      {model.slice(model.lastIndexOf("/") + 1, model.length)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <div className="app__model-hint" aria-live="polite">
+                {isLoadingModels ? "Loading models…" : "Model list unavailable"}
+              </div>
+            )}
+          </div>
+          <ThemeToggle />
+        </div>
+      </header>
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main chat-main__content">
             <Show when={!isNewChat}>
@@ -448,25 +494,90 @@ const App = () => {
                 isResponding={isResponding}
               />
             </Show>
-              <div className="chat-main__inline-input">
-                <UserInput
-                  ref={inputRef}
-                  value={inputValue}
-                  onChange={setInputValue}
-                  onSend={handleSend}
-                  onStop={cancelPendingResponse}
-                  isResponding={isResponding}
-                  availableModels={availableModels}
-                  selectedModel={selectedModel}
-                  onSelectModel={setSelectedModel}
-                  isLoadingModels={isLoadingModels}
-                />
-              </div>
-            <Show when={isNewChat}>
-              <Suggestions
-                suggestions={suggestionItems}
-                classes={suggestionsClasses}
+            <div className="chat-main__inline-input">
+              <UserInput
+                ref={inputRef}
+                value={inputValue}
+                onChange={setInputValue}
+                onSend={handleSend}
+                onStop={cancelPendingResponse}
+                isResponding={isResponding}
+                availableModels={availableModels}
+                selectedModel={selectedModel}
+                onSelectModel={setSelectedModel}
+                isLoadingModels={isLoadingModels}
+                showModelSelect={false}
               />
+            </div>
+            <Show when={isNewChat}>
+              <section className="home-panels" aria-label="Start and recent chats">
+                <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeHomeTab === "suggestions"}
+                    className={`home-panels__tab ${activeHomeTab === "suggestions" ? "home-panels__tab--active" : ""}`}
+                    onClick={() => setActiveHomeTab("suggestions")}
+                    id="tab-start"
+                    aria-controls="panel-start"
+                  >
+                    Suggestions
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeHomeTab === "recent"}
+                    className={`home-panels__tab ${activeHomeTab === "recent" ? "home-panels__tab--active" : ""}`}
+                    onClick={() => setActiveHomeTab("recent")}
+                    id="tab-recent"
+                    aria-controls="panel-recent"
+                  >
+                    Recent
+                  </button>
+                </div>
+                <div className="home-panels__body">
+                  {activeHomeTab === "suggestions" ? (
+                    <div role="tabpanel" id="panel-start" aria-labelledby="tab-start">
+                      <Suggestions
+                        suggestions={suggestionItems}
+                        classes={["suggestions", "home-panels__suggestions"]}
+                      />
+                    </div>
+                  ) : (
+                    <section
+                      className="recent-panel"
+                      role="tabpanel"
+                      id="panel-recent"
+                      aria-labelledby="tab-recent"
+                    >
+                      <div className="recent-panel__header">
+                        <h2 className="recent-panel__title">Recent chats</h2>
+                        <label className="recent-panel__search" htmlFor="recentSearch">
+                          <span className="recent-panel__search-icon" aria-hidden="true">
+                            🔍
+                          </span>
+                          <span className="sr-only">Search chats</span>
+                          <input
+                            id="recentSearch"
+                            type="search"
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                            placeholder="Search chats"
+                          />
+                        </label>
+                      </div>
+                      <div className="recent-panel__list">
+                        <ChatList
+                          chats={filteredChats}
+                          activeChatId={activeChatId}
+                          onSelectChat={handleSelectChat}
+                          onRemoveChat={handleRemoveChat}
+                        />
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </section>
             </Show>
           </div>
       </main>

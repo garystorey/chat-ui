@@ -1,14 +1,156 @@
-
 .app {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column;
   align-items: stretch;
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
   min-height: 0;
   max-width: 1480px;
   margin: 0 auto;
   position: relative;
+  padding: 1rem 1.1rem 2rem;
+}
+
+.app__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: clamp(1rem, 2.5vw, 1.25rem);
+  box-shadow: var(--shadow-soft);
+  padding: 0.95rem 1.1rem;
+  flex-wrap: wrap;
+}
+
+.app__topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app__topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.app__new-chat {
+  background: linear-gradient(135deg, var(--accent-cta-start), var(--accent-cta-end));
+  border: 1px solid color-mix(in oklab, var(--accent-strong) 80%, transparent);
+  color: var(--accent-cta-text);
+  border-radius: 0.9rem;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+  transition: transform var(--duration-sm) var(--ease-out),
+    filter var(--duration-sm) var(--ease-out),
+    box-shadow var(--duration-sm) var(--ease-out);
+}
+
+.app__new-chat:hover,
+.app__new-chat:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  outline: none;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2), var(--focus-ring);
+}
+
+.app__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: color-mix(in oklab, var(--panel) 92%, transparent 8%);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.app__status:hover,
+.app__status:focus-visible {
+  background: color-mix(in oklab, var(--panel) 88%, var(--accent) 12%);
+  border-color: color-mix(in oklab, var(--panel-border) 65%, var(--accent) 35%);
+  outline: none;
+}
+
+.app__status-dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent);
+}
+
+.app__status-dot--online {
+  background: #2ecc71;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+    0 0 0 0 rgba(46, 204, 113, 0.4);
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+.app__status-dot--connecting {
+  background: #f1c40f;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+    0 0 0 0 rgba(241, 196, 15, 0.35);
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+
+.app__status-dot--offline {
+  background: #e74c3c;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent);
+}
+
+.app__status-label {
+  white-space: nowrap;
+}
+
+.app__model-select {
+  display: flex;
+  align-items: center;
+  min-width: 12rem;
+}
+
+.app__model-select-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.app__model-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--text) 75%, transparent);
+}
+
+.app__model-select select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  background: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
+  color: var(--text);
+  font: inherit;
+  min-height: 2.6rem;
+}
+
+.app__model-select select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.app__model-hint {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 0.35rem 0.5rem;
 }
 
 .chat-wrapper {
@@ -16,13 +158,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 1.75rem 1.85rem;
-  background: var(--panel);
-  border-radius: clamp(1rem, 2.5vw, 1.4rem);
-  border: 1px solid var(--panel-border);
-  box-shadow: var(--shadow);
+  padding: 1.25rem 1.35rem 1.5rem;
   position: relative;
-  min-height: 0;
+
 }
 
 .chat-main {
@@ -64,8 +202,110 @@
   padding: 0.65rem;
 }
 
-.suggestions--hidden {
-  display: none;
+.home-panels {
+  width: 100%;
+  max-width: var(--max-chat-width);
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.home-panels__tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 0.5rem;
+}
+
+.home-panels__tab {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-radius: 0.6rem;
+  transition: color var(--duration-sm) var(--ease-out),
+    background-color var(--duration-sm) var(--ease-out);
+}
+
+.home-panels__tab:hover,
+.home-panels__tab:focus-visible {
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  outline: none;
+}
+
+.home-panels__tab--active {
+  color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+}
+
+.home-panels__body {
+  width: 100%;
+}
+
+.home-panels__suggestions .suggestions__list {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.recent-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.recent-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.recent-panel__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.recent-panel__search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  background: color-mix(in oklab, var(--input-bg) 92%, transparent 8%);
+  color: var(--text);
+  width: min(320px, 100%);
+}
+
+.recent-panel__search input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+.recent-panel__search input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.recent-panel__search-icon {
+  color: var(--muted);
+}
+
+.recent-panel__list .sidebar__chats {
+  gap: 0.5rem;
+}
+
+.recent-panel__list .sidebar__chat-list {
+  max-height: 420px;
 }
 
 @media (max-width: 900px) {
@@ -74,12 +314,26 @@
   }
 
   .chat-wrapper {
-    padding: 1.2rem;
-    border-radius: 1.25rem;
+    padding: 1.1rem;
   }
 
   .suggestions__list {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes statusPulse {
+  0% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+      0 0 0 0 rgba(46, 204, 113, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+      0 0 0 10px rgba(46, 204, 113, 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+      0 0 0 0 rgba(46, 204, 113, 0.08);
   }
 }
 

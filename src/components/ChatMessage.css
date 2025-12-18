@@ -16,11 +16,15 @@
 }
 
 .message--user {
-  background: linear-gradient(135deg, color-mix(in oklab, var(--user-msg-bg) 78%, #ffe2d0 22%), var(--user-msg-bg));
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--user-msg-bg) 80%, var(--accent) 20%),
+    var(--user-msg-bg)
+  );
   color: var(--user-msg-text);
   margin-left: auto;
   border-bottom-right-radius: 0.5rem;
-  box-shadow: 0 14px 28px rgba(241, 90, 34, 0.2);
+  box-shadow: 0 14px 28px color-mix(in oklab, var(--accent) 28%, transparent);
   border-color: color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
