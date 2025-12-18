@@ -52,9 +52,7 @@ const App = () => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
     "connecting"
   );
-  const [availableModels, setAvailableModels] = useState<string[]>([
-    DEFAULT_CHAT_MODEL,
-  ]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const {
