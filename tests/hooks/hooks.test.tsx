@@ -8,23 +8,47 @@ import useScrollToBottom from '../../src/hooks/useScrollToBottom';
 import useAutoResizeTextarea from '../../src/hooks/useAutoResizeTextarea';
 import useUnmount from '../../src/hooks/useUnmount';
 
+type MutableMediaQueryList = Omit<MediaQueryList, 'matches'> & { matches: boolean };
+
 const setMockMatchMedia = (matches: boolean) => {
   const listeners = new Set<(event: MediaQueryListEvent) => void>();
-  const mediaQueryList: MediaQueryList = {
+  const addChangeListener: MediaQueryList['addEventListener'] = (
+    _event: keyof MediaQueryListEventMap | string,
+    listener: EventListenerOrEventListenerObject,
+  ) => {
+    if (typeof listener === 'function') {
+      listeners.add(listener as (event: MediaQueryListEvent) => void);
+    } else if ('handleEvent' in listener && typeof listener.handleEvent === 'function') {
+      listeners.add(listener.handleEvent as (event: MediaQueryListEvent) => void);
+    }
+  };
+
+  const removeChangeListener: MediaQueryList['removeEventListener'] = (
+    _event: keyof MediaQueryListEventMap | string,
+    listener: EventListenerOrEventListenerObject,
+  ) => {
+    if (typeof listener === 'function') {
+      listeners.delete(listener as (event: MediaQueryListEvent) => void);
+    } else if ('handleEvent' in listener && typeof listener.handleEvent === 'function') {
+      listeners.delete(listener.handleEvent as (event: MediaQueryListEvent) => void);
+    }
+  };
+
+  const addLegacyListener: MediaQueryList['addListener'] = (listener) => {
+    listeners.add(listener as (event: MediaQueryListEvent) => void);
+  };
+
+  const removeLegacyListener: MediaQueryList['removeListener'] = (listener) => {
+    listeners.delete(listener as (event: MediaQueryListEvent) => void);
+  };
+
+  const mediaQueryList: MutableMediaQueryList = {
     matches,
     media: '(prefers-reduced-motion: reduce)',
-    addEventListener: (_event, listener) => {
-      listeners.add(listener as (event: MediaQueryListEvent) => void);
-    },
-    removeEventListener: (_event, listener) => {
-      listeners.delete(listener as (event: MediaQueryListEvent) => void);
-    },
-    addListener: (_listener: (this: MediaQueryList, ev: MediaQueryListEvent) => any) => {
-      listeners.add(_listener as (event: MediaQueryListEvent) => void);
-    },
-    removeListener: (_listener: (this: MediaQueryList, ev: MediaQueryListEvent) => any) => {
-      listeners.delete(_listener as (event: MediaQueryListEvent) => void);
-    },
+    addEventListener: addChangeListener,
+    removeEventListener: removeChangeListener,
+    addListener: addLegacyListener,
+    removeListener: removeLegacyListener,
     dispatchEvent: () => true,
     onchange: null,
   };

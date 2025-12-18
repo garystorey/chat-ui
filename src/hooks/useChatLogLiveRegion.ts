@@ -29,7 +29,7 @@ const useChatLogLiveRegion = ({
 }: ChatLogLiveRegionOptions): ChatLogLiveRegionResult => {
   const [liveMode, setLiveMode] = useState<LiveRegionMode>('polite');
   const lastAnnouncedContentRef = useRef('');
-  const rafIdRef = useRef<number>();
+  const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     const latestBotMessage = getLatestBotMessage(messages);
@@ -37,7 +37,7 @@ const useChatLogLiveRegion = ({
 
     if (!isResponding) {
       lastAnnouncedContentRef.current = latestContent;
-      if (rafIdRef.current !== undefined && typeof cancelAnimationFrame === 'function') {
+      if (rafIdRef.current !== null && typeof cancelAnimationFrame === 'function') {
         cancelAnimationFrame(rafIdRef.current);
       }
       setLiveMode('polite');
@@ -51,13 +51,13 @@ const useChatLogLiveRegion = ({
     lastAnnouncedContentRef.current = latestContent;
     setLiveMode('off');
 
-    if (rafIdRef.current !== undefined && typeof cancelAnimationFrame === 'function') {
+    if (rafIdRef.current !== null && typeof cancelAnimationFrame === 'function') {
       cancelAnimationFrame(rafIdRef.current);
     }
 
     if (typeof requestAnimationFrame === 'function') {
       rafIdRef.current = requestAnimationFrame(() => {
-        rafIdRef.current = undefined;
+        rafIdRef.current = null;
         setLiveMode('polite');
       });
     } else {
@@ -66,7 +66,7 @@ const useChatLogLiveRegion = ({
   }, [isResponding, messages]);
 
   useEffect(() => () => {
-    if (rafIdRef.current !== undefined && typeof cancelAnimationFrame === 'function') {
+    if (rafIdRef.current !== null && typeof cancelAnimationFrame === 'function') {
       cancelAnimationFrame(rafIdRef.current);
     }
   }, []);
