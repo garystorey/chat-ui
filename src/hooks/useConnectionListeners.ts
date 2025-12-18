@@ -3,33 +3,25 @@ import { useCallback, useEffect, type SetStateAction } from "react";
 import { API_BASE_URL } from "../config";
 import useLatestRef from "./useLatestRef";
 
-export type ConnectionStatus = "online" | "offline";
+export type ConnectionStatus = "online" | "offline" | "connecting";
+
+const logConnectionError = (message: string, error?: unknown) => {
+  const reason =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : null;
+  const logMessage = reason
+    ? `[Connection] ${message} (reason: ${reason})`
+    : `[Connection] ${message}`;
+
+  console.info(logMessage);
+};
 
 type UseConnectionListenersProps = {
   setConnectionStatus: (update: SetStateAction<ConnectionStatus>) => void;
   cancelPendingResponse: () => void;
-};
-
-const checkApiAvailability = async (signal?: AbortSignal) => {
-  try {
-    const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
-    if (response.ok) {
-      return true;
-    }
-
-    if (response.status >= 400 && response.status < 600) {
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return false;
-    }
-
-    console.error("API availability check failed", error);
-    return false;
-  }
 };
 
 const useConnectionListeners = ({
@@ -40,14 +32,36 @@ const useConnectionListeners = ({
 
   const updateStatus = useCallback(
     async (signal?: AbortSignal) => {
-      const isApiAvailable = await checkApiAvailability(signal);
-      setConnectionStatus(isApiAvailable ? "online" : "offline");
+      try {
+        setConnectionStatus("connecting");
 
-      if (isApiAvailable) {
-        cancelPendingResponseRef.current();
+        const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
+        const isApiAvailable =
+          response.ok || (response.status >= 400 && response.status < 600);
+        const nextStatus: ConnectionStatus = isApiAvailable ? "online" : "offline";
+
+        setConnectionStatus(nextStatus);
+
+        if (isApiAvailable) {
+          cancelPendingResponseRef.current();
+        } else if (!signal?.aborted) {
+          logConnectionError("Unable to connect to API.");
+        }
+
+        return isApiAvailable;
+      } catch (error) {
+        if (signal?.aborted) {
+          return false;
+        }
+
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return false;
+        }
+
+        logConnectionError("Unable to connect to API.", error);
+        setConnectionStatus("offline");
+        return false;
       }
-
-      return isApiAvailable;
     },
     [cancelPendingResponseRef, setConnectionStatus]
   );

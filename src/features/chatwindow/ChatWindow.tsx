@@ -17,6 +17,7 @@ type ChatWindowProps = {
 const ChatWindow = ({ messages, isResponding }: ChatWindowProps) => {
   const messagesRef = useRef<HTMLOListElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const streamingMessageId = isResponding ? messages[messages.length - 1]?.id : undefined;
   const { liveMode, ariaRelevant, ariaAtomic } = useChatLogLiveRegion({
     messages,
     isResponding,
@@ -38,7 +39,12 @@ const ChatWindow = ({ messages, isResponding }: ChatWindowProps) => {
         <List<Message>
           items={messages}
           keyfield="id"
-          as={(message) => <ChatMessage message={message} />}
+          as={(message) => (
+            <ChatMessage
+              message={message}
+              isStreaming={isResponding && message.id === streamingMessageId}
+            />
+          )}
           ref={messagesRef}
           className="chat-window__messages"
           role="log"

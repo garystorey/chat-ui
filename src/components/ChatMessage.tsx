@@ -1,3 +1,4 @@
+import hljs from 'highlight.js';
 import { memo, useEffect, useMemo, useRef } from 'react';
 import type { Message } from '../types';
 import { renderMarkdown } from '../utils';
@@ -5,9 +6,10 @@ import './ChatMessage.css';
 
 type ChatMessageProps = {
   message: Message;
+  isStreaming?: boolean;
 };
 
-const ChatMessage = ({ message }: ChatMessageProps) => {
+const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const content = useMemo(() => {
     if (message.renderAsHtml) {
@@ -17,6 +19,8 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
   }, [message.content, message.renderAsHtml]);
 
   useEffect(() => {
+    if (isStreaming) return;
+
     const container = bodyRef.current;
     if (!container) return;
 
@@ -24,6 +28,11 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     const cleanupTasks: Array<() => void> = [];
 
     preElements.forEach((pre) => {
+      const codeElement = pre.querySelector('code');
+      if (codeElement && !codeElement.classList.contains('hljs')) {
+        hljs.highlightElement(codeElement as HTMLElement);
+      }
+
       if (pre.querySelector('.copy-code-btn')) return;
 
       pre.classList.add('code-block');
@@ -57,7 +66,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     return () => {
       cleanupTasks.forEach((cleanup) => cleanup());
     };
-  }, [content]);
+  }, [content, isStreaming]);
 
   const ariaLabel = message.sender === 'user' ? 'User message' : 'Assistant message';
 
