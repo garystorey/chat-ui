@@ -472,7 +472,7 @@ const App = () => {
                 >
                   {availableModels.map((model) => (
                     <option key={model} value={model}>
-                      {model}
+                      {model.slice(model.lastIndexOf("/") + 1, model.length)}
                     </option>
                   ))}
                 </select>

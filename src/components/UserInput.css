@@ -256,7 +256,6 @@ body.chat-open .input-panel {
   align-items: center;
   justify-content: center;
   min-width: 3.2rem;
-  box-shadow: 0 16px 34px rgba(241, 90, 34, 0.18);
   transition: transform var(--duration-sm) var(--ease-out),
     filter var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
@@ -271,7 +270,6 @@ body.chat-open .input-panel {
 .input-panel__submit:hover {
   filter: brightness(1.05);
   transform: translateY(-2px);
-  box-shadow: 0 20px 42px rgba(241, 90, 34, 0.22);
 }
 
 .input-panel__submit:active {
