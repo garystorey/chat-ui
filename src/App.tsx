@@ -50,7 +50,7 @@ const App = () => {
   );
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
-    "offline"
+    "connecting"
   );
   const [availableModels, setAvailableModels] = useState<string[]>([
     DEFAULT_CHAT_MODEL,
