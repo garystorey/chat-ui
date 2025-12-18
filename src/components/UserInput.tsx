@@ -276,12 +276,12 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           <div className="input-panel__attachments" aria-live="polite">
             <div className="input-panel__attachments-header">
               <span className="input-panel__attachments-title">Attachments</span>
-              <span className="input-panel__attachments-hint">
+              <span className="input-panel__attachments-hint sr-only">
                 Drag and drop files to add them. Attachment upload is coming soon.
               </span>
             </div>
             <div className="input-panel__attachments-dropzone" role="presentation">
-              <span className="input-panel__attachments-empty">
+              <span className="input-panel__attachments-empty sr-only">
                 No attachments yet
               </span>
             </div>

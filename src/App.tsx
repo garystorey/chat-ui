@@ -462,7 +462,7 @@ const App = () => {
           <div className="app__model-select">
             {hasHeaderModelOptions ? (
               <label className="app__model-select-control" htmlFor="headerModelSelect">
-                <span className="app__model-label">Model</span>
+                <span className="app__model-label sr-only">Model</span>
                 <select
                   id="headerModelSelect"
                   value={selectedModel}
@@ -520,7 +520,7 @@ const App = () => {
                   id="tab-start"
                   aria-controls="panel-start"
                 >
-                  Start
+                  Suggestions
                 </button>
                 <button
                   type="button"

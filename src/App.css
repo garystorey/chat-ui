@@ -159,12 +159,8 @@
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.25rem 1.35rem 1.5rem;
-  background: var(--panel-solid);
-  border-radius: clamp(1rem, 2.5vw, 1.4rem);
-  border: 1px solid var(--panel-border);
-  box-shadow: var(--shadow);
   position: relative;
-  min-height: 0;
+
 }
 
 .chat-main {
@@ -210,11 +206,7 @@
   width: 100%;
   max-width: var(--max-chat-width);
   margin: 0 auto;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-soft);
-  padding: 1rem 1.1rem;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -233,11 +225,11 @@
   background: transparent;
   color: var(--text);
   font-weight: 700;
-  padding: 0.35rem 0.55rem;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   border-radius: 0.6rem;
   transition: color var(--duration-sm) var(--ease-out),
-    background var(--duration-sm) var(--ease-out);
+    background-color var(--duration-sm) var(--ease-out);
 }
 
 .home-panels__tab:hover,
@@ -323,7 +315,6 @@
 
   .chat-wrapper {
     padding: 1.1rem;
-    border-radius: 1.25rem;
   }
 
   .suggestions__list {
