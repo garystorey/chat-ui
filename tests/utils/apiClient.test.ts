@@ -34,7 +34,7 @@ describe('apiStreamRequest', () => {
       },
     });
 
-    const fetchMock = vi.spyOn(global, 'fetch').mockResolvedValue(response);
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(response);
 
     const result = await apiStreamRequest<{ message: string }, typeof responseData>({
       path: '/test',
@@ -64,7 +64,7 @@ describe('apiStreamRequest', () => {
       headers: { 'content-type': 'application/json' },
     });
 
-    vi.spyOn(global, 'fetch').mockResolvedValue(response);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(response);
 
     await expect(
       apiStreamRequest<{ message: string }, { data: string }>({
@@ -86,7 +86,7 @@ describe('apiStreamRequest', () => {
       'data: [DONE]\n\n',
     ]);
 
-    vi.spyOn(global, 'fetch').mockResolvedValue(response);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(response);
     const onMessage = vi.fn();
     const parseMessage = vi.fn((data: string) => JSON.parse(data) as { text: string });
     const buildResponse = vi.fn((messages: { text: string }[]) => messages.map((m) => m.text));
@@ -113,7 +113,7 @@ describe('apiStreamRequest', () => {
       'data: [DONE]\n\n',
     ]);
 
-    vi.spyOn(global, 'fetch').mockResolvedValue(response);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(response);
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const buildResponse = vi.fn((messages: unknown[]) => messages);
 

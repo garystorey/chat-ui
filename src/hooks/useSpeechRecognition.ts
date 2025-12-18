@@ -11,24 +11,62 @@ interface UseSpeechRecognitionOptions {
   silenceTimeoutMs?: number;
 }
 
+interface SpeechRecognitionAlternative {
+  transcript: string;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognition {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
 type SpeechRecognitionConstructor = new () => SpeechRecognition;
 
 type SpeechRecognitionWithVendor = SpeechRecognitionConstructor & {
   new (): SpeechRecognition;
 };
 
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionWithVendor;
+    webkitSpeechRecognition?: SpeechRecognitionWithVendor;
+  }
+}
+
 const getSpeechRecognitionConstructor = (): SpeechRecognitionWithVendor | null => {
   if (typeof window === 'undefined') {
     return null;
   }
 
-  const speechRecognition = (window as Window & {
-    webkitSpeechRecognition?: SpeechRecognitionWithVendor;
-  }).SpeechRecognition;
-
-  const webkitSpeechRecognition = (window as Window & {
-    webkitSpeechRecognition?: SpeechRecognitionWithVendor;
-  }).webkitSpeechRecognition;
+  const speechRecognition = window.SpeechRecognition;
+  const webkitSpeechRecognition = window.webkitSpeechRecognition;
 
   return speechRecognition || webkitSpeechRecognition || null;
 };
@@ -129,6 +167,11 @@ const useSpeechRecognition = ({
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setError('Microphone access is not available in this browser.');
+      return;
+    }
+
+    if (!SpeechRecognitionConstructor) {
+      setError('Speech recognition is not supported in this browser.');
       return;
     }
 
