@@ -5,6 +5,15 @@ import useLatestRef from "./useLatestRef";
 
 export type ConnectionStatus = "online" | "offline" | "connecting";
 
+const logConnectionError = (message: string, error?: unknown) => {
+  if (error) {
+    console.error(`[Connection] ${message}`, error);
+    return;
+  }
+
+  console.error(`[Connection] ${message}`);
+};
+
 type UseConnectionListenersProps = {
   setConnectionStatus: (update: SetStateAction<ConnectionStatus>) => void;
   cancelPendingResponse: () => void;
@@ -27,7 +36,7 @@ const checkApiAvailability = async (signal?: AbortSignal) => {
       return false;
     }
 
-    console.error("API availability check failed", error);
+    logConnectionError("API availability check failed.", error);
     return false;
   }
 };
@@ -40,20 +49,30 @@ const useConnectionListeners = ({
 
   const updateStatus = useCallback(
     async (signal?: AbortSignal) => {
-      setConnectionStatus("connecting");
+      try {
+        setConnectionStatus("connecting");
 
-      const isApiAvailable = await checkApiAvailability(signal);
-      const nextStatus: ConnectionStatus = isApiAvailable ? "online" : "offline";
+        const isApiAvailable = await checkApiAvailability(signal);
+        const nextStatus: ConnectionStatus = isApiAvailable ? "online" : "offline";
 
-      setConnectionStatus(nextStatus);
+        setConnectionStatus(nextStatus);
 
-      if (isApiAvailable) {
-        cancelPendingResponseRef.current();
-      } else if (!signal?.aborted) {
-        console.error("Unable to connect to API.");
+        if (isApiAvailable) {
+          cancelPendingResponseRef.current();
+        } else if (!signal?.aborted) {
+          logConnectionError("Unable to connect to API.");
+        }
+
+        return isApiAvailable;
+      } catch (error) {
+        if (signal?.aborted) {
+          return false;
+        }
+
+        logConnectionError("Unexpected error while updating connection status.", error);
+        setConnectionStatus("offline");
+        return false;
       }
-
-      return isApiAvailable;
     },
     [cancelPendingResponseRef, setConnectionStatus]
   );
