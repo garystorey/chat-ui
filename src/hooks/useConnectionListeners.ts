@@ -6,12 +6,17 @@ import useLatestRef from "./useLatestRef";
 export type ConnectionStatus = "online" | "offline" | "connecting";
 
 const logConnectionError = (message: string, error?: unknown) => {
-  if (error) {
-    console.error(`[Connection] ${message}`, error);
-    return;
-  }
+  const reason =
+    error instanceof Error
+      ? error.message
+      : typeof error === "string"
+        ? error
+        : null;
+  const logMessage = reason
+    ? `[Connection] ${message} (reason: ${reason})`
+    : `[Connection] ${message}`;
 
-  console.error(`[Connection] ${message}`);
+  console.info(logMessage);
 };
 
 type UseConnectionListenersProps = {
