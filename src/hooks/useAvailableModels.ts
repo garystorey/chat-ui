@@ -49,23 +49,24 @@ const useAvailableModels = ({
           : [];
 
         if (!models.length) {
-          return;
+          setAvailableModels([]);
+          setSelectedModel(DEFAULT_CHAT_MODEL);
+        } else {
+          const uniqueModels = Array.from(new Set(models));
+
+          setAvailableModels(uniqueModels);
+          setSelectedModel((current) => {
+            if (uniqueModels.includes(current)) {
+              return current;
+            }
+
+            if (uniqueModels.includes(DEFAULT_CHAT_MODEL)) {
+              return DEFAULT_CHAT_MODEL;
+            }
+
+            return uniqueModels[0];
+          });
         }
-
-        const uniqueModels = Array.from(new Set(models));
-
-        setAvailableModels(uniqueModels);
-        setSelectedModel((current) => {
-          if (uniqueModels.includes(current)) {
-            return current;
-          }
-
-          if (uniqueModels.includes(DEFAULT_CHAT_MODEL)) {
-            return DEFAULT_CHAT_MODEL;
-          }
-
-          return uniqueModels[0];
-        });
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Failed to fetch models", error);

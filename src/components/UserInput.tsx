@@ -244,6 +244,8 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       micButtonClasses.push("input-panel__icon-button--recording");
     }
 
+    const showModelSelect = availableModels.length > 0;
+
     return (
       <form
         className="input-panel"
@@ -270,22 +272,29 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
             />
           </div>
           <div className="input-panel__controls">
-            <div className="input-panel__model-select">
-              <select
-                id="modelSelect"
-                aria-label="Model"
-                value={selectedModel}
-                onChange={handleModelChange}
-                disabled={isResponding || isLoadingModels}
-              >
-                {availableModels.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))}
-              </select>
-              {isLoadingModels && <span className="input-panel__model-hint">Loading…</span>}
-            </div>
+            {showModelSelect && (
+              <div className="input-panel__model-select">
+                <select
+                  id="modelSelect"
+                  aria-label="Model"
+                  value={selectedModel}
+                  onChange={handleModelChange}
+                  disabled={isResponding || isLoadingModels}
+                >
+                  {availableModels.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))}
+                </select>
+                {isLoadingModels && <span className="input-panel__model-hint">Loading…</span>}
+              </div>
+            )}
+            {!showModelSelect && isLoadingModels && (
+              <div className="input-panel__model-select">
+                <span className="input-panel__model-hint">Loading models…</span>
+              </div>
+            )}
             <div className="input-panel__actions">
               <button
                 type="button"
