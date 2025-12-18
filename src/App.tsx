@@ -509,74 +509,76 @@ const App = () => {
                 showModelSelect={false}
               />
             </div>
-            <section className="home-panels" aria-label="Start and recent chats">
-              <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeHomeTab === "suggestions"}
-                  className={`home-panels__tab ${activeHomeTab === "suggestions" ? "home-panels__tab--active" : ""}`}
-                  onClick={() => setActiveHomeTab("suggestions")}
-                  id="tab-start"
-                  aria-controls="panel-start"
-                >
-                  Suggestions
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeHomeTab === "recent"}
-                  className={`home-panels__tab ${activeHomeTab === "recent" ? "home-panels__tab--active" : ""}`}
-                  onClick={() => setActiveHomeTab("recent")}
-                  id="tab-recent"
-                  aria-controls="panel-recent"
-                >
-                  Recent
-                </button>
-              </div>
-              <div className="home-panels__body">
-                {activeHomeTab === "suggestions" ? (
-                  <div role="tabpanel" id="panel-start" aria-labelledby="tab-start">
-                    <Suggestions
-                      suggestions={suggestionItems}
-                      classes={["suggestions", "home-panels__suggestions"]}
-                    />
-                  </div>
-                ) : (
-                  <section
-                    className="recent-panel"
-                    role="tabpanel"
-                    id="panel-recent"
-                    aria-labelledby="tab-recent"
+            <Show when={isNewChat}>
+              <section className="home-panels" aria-label="Start and recent chats">
+                <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeHomeTab === "suggestions"}
+                    className={`home-panels__tab ${activeHomeTab === "suggestions" ? "home-panels__tab--active" : ""}`}
+                    onClick={() => setActiveHomeTab("suggestions")}
+                    id="tab-start"
+                    aria-controls="panel-start"
                   >
-                    <div className="recent-panel__header">
-                      <h2 className="recent-panel__title">Recent chats</h2>
-                      <label className="recent-panel__search" htmlFor="recentSearch">
-                        <span className="recent-panel__search-icon" aria-hidden="true">
-                          🔍
-                        </span>
-                        <span className="sr-only">Search chats</span>
-                        <input
-                          id="recentSearch"
-                          type="search"
-                          value={searchTerm}
-                          onChange={(event) => setSearchTerm(event.target.value)}
-                          placeholder="Search chats"
-                        />
-                      </label>
-                    </div>
-                    <div className="recent-panel__list">
-                      <ChatList
-                        chats={filteredChats}
-                        activeChatId={activeChatId}
-                        onSelectChat={handleSelectChat}
-                        onRemoveChat={handleRemoveChat}
+                    Suggestions
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeHomeTab === "recent"}
+                    className={`home-panels__tab ${activeHomeTab === "recent" ? "home-panels__tab--active" : ""}`}
+                    onClick={() => setActiveHomeTab("recent")}
+                    id="tab-recent"
+                    aria-controls="panel-recent"
+                  >
+                    Recent
+                  </button>
+                </div>
+                <div className="home-panels__body">
+                  {activeHomeTab === "suggestions" ? (
+                    <div role="tabpanel" id="panel-start" aria-labelledby="tab-start">
+                      <Suggestions
+                        suggestions={suggestionItems}
+                        classes={["suggestions", "home-panels__suggestions"]}
                       />
                     </div>
-                  </section>
-                )}
-              </div>
-            </section>
+                  ) : (
+                    <section
+                      className="recent-panel"
+                      role="tabpanel"
+                      id="panel-recent"
+                      aria-labelledby="tab-recent"
+                    >
+                      <div className="recent-panel__header">
+                        <h2 className="recent-panel__title">Recent chats</h2>
+                        <label className="recent-panel__search" htmlFor="recentSearch">
+                          <span className="recent-panel__search-icon" aria-hidden="true">
+                            🔍
+                          </span>
+                          <span className="sr-only">Search chats</span>
+                          <input
+                            id="recentSearch"
+                            type="search"
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                            placeholder="Search chats"
+                          />
+                        </label>
+                      </div>
+                      <div className="recent-panel__list">
+                        <ChatList
+                          chats={filteredChats}
+                          activeChatId={activeChatId}
+                          onSelectChat={handleSelectChat}
+                          onRemoveChat={handleRemoveChat}
+                        />
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </section>
+            </Show>
           </div>
       </main>
     </article>
