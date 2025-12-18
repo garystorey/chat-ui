@@ -19,28 +19,6 @@ type UseConnectionListenersProps = {
   cancelPendingResponse: () => void;
 };
 
-const checkApiAvailability = async (signal?: AbortSignal) => {
-  try {
-    const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
-    if (response.ok) {
-      return true;
-    }
-
-    if (response.status >= 400 && response.status < 600) {
-      return true;
-    }
-
-    return false;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      return false;
-    }
-
-    logConnectionError("API availability check failed.", error);
-    return false;
-  }
-};
-
 const useConnectionListeners = ({
   setConnectionStatus,
   cancelPendingResponse,
@@ -52,7 +30,9 @@ const useConnectionListeners = ({
       try {
         setConnectionStatus("connecting");
 
-        const isApiAvailable = await checkApiAvailability(signal);
+        const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
+        const isApiAvailable =
+          response.ok || (response.status >= 400 && response.status < 600);
         const nextStatus: ConnectionStatus = isApiAvailable ? "online" : "offline";
 
         setConnectionStatus(nextStatus);
@@ -69,7 +49,11 @@ const useConnectionListeners = ({
           return false;
         }
 
-        logConnectionError("Unexpected error while updating connection status.", error);
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return false;
+        }
+
+        logConnectionError("Unable to connect to API.", error);
         setConnectionStatus("offline");
         return false;
       }
