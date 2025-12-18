@@ -29,8 +29,11 @@ const Sidebar = ({
   onRetryConnection,
 }: SidebarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const isOffline = connectionStatus === "offline";
-  const statusLabel = isOffline ? "Offline" : "Online";
+  const statusLabel = {
+    connecting: "Connecting",
+    online: "Online",
+    offline: "Offline",
+  }[connectionStatus];
 
   useEffect(() => {
     if (collapsed) {
@@ -39,9 +42,7 @@ const Sidebar = ({
   }, [collapsed]);
 
   const handleRetryConnection = () => {
-    if (isOffline) {
-      onRetryConnection();
-    }
+    onRetryConnection();
   };
 
   const filteredChats = useMemo(() => {
@@ -68,18 +69,9 @@ const Sidebar = ({
             className="sidebar__status"
             role="status"
             aria-live="polite"
-            aria-label={
-              isOffline
-                ? "Connection offline. Click to retry connection."
-                : `Connection status: ${statusLabel}`
-            }
-            title={
-              isOffline
-                ? "Connection offline. Click to retry connection."
-                : `Connection status: ${statusLabel}`
-            }
+            aria-label={`Connection status: ${statusLabel}. Click to retry connection.`}
+            title={`Connection status: ${statusLabel}. Click to retry connection.`}
             onClick={handleRetryConnection}
-            disabled={!isOffline}
           >
             <span
               className={`sidebar__status-dot sidebar__status-dot--${connectionStatus}`}
@@ -88,7 +80,7 @@ const Sidebar = ({
             <span
               className={`sidebar__status-label ${collapsed ? "sr-only" : ""}`}
             >
-              {isOffline ? "Offline" : statusLabel}
+              {statusLabel}
             </span>
           </button>
 

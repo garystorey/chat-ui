@@ -3,7 +3,7 @@ import { useCallback, useEffect, type SetStateAction } from "react";
 import { API_BASE_URL } from "../config";
 import useLatestRef from "./useLatestRef";
 
-export type ConnectionStatus = "online" | "offline";
+export type ConnectionStatus = "online" | "offline" | "connecting";
 
 type UseConnectionListenersProps = {
   setConnectionStatus: (update: SetStateAction<ConnectionStatus>) => void;
@@ -40,11 +40,17 @@ const useConnectionListeners = ({
 
   const updateStatus = useCallback(
     async (signal?: AbortSignal) => {
+      setConnectionStatus("connecting");
+
       const isApiAvailable = await checkApiAvailability(signal);
-      setConnectionStatus(isApiAvailable ? "online" : "offline");
+      const nextStatus: ConnectionStatus = isApiAvailable ? "online" : "offline";
+
+      setConnectionStatus(nextStatus);
 
       if (isApiAvailable) {
         cancelPendingResponseRef.current();
+      } else if (!signal?.aborted) {
+        console.error("Unable to connect to API.");
       }
 
       return isApiAvailable;
