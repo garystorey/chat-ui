@@ -69,6 +69,14 @@
   --glow: var(--glow-dark);
   --panel-overlay: color-mix(in oklab, var(--panel) 92%, var(--bg) 8%);
   --panel-overlay-strong: color-mix(in oklab, var(--panel) 96%, var(--bg) 4%);
+  --code-surface: color-mix(in oklab, var(--input-bg) 94%, transparent 6%);
+  --code-plain: color-mix(in oklab, var(--text) 96%, white 4%);
+  --code-muted: color-mix(in oklab, var(--muted) 88%, var(--text) 12%);
+  --code-accent: color-mix(in oklab, var(--accent) 78%, var(--text) 22%);
+  --code-accent-strong: color-mix(in oklab, var(--accent-strong) 72%, var(--text) 28%);
+  --code-positive: color-mix(in oklab, var(--accent) 40%, var(--text) 60%);
+  --code-warning: color-mix(in oklab, var(--accent-contrast) 54%, var(--text) 46%);
+  --code-heading: color-mix(in oklab, var(--icon-strong) 72%, var(--text) 28%);
   --status-online: #2ecc71;
   --status-connecting: #f1c40f;
   --status-offline: #e74c3c;
