@@ -62,7 +62,8 @@
   padding: 2.25rem 0.75rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--panel-border);
-  background: color-mix(in oklab, var(--input-bg) 92%, transparent);
+  background: var(--code-surface);
+  color: var(--code-plain);
   position: relative;
 }
 
@@ -70,6 +71,7 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Fira Code', monospace;
   font-size: 0.95rem;
+  color: var(--code-plain);
 }
 
 .message .copy-code-btn {
