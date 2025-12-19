@@ -25,7 +25,6 @@
   color: var(--user-msg-text);
   margin-left: auto;
   border-bottom-right-radius: 0.5rem;
-  box-shadow: 0 14px 28px color-mix(in oklab, var(--accent) 28%, transparent);
   border-color: color-mix(in oklab, var(--accent) 40%, transparent);
 }
 
