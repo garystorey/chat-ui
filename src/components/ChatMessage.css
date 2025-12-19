@@ -31,7 +31,8 @@
 .message--bot {
   margin-right: auto;
   border-bottom-left-radius: 0.5rem;
-  background: color-mix(in oklab, var(--panel-overlay-strong) 92%, var(--panel) 8%);
+  background: var(--bot-msg-bg);
+  color: var(--bot-msg-text);
 }
 
 .message__body {

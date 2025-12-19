@@ -27,6 +27,9 @@
   --user-msg-text-dark: #fff8f4;
   --user-msg-text-light: #3c2417;
 
+  --bot-msg-bg: color-mix(in oklab, var(--panel) 97%, var(--bg) 3%);
+  --bot-msg-text: var(--text);
+
   --bg-light: #e9edf5;
   --panel-light: #ffffff;
   --panel-solid-light: #ffffff;
