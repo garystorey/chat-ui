@@ -6,11 +6,6 @@ import { THEME_OPTIONS } from '../config/themes';
 import useToggleBodyClass from './useToggleBodyClass';
 
 const prefersDarkSchemeQuery = '(prefers-color-scheme: dark)';
-const highlightThemeHref: Record<ThemeMode, string> = {
-  light: 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css',
-  dark: 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css',
-};
-
 const getPreferredThemeMode = (mediaQuery: { matches: boolean }): ThemeMode =>
   mediaQuery.matches ? 'dark' : 'light';
 
@@ -70,17 +65,6 @@ const useTheme = () => {
 
     document.body.dataset.theme = themePreference.id;
   }, [themePreference.id]);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    const highlightThemeLink = document.getElementById('hljs-theme');
-    if (highlightThemeLink) {
-      highlightThemeLink.setAttribute('href', highlightThemeHref[themePreference.mode]);
-    }
-  }, [themePreference.mode]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {

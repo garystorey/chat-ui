@@ -2,6 +2,8 @@ import { ChangeEvent, memo } from 'react';
 import { useTheme } from '../hooks';
 import { ThemeId } from '../types';
 import './ThemeToggle.css';
+import List from './List';
+import { ThemeOption } from '../config/themes';
 
 const ThemeToggle = () => {
   const { themes, themeId, activeTheme, isLight, toggleMode, setThemeId } = useTheme();
@@ -26,11 +28,14 @@ const ThemeToggle = () => {
           aria-label={`Theme: ${activeTheme?.label ?? 'Select a theme'}`}
           onChange={handleChange}
         >
-          {themes.map((themeOption) => (
-            <option key={themeOption.id} value={themeOption.id}>
-              {themeOption.label}
+          <List<ThemeOption> items={themes} keyfield="id"
+            as={(t) => (
+            <option key={t.id} value={t.id}>
+              {t.label}
             </option>
-          ))}
+
+            )}
+          />
         </select>
 
         <button

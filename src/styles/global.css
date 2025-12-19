@@ -1,12 +1,12 @@
 :root {
   --max-chat-width: 120ch;
-  --chat-open-height: 65vh;
+  --chat-open-height: 85vh;
   --bubble-radius: 0.75rem;
 
   --font-body: 'Source Sans 3', Inter, 'Segoe UI', Roboto, system-ui,
     -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
-  --bottom-gap: 2rem;
+  --bottom-gap: 1.1rem;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.5, 0, 0.7, 0.2);
@@ -26,6 +26,9 @@
   --user-msg-bg-dark: #2c1f18;
   --user-msg-text-dark: #fff8f4;
   --user-msg-text-light: #3c2417;
+
+  --bot-msg-bg: color-mix(in oklab, var(--panel) 97%, var(--bg) 3%);
+  --bot-msg-text: var(--text);
 
   --bg-light: #e9edf5;
   --panel-light: #ffffff;
@@ -67,6 +70,24 @@
   --shadow-strong: var(--shadow-strong-dark);
   --divider: var(--divider-dark);
   --glow: var(--glow-dark);
+  --panel-overlay: color-mix(in oklab, var(--panel) 92%, var(--bg) 8%);
+  --panel-overlay-strong: color-mix(in oklab, var(--panel) 96%, var(--bg) 4%);
+  --code-surface: color-mix(in oklab, var(--input-bg) 94%, transparent 6%);
+  --code-plain: color-mix(in oklab, var(--text) 96%, white 4%);
+  --code-muted: color-mix(in oklab, var(--muted) 88%, var(--text) 12%);
+  --code-accent: color-mix(in oklab, var(--accent) 78%, var(--text) 22%);
+  --code-accent-strong: color-mix(in oklab, var(--accent-strong) 72%, var(--text) 28%);
+  --code-positive: color-mix(in oklab, var(--accent) 40%, var(--text) 60%);
+  --code-warning: color-mix(in oklab, var(--accent-contrast) 54%, var(--text) 46%);
+  --code-heading: color-mix(in oklab, var(--icon-strong) 72%, var(--text) 28%);
+  --status-online: #2ecc71;
+  --status-connecting: #f1c40f;
+  --status-offline: #e74c3c;
+  --status-error: #e74c3c;
+  --bg-spot-1: color-mix(in oklab, var(--accent-contrast) 26%, var(--bg) 74%);
+  --bg-spot-2: color-mix(in oklab, var(--accent) 24%, var(--bg) 76%);
+  --bg-depth-1: color-mix(in oklab, var(--bg) 88%, var(--panel-solid) 12%);
+  --bg-depth-2: color-mix(in oklab, var(--bg) 96%, var(--panel) 4%);
   --icon-strong: color-mix(in oklab, var(--text) 92%, white 8%);
 
   --focus-ring: 0 0 0 2px rgba(255, 248, 243, 0.9),
@@ -96,23 +117,24 @@ body {
   flex-direction: column;
   align-items: stretch;
   min-height: 100dvh;
-  padding: 1.75rem 1.5rem;
-  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  padding: 0.9rem 1rem;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
   font-size: 1rem;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background-image: radial-gradient(
       20rem 20rem at 12% -8%,
-      color-mix(in oklab, #233857 65%, transparent) 0%,
+      color-mix(in oklab, var(--bg-spot-1) 65%, transparent) 0%,
       transparent 60%
     ),
     radial-gradient(
       28rem 28rem at 86% 0%,
-      color-mix(in oklab, #1b2d45 70%, transparent) 0%,
+      color-mix(in oklab, var(--bg-spot-2) 70%, transparent) 0%,
       transparent 70%
     ),
-    linear-gradient(180deg, #0c1422 0%, #0f1928 26%, #0f1928 100%);
+    linear-gradient(180deg, var(--bg-depth-1) 0%, var(--bg) 26%, var(--bg) 100%);
 }
 
 body::before,
@@ -132,7 +154,7 @@ body::before {
     ),
     radial-gradient(
       circle at 82% -12%,
-      color-mix(in oklab, #1a2a40 40%, transparent) 0%,
+      color-mix(in oklab, var(--bg-spot-2) 40%, transparent) 0%,
       transparent 42%
     );
   filter: blur(72px);
@@ -221,7 +243,11 @@ body.dark {
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, color-mix(in oklab, var(--bg) 68%, #0e1016 32%) 65%, transparent) 0%,
+      color-mix(
+        in oklab,
+        color-mix(in oklab, var(--bg) 68%, var(--panel-solid) 32%) 65%,
+        transparent
+      ) 0%,
       transparent 55%,
       color-mix(in oklab, var(--bg) 78%, transparent) 100%
     );

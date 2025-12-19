@@ -1,0 +1,101 @@
+/* Theme-aware syntax highlighting that follows the current UI colors */
+.hljs {
+  background: transparent;
+  color: var(--code-plain);
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+  color: var(--code-accent-strong);
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+  color: var(--code-heading);
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-variable,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id {
+  color: var(--code-accent);
+}
+
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string {
+  color: var(--code-positive);
+}
+
+.hljs-built_in,
+.hljs-symbol {
+  color: color-mix(in oklab, var(--code-accent-strong) 82%, var(--code-plain) 18%);
+}
+
+.hljs-comment,
+.hljs-code,
+.hljs-formula {
+  color: var(--code-muted);
+}
+
+.hljs-name,
+.hljs-quote,
+.hljs-selector-tag,
+.hljs-selector-pseudo {
+  color: var(--code-positive);
+}
+
+.hljs-subst {
+  color: var(--code-plain);
+}
+
+.hljs-section {
+  color: var(--code-heading);
+  font-weight: bold;
+}
+
+.hljs-bullet {
+  color: var(--code-warning);
+}
+
+.hljs-emphasis {
+  color: var(--code-plain);
+  font-style: italic;
+}
+
+.hljs-strong {
+  color: var(--code-plain);
+  font-weight: bold;
+}
+
+.hljs-addition {
+  color: var(--code-positive);
+  background-color: color-mix(in oklab, var(--code-positive) 12%, transparent);
+}
+
+.hljs-deletion {
+  color: var(--code-accent-strong);
+  background-color: color-mix(in oklab, var(--code-accent-strong) 12%, transparent);
+}
+
+.hljs-char.escape_,
+.hljs-link,
+.hljs-params,
+.hljs-property,
+.hljs-punctuation,
+.hljs-tag {
+  /* intentionally inherit */
+}
