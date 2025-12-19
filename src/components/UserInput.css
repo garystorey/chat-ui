@@ -177,7 +177,7 @@ body.chat-open .input-panel {
 .input-panel__icon-button:hover {
   filter: brightness(1.05);
   transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(17, 19, 24, 0.12);
+  box-shadow: var(--shadow-soft);
 }
 
 .input-panel__icon-button:active {

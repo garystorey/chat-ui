@@ -67,6 +67,16 @@
   --shadow-strong: var(--shadow-strong-dark);
   --divider: var(--divider-dark);
   --glow: var(--glow-dark);
+  --panel-overlay: color-mix(in oklab, var(--panel) 92%, var(--bg) 8%);
+  --panel-overlay-strong: color-mix(in oklab, var(--panel) 96%, var(--bg) 4%);
+  --status-online: #2ecc71;
+  --status-connecting: #f1c40f;
+  --status-offline: #e74c3c;
+  --status-error: #e74c3c;
+  --bg-spot-1: color-mix(in oklab, var(--accent-contrast) 26%, var(--bg) 74%);
+  --bg-spot-2: color-mix(in oklab, var(--accent) 24%, var(--bg) 76%);
+  --bg-depth-1: color-mix(in oklab, var(--bg) 88%, var(--panel-solid) 12%);
+  --bg-depth-2: color-mix(in oklab, var(--bg) 96%, var(--panel) 4%);
   --icon-strong: color-mix(in oklab, var(--text) 92%, white 8%);
 
   --focus-ring: 0 0 0 2px rgba(255, 248, 243, 0.9),
@@ -105,15 +115,15 @@ body {
   overflow-y: auto;
   background-image: radial-gradient(
       20rem 20rem at 12% -8%,
-      color-mix(in oklab, #233857 65%, transparent) 0%,
+      color-mix(in oklab, var(--bg-spot-1) 65%, transparent) 0%,
       transparent 60%
     ),
     radial-gradient(
       28rem 28rem at 86% 0%,
-      color-mix(in oklab, #1b2d45 70%, transparent) 0%,
+      color-mix(in oklab, var(--bg-spot-2) 70%, transparent) 0%,
       transparent 70%
     ),
-    linear-gradient(180deg, #0c1422 0%, #0f1928 26%, #0f1928 100%);
+    linear-gradient(180deg, var(--bg-depth-1) 0%, var(--bg) 26%, var(--bg) 100%);
 }
 
 body::before,
@@ -133,7 +143,7 @@ body::before {
     ),
     radial-gradient(
       circle at 82% -12%,
-      color-mix(in oklab, #1a2a40 40%, transparent) 0%,
+      color-mix(in oklab, var(--bg-spot-2) 40%, transparent) 0%,
       transparent 42%
     );
   filter: blur(72px);
@@ -222,7 +232,11 @@ body.dark {
     ),
     linear-gradient(
       180deg,
-      color-mix(in oklab, color-mix(in oklab, var(--bg) 68%, #0e1016 32%) 65%, transparent) 0%,
+      color-mix(
+        in oklab,
+        color-mix(in oklab, var(--bg) 68%, var(--panel-solid) 32%) 65%,
+        transparent
+      ) 0%,
       transparent 55%,
       color-mix(in oklab, var(--bg) 78%, transparent) 100%
     );
