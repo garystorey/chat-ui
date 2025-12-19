@@ -1,12 +1,12 @@
 :root {
   --max-chat-width: 120ch;
-  --chat-open-height: 65vh;
+  --chat-open-height: 85vh;
   --bubble-radius: 0.75rem;
 
   --font-body: 'Source Sans 3', Inter, 'Segoe UI', Roboto, system-ui,
     -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
-  --bottom-gap: 2rem;
+  --bottom-gap: 1.1rem;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.5, 0, 0.7, 0.2);
@@ -106,8 +106,8 @@ body {
   flex-direction: column;
   align-items: stretch;
   min-height: 100dvh;
-  padding: 1.75rem 1.5rem;
-  padding-bottom: calc(2rem + env(safe-area-inset-bottom));
+  padding: 0.9rem 1rem;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
   font-size: 1rem;
   position: relative;
   isolation: isolate;
