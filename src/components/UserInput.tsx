@@ -273,7 +273,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
-          <div className="input-panel__attachments" aria-live="polite">
+          {/* <div className="input-panel__attachments" aria-live="polite">
             <div className="input-panel__attachments-header">
               <span className="input-panel__attachments-title">Attachments</span>
               <span className="input-panel__attachments-hint sr-only">
@@ -285,7 +285,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 No attachments yet
               </span>
             </div>
-          </div>
+          </div> */}
           <div className="input-panel__controls">
             {showModelSelect && (
               <div className="input-panel__model-select">
