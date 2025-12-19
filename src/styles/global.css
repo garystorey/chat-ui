@@ -101,7 +101,8 @@ body {
   font-size: 1rem;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background-image: radial-gradient(
       20rem 20rem at 12% -8%,
       color-mix(in oklab, #233857 65%, transparent) 0%,

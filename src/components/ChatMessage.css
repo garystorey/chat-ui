@@ -1,5 +1,6 @@
 .message {
-  width: 94%;
+  width: min(85vw, 94%);
+  max-width: 85vw;
   padding: 1rem 1.25rem;
   border-radius: 1rem;
   margin: 0.4rem 0;
