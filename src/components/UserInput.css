@@ -9,13 +9,11 @@
   gap: 0.9rem;
   box-shadow: var(--shadow-soft);
   margin: 0;
-  position: sticky;
-  bottom: 0;
+  position: static;
   width: 100%;
   max-width: var(--max-chat-width);
   margin-left: auto;
   margin-right: auto;
-  backdrop-filter: blur(6px);
 }
 
 body.chat-open .input-panel {
