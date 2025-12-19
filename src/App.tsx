@@ -492,6 +492,22 @@ const App = () => {
           </Show>
 
           <Show when={isNewChat}>
+            <div className="chat-main__inline-input chat-main__inline-input--home">
+              <UserInput
+                ref={inputRef}
+                value={inputValue}
+                onChange={setInputValue}
+                onSend={handleSend}
+                onStop={cancelPendingResponse}
+                isResponding={isResponding}
+                availableModels={availableModels}
+                selectedModel={selectedModel}
+                onSelectModel={setSelectedModel}
+                isLoadingModels={isLoadingModels}
+                showModelSelect={false}
+              />
+            </div>
+
             <section className="home-panels" aria-label="Start and recent chats">
               <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
                 <button
@@ -563,21 +579,23 @@ const App = () => {
           </Show>
         </div>
 
-        <div className="chat-main__inline-input">
-          <UserInput
-            ref={inputRef}
-            value={inputValue}
-            onChange={setInputValue}
-            onSend={handleSend}
-            onStop={cancelPendingResponse}
-            isResponding={isResponding}
-            availableModels={availableModels}
-            selectedModel={selectedModel}
-            onSelectModel={setSelectedModel}
-            isLoadingModels={isLoadingModels}
-            showModelSelect={false}
-          />
-        </div>
+        <Show when={!isNewChat}>
+          <div className="chat-main__inline-input">
+            <UserInput
+              ref={inputRef}
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              onStop={cancelPendingResponse}
+              isResponding={isResponding}
+              availableModels={availableModels}
+              selectedModel={selectedModel}
+              onSelectModel={setSelectedModel}
+              isLoadingModels={isLoadingModels}
+              showModelSelect={false}
+            />
+          </div>
+        </Show>
       </main>
     </article>
   );
