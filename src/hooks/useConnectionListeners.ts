@@ -2,8 +2,7 @@ import { useCallback, useEffect, type SetStateAction } from "react";
 
 import { API_BASE_URL } from "../config";
 import useLatestRef from "./useLatestRef";
-
-export type ConnectionStatus = "online" | "offline" | "connecting";
+import { ConnectionStatus } from "../types";
 
 const logConnectionError = (message: string, error?: unknown) => {
   const reason =

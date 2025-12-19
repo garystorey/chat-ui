@@ -21,6 +21,10 @@ export type ThemePreference = {
   mode: ThemeMode;
 };
 
+export type ConnectionStatus = "online" | "offline" | "connecting";
+
+
+
 export type Message = {
   id: string;
   sender: 'user' | 'bot';

@@ -7,14 +7,13 @@ import {
   type MouseEvent,
 } from "react";
 import { messagesAtom, respondingAtom } from "./atoms";
-import { ChatList, Show, Suggestions, ThemeToggle, UserInput } from "./components";
+import { ChatHeader, ChatList, Show, Suggestions, ThemeToggle, UserInput } from "./components";
 import { ChatWindow } from "./features/";
-import type { ConnectionStatus } from "./hooks/useConnectionListeners";
 
 import type {
   UserInputSendPayload,
   ChatSummary,
-  Message,
+  Message,ConnectionStatus
 } from "./types";
 import {
   useConnectionListeners,
@@ -439,59 +438,24 @@ const App = () => {
       <a href="#messages" className="sr-only skip-link" onClick={handleSkipToMessages}>
         Skip to conversation
       </a>
-      <header className="app__topbar" aria-label="Chat controls">
-        <div className="app__topbar-left">
-          <button type="button" className="app__new-chat" onClick={handleNewChat}>
-            New Chat
-          </button>
-        </div>
-        <div className="app__topbar-right">
-          <button
-            type="button"
-            className="app__status"
-            role="status"
-            aria-live="polite"
-            aria-label={`Connection status: ${statusLabel}. Click to retry connection.`}
-            title={`Connection status: ${statusLabel}. Click to retry connection.`}
-            onClick={retryConnection}
-          >
-            <span className={`app__status-dot app__status-dot--${connectionStatus}`} aria-hidden="true" />
-            <span className="app__status-label">{statusLabel}</span>
-          </button>
-          <div className="app__model-select">
-            {hasHeaderModelOptions ? (
-              <label className="app__model-select-control" htmlFor="headerModelSelect">
-                <span className="app__model-label sr-only">Model</span>
-                <select
-                  id="headerModelSelect"
-                  value={selectedModel}
-                  onChange={(event) => setSelectedModel(event.target.value)}
-                  disabled={isResponding || isLoadingModels}
-                  aria-label="Select model"
-                >
-                  {availableModels.map((model) => (
-                    <option key={model} value={model}>
-                      {model.slice(model.lastIndexOf("/") + 1, model.length)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : (
-              <div className="app__model-hint" aria-live="polite">
-                {isLoadingModels ? "Loading models…" : "Model list unavailable"}
-              </div>
-            )}
-          </div>
-          <ThemeToggle />
-        </div>
-      </header>
+      <ChatHeader
+        handleNewChat={handleNewChat}
+        connectionStatus={connectionStatus}
+        statusLabel={statusLabel}
+        retryConnection={retryConnection}
+        availableModels={availableModels}
+        selectedModel={selectedModel}
+        setSelectedModel={setSelectedModel}
+        isResponding={isResponding}
+        isLoadingModels={isLoadingModels}
+        hasHeaderModelOptions={hasHeaderModelOptions}
+      />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
           <Show when={!isNewChat}>
             <ChatWindow messages={messages} isResponding={isResponding} />
           </Show>
 
-          <Show when={isNewChat}>
             <div className="chat-main__inline-input chat-main__inline-input--home">
               <UserInput
                 ref={inputRef}
@@ -508,6 +472,7 @@ const App = () => {
               />
             </div>
 
+          <Show when={isNewChat}>
             <section className="home-panels" aria-label="Start and recent chats">
               <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
                 <button
@@ -579,23 +544,6 @@ const App = () => {
           </Show>
         </div>
 
-        <Show when={!isNewChat}>
-          <div className="chat-main__inline-input">
-            <UserInput
-              ref={inputRef}
-              value={inputValue}
-              onChange={setInputValue}
-              onSend={handleSend}
-              onStop={cancelPendingResponse}
-              isResponding={isResponding}
-              availableModels={availableModels}
-              selectedModel={selectedModel}
-              onSelectModel={setSelectedModel}
-              isLoadingModels={isLoadingModels}
-              showModelSelect={false}
-            />
-          </div>
-        </Show>
       </main>
     </article>
   );
