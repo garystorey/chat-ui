@@ -14,6 +14,7 @@ import { combineValueWithTranscript, trimTrailingTranscript } from "../utils";
 import { UserInputSendPayload } from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
 import "./UserInput.css";
+import { Show } from ".";
 
 type UserInputProps = {
   value: string;
@@ -287,9 +288,9 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
             </div>
           </div> */}
           <div className="input-panel__controls">
-            {showModelSelect && (
+            <Show when={showModelSelect}>
               <div className="input-panel__model-select">
-                {hasModelOptions ? (
+                <Show when={hasModelOptions}>
                   <select
                     id="modelSelect"
                     aria-label="Model"
@@ -303,17 +304,21 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                       </option>
                     ))}
                   </select>
-                ) : (
+                </Show>
+                <Show when={!hasModelOptions}>
                   <span className="input-panel__model-hint">Model list unavailable</span>
-                )}
-                {isLoadingModels && <span className="input-panel__model-hint">Loading…</span>}
+                </Show>
+                <Show when={!isLoadingModels}>
+                  <span className="input-panel__model-hint">Loading…</span>
+                </Show>
               </div>
-            )}
-            {!showModelSelect && isLoadingModels && (
+
+            </Show>
+            <Show when={!showModelSelect && isLoadingModels}>
               <div className="input-panel__model-select">
                 <span className="input-panel__model-hint">Loading models…</span>
               </div>
-            )}
+            </Show>
             <div className="input-panel__actions">
               <button
                 type="button"
@@ -331,9 +336,11 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               aria-live="polite"
               role="status"
             >
-              {recordingStatus && <span>{recordingStatus}</span>}
+              <Show when={!!recordingStatus}>
+                <span>{recordingStatus}</span>
+              </Show>
             </div>
-            {isResponding ? (
+            <Show when={isResponding}>
               <button
                 type="button"
                 className="input-panel__submit"
@@ -343,7 +350,8 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               >
                 <StopIcon />
               </button>
-            ) : (
+            </Show>
+            <Show when={!isResponding}>
               <button
                 type="submit"
                 className="input-panel__submit"
@@ -352,7 +360,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               >
                 <SendIcon />
               </button>
-            )}
+            </Show>
           </div>
           <div id="inputHint" className="sr-only">
             Press Enter to send and Shift+Enter for newline
