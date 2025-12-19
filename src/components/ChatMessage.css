@@ -9,7 +9,7 @@
   word-wrap: break-word;
   border: 1px solid var(--panel-border);
   animation: messageIn var(--duration-md) var(--ease-out) both;
-  background: color-mix(in oklab, var(--panel) 92%, transparent 8%);
+  background: color-mix(in oklab, var(--panel) 94%, var(--bg) 6%);
   color: var(--text);
   box-shadow: var(--shadow-soft);
   position: relative;
@@ -31,11 +31,15 @@
 .message--bot {
   margin-right: auto;
   border-bottom-left-radius: 0.5rem;
-  background: var(--panel-overlay-strong);
+  background: color-mix(in oklab, var(--panel-overlay-strong) 92%, var(--panel) 8%);
 }
 
 .message__body {
   display: block;
+}
+
+.message :where(p, li, ul, ol, blockquote) {
+  color: inherit;
 }
 
 .message p {
