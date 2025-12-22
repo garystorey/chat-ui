@@ -213,6 +213,23 @@
   gap: 0.8rem;
 }
 
+.home-panels__tab-list,
+.home-panels__panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.home-panels__tab-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.home-panels__panel-list > li {
+  width: 100%;
+}
+
 .home-panels__tabs {
   display: inline-flex;
   align-items: center;

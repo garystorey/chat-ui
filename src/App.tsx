@@ -1,19 +1,14 @@
 import { useAtom } from "jotai";
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from "react";
+import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
 import { messagesAtom, respondingAtom } from "./atoms";
-import { ChatHeader, ChatList, Show, Suggestions, ThemeToggle, UserInput } from "./components";
+import { ChatHeader, HomePanels, Show, UserInput } from "./components";
 import { ChatWindow } from "./features/";
 
 import type {
-  UserInputSendPayload,
   ChatSummary,
-  Message,ConnectionStatus
+  ConnectionStatus,
+  Message,
+  UserInputSendPayload,
 } from "./types";
 import {
   useConnectionListeners,
@@ -53,10 +48,6 @@ const App = () => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
-  const [activeHomeTab, setActiveHomeTab] = useState<"suggestions" | "recent">(
-    "suggestions"
-  );
-  const [searchTerm, setSearchTerm] = useState("");
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
@@ -318,19 +309,6 @@ const App = () => {
     [handleSuggestionSelect]
   );
 
-  const filteredChats = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      return chatHistory;
-    }
-
-    return chatHistory.filter((chat) => {
-      const titleMatch = chat.title.toLowerCase().includes(term);
-      const previewMatch = chat.preview.toLowerCase().includes(term);
-      return titleMatch || previewMatch;
-    });
-  }, [chatHistory, searchTerm]);
-
   const statusLabel = {
     connecting: "Connecting",
     online: "Online",
@@ -473,74 +451,13 @@ const App = () => {
             </div>
 
           <Show when={isNewChat}>
-            <section className="home-panels" aria-label="Start and recent chats">
-              <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeHomeTab === "suggestions"}
-                  className={`home-panels__tab ${activeHomeTab === "suggestions" ? "home-panels__tab--active" : ""}`}
-                  onClick={() => setActiveHomeTab("suggestions")}
-                  id="tab-start"
-                  aria-controls="panel-start"
-                >
-                  Suggestions
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={activeHomeTab === "recent"}
-                  className={`home-panels__tab ${activeHomeTab === "recent" ? "home-panels__tab--active" : ""}`}
-                  onClick={() => setActiveHomeTab("recent")}
-                  id="tab-recent"
-                  aria-controls="panel-recent"
-                >
-                  Recent
-                </button>
-              </div>
-              <div className="home-panels__body">
-                {activeHomeTab === "suggestions" ? (
-                  <div role="tabpanel" id="panel-start" aria-labelledby="tab-start">
-                    <Suggestions
-                      suggestions={suggestionItems}
-                      classes={["suggestions", "home-panels__suggestions"]}
-                    />
-                  </div>
-                ) : (
-                  <section
-                    className="recent-panel"
-                    role="tabpanel"
-                    id="panel-recent"
-                    aria-labelledby="tab-recent"
-                  >
-                    <div className="recent-panel__header">
-                      <h2 className="recent-panel__title">Recent chats</h2>
-                      <label className="recent-panel__search" htmlFor="recentSearch">
-                        <span className="recent-panel__search-icon" aria-hidden="true">
-                          🔍
-                        </span>
-                        <span className="sr-only">Search chats</span>
-                        <input
-                          id="recentSearch"
-                          type="search"
-                          value={searchTerm}
-                          onChange={(event) => setSearchTerm(event.target.value)}
-                          placeholder="Search chats"
-                        />
-                      </label>
-                    </div>
-                    <div className="recent-panel__list">
-                      <ChatList
-                        chats={filteredChats}
-                        activeChatId={activeChatId}
-                        onSelectChat={handleSelectChat}
-                        onRemoveChat={handleRemoveChat}
-                      />
-                    </div>
-                  </section>
-                )}
-              </div>
-            </section>
+            <HomePanels
+              suggestionItems={suggestionItems}
+              chatHistory={chatHistory}
+              activeChatId={activeChatId}
+              onSelectChat={handleSelectChat}
+              onRemoveChat={handleRemoveChat}
+            />
           </Show>
         </div>
 
