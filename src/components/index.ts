@@ -10,3 +10,4 @@ export { default as ThinkingIndicator } from './ThinkingIndicator';
 export { default as UserInput } from './UserInput';
 export { default as Heading } from './Heading';
 export { default as ChatHeader } from './ChatHeader';
+export { default as HomePanels } from './HomePanels';
