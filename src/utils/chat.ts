@@ -121,23 +121,24 @@ export const extractAssistantReply = (response: ChatCompletionResponse) => {
   return content.trim();
 };
 
+const buildChatText = (
+  message: Message | undefined,
+  fallback: string,
+  maxLength: number
+) => {
+  const text = getMessagePlainText(message) || getPlainTextFromHtml(fallback) || 'Conversation';
+  return truncate(text, maxLength) || 'Conversation';
+};
+
 export const buildChatTitle = (
   message?: Message,
   fallback = 'Conversation'
-) =>
-  truncate(
-    getMessagePlainText(message) || getPlainTextFromHtml(fallback) || 'Conversation',
-    60
-  ) || 'Conversation';
+) => buildChatText(message, fallback, 60);
 
 export const buildChatPreview = (
   message?: Message,
   fallback = 'Conversation'
-) =>
-  truncate(
-    getMessagePlainText(message) || getPlainTextFromHtml(fallback) || 'Conversation',
-    80
-  ) || 'Conversation';
+) => buildChatText(message, fallback, 80);
 
 export const createChatRecordFromMessages = (messages: Message[]): ChatSummary => {
   const firstUserMessage = messages.find((message) => message.sender === 'user');

@@ -1,7 +1,7 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { DEFAULT_CHAT_MODEL } from "../config";
 import { buildRequest, isJsonLike, parseJson } from "../utils";
-import type { ConnectionStatus } from "./useConnectionListeners";
+import type { ConnectionStatus } from "../types";
 
 const useAvailableModels = ({
   connectionStatus,
