@@ -268,8 +268,6 @@ const App = () => {
           messages: toChatCompletionMessages(conversationForRequest),
           stream: true,
         },
-        chatId,
-        assistantMessageId,
         onStreamUpdate: (content) =>
           updateAssistantMessageContent(assistantMessageId, chatId, content),
         onStreamComplete: handleFinalAssistantReply,
