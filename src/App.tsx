@@ -315,6 +315,25 @@ const App = () => {
 
   const hasHeaderModelOptions = availableModels.length > 0;
 
+  const currentChat = useMemo(() => {
+    if (!activeChatId || messages.length === 0) {
+      return null;
+    }
+
+    const existingChat = chatHistory.find((chat) => chat.id === activeChatId);
+    if (existingChat) {
+      return {
+        ...existingChat,
+        messages: cloneMessages(messages),
+      };
+    }
+
+    return {
+      ...createChatRecordFromMessages(messages),
+      id: activeChatId,
+    };
+  }, [activeChatId, messages, chatHistory]);
+
   const handleNewChat = useCallback(() => {
     cancelPendingResponse();
     archiveCurrentConversation();
@@ -398,6 +417,24 @@ const App = () => {
     ]
   );
 
+  const handleImportChats = useCallback(
+    (importedChats: ChatSummary[]) => {
+      if (importedChats.length === 0) return;
+
+      setChatHistory((current) => {
+        const existingIds = new Set(current.map((chat) => chat.id));
+        const newChats = importedChats.filter((chat) => !existingIds.has(chat.id));
+
+        if (newChats.length === 0) {
+          return current;
+        }
+
+        return [...newChats, ...current].sort((a, b) => b.updatedAt - a.updatedAt);
+      });
+    },
+    []
+  );
+
   const handleSkipToMessages = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
@@ -425,6 +462,9 @@ const App = () => {
         isResponding={isResponding}
         isLoadingModels={isLoadingModels}
         hasHeaderModelOptions={hasHeaderModelOptions}
+        currentChat={currentChat}
+        allChats={chatHistory}
+        onImportChats={handleImportChats}
       />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
