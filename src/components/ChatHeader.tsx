@@ -1,4 +1,6 @@
-import { ConnectionStatus } from "../types";
+import { ConnectionStatus, ChatSummary } from "../types";
+import ExportButton from "./ExportButton";
+import ImportButton from "./ImportButton";
 import List from "./List";
 import Show from "./Show";
 import ThemeToggle from "./ThemeToggle";
@@ -14,9 +16,12 @@ interface ChatHeaderProps {
     isResponding: boolean;
     isLoadingModels: boolean;
     hasHeaderModelOptions: boolean;
+    currentChat: ChatSummary | null;
+    allChats: ChatSummary[];
+    onImportChats: (chats: ChatSummary[]) => void;
 }
 
-function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnection, availableModels, selectedModel, setSelectedModel, isResponding, isLoadingModels, hasHeaderModelOptions}: ChatHeaderProps) {
+function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnection, availableModels, selectedModel, setSelectedModel, isResponding, isLoadingModels, hasHeaderModelOptions, currentChat, allChats, onImportChats}: ChatHeaderProps) {
     return (      
         <header className="app__topbar" aria-label="Chat controls">
             <div className="app__topbar-left">
@@ -65,6 +70,8 @@ function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnecti
                 </Show>
 
               </div>
+              <ImportButton onImportChats={onImportChats} />
+              <ExportButton currentChat={currentChat} allChats={allChats} />
               <ThemeToggle />
             </div>
           </header>

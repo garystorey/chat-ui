@@ -274,19 +274,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
-          {/* <div className="input-panel__attachments" aria-live="polite">
-            <div className="input-panel__attachments-header">
-              <span className="input-panel__attachments-title">Attachments</span>
-              <span className="input-panel__attachments-hint sr-only">
-                Drag and drop files to add them. Attachment upload is coming soon.
-              </span>
-            </div>
-            <div className="input-panel__attachments-dropzone" role="presentation">
-              <span className="input-panel__attachments-empty sr-only">
-                No attachments yet
-              </span>
-            </div>
-          </div> */}
           <div className="input-panel__controls">
             <Show when={showModelSelect}>
               <div className="input-panel__model-select">
@@ -305,10 +292,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                     ))}
                   </select>
                 </Show>
-                <Show when={!hasModelOptions}>
+                <Show when={!hasModelOptions && !isLoadingModels}>
                   <span className="input-panel__model-hint">Model list unavailable</span>
                 </Show>
-                <Show when={!isLoadingModels}>
+                <Show when={isLoadingModels}>
                   <span className="input-panel__model-hint">Loading…</span>
                 </Show>
               </div>

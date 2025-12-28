@@ -12,8 +12,6 @@ import useChatCompletion from "./useChatCompletion";
 
 export type ChatCompletionStreamArgs = {
   body: ChatCompletionRequest;
-  chatId: string;
-  assistantMessageId: string;
   onStreamUpdate: (content: string) => void;
   onStreamComplete: (content: string) => void;
   onError: (error: unknown) => void;
@@ -35,16 +33,12 @@ export default function useChatCompletionStream() {
   const send = useCallback(
     ({
       body,
-      chatId: _chatId,
-      assistantMessageId: _assistantMessageId,
       onStreamUpdate,
       onStreamComplete,
       onError,
       onSettled,
     }: ChatCompletionStreamArgs) => {
       let assistantReply = "";
-      void _chatId;
-      void _assistantMessageId;
 
       const flushStreamBuffer = () => {
         if (!streamBufferRef.current) {
