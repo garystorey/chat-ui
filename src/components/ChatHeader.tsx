@@ -17,9 +17,10 @@ interface ChatHeaderProps {
     hasHeaderModelOptions: boolean;
     currentChat: ChatSummary | null;
     allChats: ChatSummary[];
+    onImportChats: (chats: ChatSummary[]) => void;
 }
 
-function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnection, availableModels, selectedModel, setSelectedModel, isResponding, isLoadingModels, hasHeaderModelOptions, currentChat, allChats}: ChatHeaderProps) {
+function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnection, availableModels, selectedModel, setSelectedModel, isResponding, isLoadingModels, hasHeaderModelOptions, currentChat, allChats, onImportChats}: ChatHeaderProps) {
     return (      
         <header className="app__topbar" aria-label="Chat controls">
             <div className="app__topbar-left">
@@ -68,7 +69,7 @@ function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnecti
                 </Show>
 
               </div>
-              <ExportMenu currentChat={currentChat} allChats={allChats} />
+              <ExportMenu currentChat={currentChat} allChats={allChats} onImportChats={onImportChats} />
               <ThemeToggle />
             </div>
           </header>

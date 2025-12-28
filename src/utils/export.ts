@@ -155,3 +155,116 @@ export const exportAllChats = (
     throw new Error('Only JSON format is supported for exporting all chats');
   }
 };
+
+// Import functionality
+
+export type ImportResult = {
+  success: boolean;
+  chats: ChatSummary[];
+  errors: string[];
+};
+
+const isValidMessage = (msg: unknown): msg is Message => {
+  if (typeof msg !== 'object' || msg === null) return false;
+  const m = msg as Record<string, unknown>;
+  return (
+    typeof m.id === 'string' &&
+    (m.sender === 'user' || m.sender === 'bot') &&
+    typeof m.content === 'string'
+  );
+};
+
+const isValidChat = (chat: unknown): chat is ChatSummary => {
+  if (typeof chat !== 'object' || chat === null) return false;
+  const c = chat as Record<string, unknown>;
+  return (
+    typeof c.id === 'string' &&
+    typeof c.title === 'string' &&
+    typeof c.preview === 'string' &&
+    typeof c.updatedAt === 'number' &&
+    Array.isArray(c.messages) &&
+    c.messages.every(isValidMessage)
+  );
+};
+
+const validateSingleChatJSON = (data: unknown): ChatSummary | null => {
+  if (!isValidChat(data)) return null;
+  return data;
+};
+
+const validateMultipleChatsJSON = (data: unknown): ChatSummary[] => {
+  if (typeof data !== 'object' || data === null) return [];
+  const d = data as Record<string, unknown>;
+
+  if (Array.isArray(d.chats)) {
+    return d.chats.filter(isValidChat);
+  }
+
+  return [];
+};
+
+export const parseImportedJSON = (jsonString: string): ImportResult => {
+  const errors: string[] = [];
+  const chats: ChatSummary[] = [];
+
+  try {
+    const data = JSON.parse(jsonString);
+
+    // Try to parse as single chat first
+    const singleChat = validateSingleChatJSON(data);
+    if (singleChat) {
+      chats.push(singleChat);
+      return { success: true, chats, errors };
+    }
+
+    // Try to parse as multiple chats
+    const multipleChats = validateMultipleChatsJSON(data);
+    if (multipleChats.length > 0) {
+      chats.push(...multipleChats);
+      return { success: true, chats, errors };
+    }
+
+    errors.push('Invalid JSON structure: Expected chat or chats array');
+    return { success: false, chats: [], errors };
+  } catch (error) {
+    errors.push(`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    return { success: false, chats: [], errors };
+  }
+};
+
+export const readFileAsText = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result;
+      if (typeof result === 'string') {
+        resolve(result);
+      } else {
+        reject(new Error('Failed to read file as text'));
+      }
+    };
+    reader.onerror = () => reject(new Error('File reading failed'));
+    reader.readAsText(file);
+  });
+};
+
+export const importChatsFromFile = async (file: File): Promise<ImportResult> => {
+  try {
+    if (!file.name.endsWith('.json')) {
+      return {
+        success: false,
+        chats: [],
+        errors: ['Only JSON files are supported for import'],
+      };
+    }
+
+    const content = await readFileAsText(file);
+    return parseImportedJSON(content);
+  } catch (error) {
+    return {
+      success: false,
+      chats: [],
+      errors: [`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
+    };
+  }
+};

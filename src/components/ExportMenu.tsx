@@ -1,16 +1,19 @@
 import { useState, useRef, useEffect } from 'react';
 import type { ChatSummary } from '../types';
-import { exportChat, exportAllChats, type ExportFormat } from '../utils';
+import { exportChat, exportAllChats, importChatsFromFile, type ExportFormat } from '../utils';
 import './ExportMenu.css';
 
 interface ExportMenuProps {
   currentChat: ChatSummary | null;
   allChats: ChatSummary[];
+  onImportChats: (chats: ChatSummary[]) => void;
 }
 
-function ExportMenu({ currentChat, allChats }: ExportMenuProps) {
+function ExportMenu({ currentChat, allChats, onImportChats }: ExportMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -38,6 +41,46 @@ function ExportMenu({ currentChat, allChats }: ExportMenuProps) {
     if (allChats.length === 0) return;
     exportAllChats(allChats, 'json');
     setIsOpen(false);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportStatus(null);
+
+    try {
+      const result = await importChatsFromFile(file);
+
+      if (result.success && result.chats.length > 0) {
+        onImportChats(result.chats);
+        setImportStatus({
+          type: 'success',
+          message: `Successfully imported ${result.chats.length} chat${result.chats.length === 1 ? '' : 's'}`,
+        });
+        setTimeout(() => {
+          setImportStatus(null);
+          setIsOpen(false);
+        }, 2000);
+      } else {
+        setImportStatus({
+          type: 'error',
+          message: result.errors[0] || 'Failed to import chats',
+        });
+      }
+    } catch (error) {
+      setImportStatus({
+        type: 'error',
+        message: `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      });
+    }
+
+    // Reset file input
+    event.target.value = '';
   };
 
   const hasCurrentChat = currentChat !== null && currentChat.messages.length > 0;
@@ -73,9 +116,35 @@ function ExportMenu({ currentChat, allChats }: ExportMenuProps) {
 
       {isOpen && (
         <div className="export-menu__dropdown" role="menu">
+          {importStatus && (
+            <div className={`export-menu__status export-menu__status--${importStatus.type}`}>
+              {importStatus.message}
+            </div>
+          )}
+
+          <div className="export-menu__section-title">Import</div>
+          <button
+            type="button"
+            className="export-menu__item"
+            onClick={handleImportClick}
+            role="menuitem"
+          >
+            Import Chats from JSON
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+            aria-label="Import chats file"
+          />
+
+          {(hasCurrentChat || hasChats) && <div className="export-menu__divider" />}
+
           {hasCurrentChat && (
             <>
-              <div className="export-menu__section-title">Current Chat</div>
+              <div className="export-menu__section-title">Export Current Chat</div>
               <button
                 type="button"
                 className="export-menu__item"
@@ -106,7 +175,7 @@ function ExportMenu({ currentChat, allChats }: ExportMenuProps) {
 
           {hasChats && (
             <>
-              <div className="export-menu__section-title">All Chats</div>
+              <div className="export-menu__section-title">Export All Chats</div>
               <button
                 type="button"
                 className="export-menu__item"

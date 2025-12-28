@@ -441,6 +441,24 @@ const App = () => {
     ]
   );
 
+  const handleImportChats = useCallback(
+    (importedChats: ChatSummary[]) => {
+      if (importedChats.length === 0) return;
+
+      setChatHistory((current) => {
+        const existingIds = new Set(current.map((chat) => chat.id));
+        const newChats = importedChats.filter((chat) => !existingIds.has(chat.id));
+
+        if (newChats.length === 0) {
+          return current;
+        }
+
+        return [...newChats, ...current].sort((a, b) => b.updatedAt - a.updatedAt);
+      });
+    },
+    []
+  );
+
   const handleSkipToMessages = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
@@ -470,6 +488,7 @@ const App = () => {
         hasHeaderModelOptions={hasHeaderModelOptions}
         currentChat={currentChat}
         allChats={chatHistory}
+        onImportChats={handleImportChats}
       />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
