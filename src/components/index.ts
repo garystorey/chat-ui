@@ -2,6 +2,7 @@ export { default as Card } from './Card';
 export { default as ChatList } from './ChatList';
 export { default as ChatListItem } from './ChatListItem';
 export { default as ChatMessage } from './ChatMessage';
+export { default as ExportMenu } from './ExportMenu';
 export { default as List } from './List';
 export { default as Show } from './Show';
 export { default as Suggestions } from './Suggestions';

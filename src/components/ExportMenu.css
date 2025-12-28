@@ -1,0 +1,154 @@
+.export-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.export-menu__button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 0.375rem;
+  color: var(--text-color, #333);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.export-menu__button:hover {
+  background-color: var(--hover-bg-color, #f5f5f5);
+  border-color: var(--hover-border-color, #d0d0d0);
+}
+
+.export-menu__button:focus-visible {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.export-menu__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.export-menu__label {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .export-menu__label {
+    display: none;
+  }
+
+  .export-menu__button {
+    padding: 0.5rem;
+  }
+}
+
+.export-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: 15rem;
+  background-color: var(--dropdown-bg-color, white);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0.5rem;
+  z-index: 1000;
+  animation: export-menu-fade-in 0.15s ease-out;
+}
+
+@keyframes export-menu-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.export-menu__section-title {
+  padding: 0.5rem 0.75rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted-color, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.export-menu__item {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background-color: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--text-color, #333);
+  cursor: pointer;
+  font-size: 0.875rem;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.export-menu__item:hover {
+  background-color: var(--hover-bg-color, #f5f5f5);
+}
+
+.export-menu__item:focus-visible {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: -2px;
+}
+
+.export-menu__divider {
+  height: 1px;
+  background-color: var(--border-color, #e0e0e0);
+  margin: 0.5rem 0;
+}
+
+.export-menu__empty {
+  padding: 1rem 0.75rem;
+  color: var(--text-muted-color, #6b7280);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .export-menu__button {
+    border-color: var(--border-color, #404040);
+    color: var(--text-color, #e0e0e0);
+  }
+
+  .export-menu__button:hover {
+    background-color: var(--hover-bg-color, #2a2a2a);
+    border-color: var(--hover-border-color, #505050);
+  }
+
+  .export-menu__dropdown {
+    background-color: var(--dropdown-bg-color, #1f1f1f);
+    border-color: var(--border-color, #404040);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  .export-menu__item {
+    color: var(--text-color, #e0e0e0);
+  }
+
+  .export-menu__item:hover {
+    background-color: var(--hover-bg-color, #2a2a2a);
+  }
+
+  .export-menu__section-title,
+  .export-menu__empty {
+    color: var(--text-muted-color, #9ca3af);
+  }
+
+  .export-menu__divider {
+    background-color: var(--border-color, #404040);
+  }
+}

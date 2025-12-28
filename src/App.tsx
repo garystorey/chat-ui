@@ -339,6 +339,25 @@ const App = () => {
 
   const hasHeaderModelOptions = availableModels.length > 0;
 
+  const currentChat = useMemo(() => {
+    if (!activeChatId || messages.length === 0) {
+      return null;
+    }
+
+    const existingChat = chatHistory.find((chat) => chat.id === activeChatId);
+    if (existingChat) {
+      return {
+        ...existingChat,
+        messages: cloneMessages(messages),
+      };
+    }
+
+    return {
+      ...createChatRecordFromMessages(messages),
+      id: activeChatId,
+    };
+  }, [activeChatId, messages, chatHistory]);
+
   const handleNewChat = useCallback(() => {
     cancelPendingResponse();
     archiveCurrentConversation();
@@ -449,6 +468,8 @@ const App = () => {
         isResponding={isResponding}
         isLoadingModels={isLoadingModels}
         hasHeaderModelOptions={hasHeaderModelOptions}
+        currentChat={currentChat}
+        allChats={chatHistory}
       />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
