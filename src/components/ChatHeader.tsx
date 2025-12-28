@@ -1,5 +1,6 @@
 import { ConnectionStatus, ChatSummary } from "../types";
-import ExportMenu from "./ExportMenu";
+import ExportButton from "./ExportButton";
+import ImportButton from "./ImportButton";
 import List from "./List";
 import Show from "./Show";
 import ThemeToggle from "./ThemeToggle";
@@ -69,7 +70,8 @@ function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnecti
                 </Show>
 
               </div>
-              <ExportMenu currentChat={currentChat} allChats={allChats} onImportChats={onImportChats} />
+              <ImportButton onImportChats={onImportChats} />
+              <ExportButton currentChat={currentChat} allChats={allChats} />
               <ThemeToggle />
             </div>
           </header>
