@@ -375,6 +375,13 @@
   gap: 0.75rem;
 }
 
+.recent-panel__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
 .recent-panel__title {
   margin: 0;
   font-size: 1.05rem;
@@ -390,6 +397,13 @@
   background: color-mix(in oklab, var(--input-bg) 92%, transparent 8%);
   color: var(--text);
   width: min(320px, 100%);
+}
+
+.recent-panel__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .recent-panel__search input {
