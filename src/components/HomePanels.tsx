@@ -7,16 +7,13 @@ import ChatList from "./ChatList";
 import List from "./List";
 import Show from "./Show";
 import Suggestions from "./Suggestions";
+import { useChat } from "../context/ChatContext";
 
 type HomePanelsProps = {
   suggestionItems: Suggestion[];
-  chatHistory: ChatSummary[];
-  activeChatId: string | null;
   onSelectChat: (chatId: string) => void;
   onRemoveChat: (chatId: string) => void;
   onImportChats: (chats: ChatSummary[]) => void;
-  currentChat: ChatSummary | null;
-  allChats: ChatSummary[];
 };
 
 type HomeTab = {
@@ -33,14 +30,11 @@ const tabs: HomeTab[] = [
 
 const HomePanels = ({
   suggestionItems,
-  chatHistory,
-  activeChatId,
   onSelectChat,
   onRemoveChat,
   onImportChats,
-  currentChat,
-  allChats,
 }: HomePanelsProps) => {
+  const { chatHistory, activeChatId, currentChat } = useChat();
   const [activeTab, setActiveTab] = useState<HomeTab["id"]>("suggestions");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -121,7 +115,7 @@ const HomePanels = ({
                       </label>
                       <div className="recent-panel__actions">
                         <ImportButton onImportChats={onImportChats} />
-                        <ExportButton currentChat={currentChat} allChats={allChats} />
+                          <ExportButton currentChat={currentChat} allChats={chatHistory} />
                       </div>
                     </div>
                   </div>
