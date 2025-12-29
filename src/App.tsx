@@ -462,9 +462,6 @@ const App = () => {
         isResponding={isResponding}
         isLoadingModels={isLoadingModels}
         hasHeaderModelOptions={hasHeaderModelOptions}
-        currentChat={currentChat}
-        allChats={chatHistory}
-        onImportChats={handleImportChats}
       />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
@@ -495,6 +492,9 @@ const App = () => {
               activeChatId={activeChatId}
               onSelectChat={handleSelectChat}
               onRemoveChat={handleRemoveChat}
+              onImportChats={handleImportChats}
+              currentChat={currentChat}
+              allChats={chatHistory}
             />
           </Show>
         </div>

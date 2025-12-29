@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 
 import type { ChatSummary, Suggestion } from "../types";
+import ExportButton from "./ExportButton";
+import ImportButton from "./ImportButton";
 import ChatList from "./ChatList";
 import List from "./List";
 import Show from "./Show";
@@ -12,6 +14,9 @@ type HomePanelsProps = {
   activeChatId: string | null;
   onSelectChat: (chatId: string) => void;
   onRemoveChat: (chatId: string) => void;
+  onImportChats: (chats: ChatSummary[]) => void;
+  currentChat: ChatSummary | null;
+  allChats: ChatSummary[];
 };
 
 type HomeTab = {
@@ -32,6 +37,9 @@ const HomePanels = ({
   activeChatId,
   onSelectChat,
   onRemoveChat,
+  onImportChats,
+  currentChat,
+  allChats,
 }: HomePanelsProps) => {
   const [activeTab, setActiveTab] = useState<HomeTab["id"]>("suggestions");
   const [searchTerm, setSearchTerm] = useState("");
@@ -97,19 +105,25 @@ const HomePanels = ({
                 >
                   <div className="recent-panel__header">
                     <h2 className="recent-panel__title">Recent chats</h2>
-                    <label className="recent-panel__search" htmlFor="recentSearch">
-                      <span className="recent-panel__search-icon" aria-hidden="true">
-                        🔍
-                      </span>
-                      <span className="sr-only">Search chats</span>
-                      <input
-                        id="recentSearch"
-                        type="search"
-                        value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
-                        placeholder="Search chats"
-                      />
-                    </label>
+                    <div className="recent-panel__controls">
+                      <label className="recent-panel__search" htmlFor="recentSearch">
+                        <span className="recent-panel__search-icon" aria-hidden="true">
+                          🔍
+                        </span>
+                        <span className="sr-only">Search chats</span>
+                        <input
+                          id="recentSearch"
+                          type="search"
+                          value={searchTerm}
+                          onChange={(event) => setSearchTerm(event.target.value)}
+                          placeholder="Search chats"
+                        />
+                      </label>
+                      <div className="recent-panel__actions">
+                        <ImportButton onImportChats={onImportChats} />
+                        <ExportButton currentChat={currentChat} allChats={allChats} />
+                      </div>
+                    </div>
                   </div>
                   <div className="recent-panel__list">
                     <ChatList

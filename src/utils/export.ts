@@ -1,5 +1,5 @@
 import type { ChatSummary, Message } from '../types';
-import { getMessagePlainText } from './chat';
+import { buildChatPreview, getMessagePlainText } from './chat';
 
 export type ExportFormat = 'markdown' | 'json' | 'text';
 
@@ -43,6 +43,7 @@ export const exportChatAsJSON = (chat: ChatSummary): string => {
   const exportData = {
     title: chat.title,
     id: chat.id,
+    preview: chat.preview,
     updatedAt: chat.updatedAt,
     updatedAtFormatted: formatDate(chat.updatedAt),
     messages: chat.messages.map((msg) => ({
@@ -62,6 +63,7 @@ export const exportAllChatsAsJSON = (chats: ChatSummary[]): string => {
     chats: chats.map((chat) => ({
       title: chat.title,
       id: chat.id,
+      preview: chat.preview,
       updatedAt: chat.updatedAt,
       updatedAtFormatted: formatDate(chat.updatedAt),
       messages: chat.messages.map((msg) => ({
@@ -174,30 +176,55 @@ const isValidMessage = (msg: unknown): msg is Message => {
   );
 };
 
-const isValidChat = (chat: unknown): chat is ChatSummary => {
-  if (typeof chat !== 'object' || chat === null) return false;
+const parseTimestamp = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+};
+
+const normalizeChat = (chat: unknown): ChatSummary | null => {
+  if (typeof chat !== 'object' || chat === null) return null;
+
   const c = chat as Record<string, unknown>;
-  return (
-    typeof c.id === 'string' &&
-    typeof c.title === 'string' &&
-    typeof c.preview === 'string' &&
-    typeof c.updatedAt === 'number' &&
-    Array.isArray(c.messages) &&
-    c.messages.every(isValidMessage)
-  );
+  if (typeof c.id !== 'string' || typeof c.title !== 'string') return null;
+
+  const updatedAt = parseTimestamp(c.updatedAt);
+  const messages = Array.isArray(c.messages) && c.messages.every(isValidMessage)
+    ? (c.messages as Message[])
+    : null;
+
+  if (updatedAt === null || messages === null) return null;
+
+  const preview = typeof c.preview === 'string'
+    ? c.preview
+    : buildChatPreview(messages[messages.length - 1], c.title);
+
+  return {
+    id: c.id,
+    title: c.title,
+    preview,
+    updatedAt,
+    messages,
+  };
 };
 
 const validateSingleChatJSON = (data: unknown): ChatSummary | null => {
-  if (!isValidChat(data)) return null;
-  return data;
+  return normalizeChat(data);
 };
 
 const validateMultipleChatsJSON = (data: unknown): ChatSummary[] => {
+  if (Array.isArray(data)) {
+    return data.map(normalizeChat).filter(Boolean) as ChatSummary[];
+  }
+
   if (typeof data !== 'object' || data === null) return [];
   const d = data as Record<string, unknown>;
 
   if (Array.isArray(d.chats)) {
-    return d.chats.filter(isValidChat);
+    return d.chats.map(normalizeChat).filter(Boolean) as ChatSummary[];
   }
 
   return [];
