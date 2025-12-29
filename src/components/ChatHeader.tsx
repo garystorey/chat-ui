@@ -16,7 +16,18 @@ interface ChatHeaderProps {
     hasHeaderModelOptions: boolean;
 }
 
-function ChatHeader({handleNewChat, connectionStatus, statusLabel, retryConnection, availableModels, selectedModel, setSelectedModel, isResponding, isLoadingModels, hasHeaderModelOptions}: ChatHeaderProps) {
+function ChatHeader({
+    handleNewChat,
+    connectionStatus,
+    statusLabel,
+    retryConnection,
+    availableModels,
+    selectedModel,
+    setSelectedModel,
+    isResponding,
+    isLoadingModels,
+    hasHeaderModelOptions,
+}: ChatHeaderProps) {
     return (
         <header className="app__topbar" aria-label="Chat controls">
             <div className="app__topbar-left">
