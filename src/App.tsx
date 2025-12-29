@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
 import { messagesAtom, respondingAtom } from "./atoms";
-import { ChatHeader, HomePanels, Show, UserInput } from "./components";
+import { ChatHeader, ExportButton, HomePanels, Show, UserInput } from "./components";
 import { ChatWindow } from "./features/";
 
 import type {
@@ -462,12 +462,14 @@ const App = () => {
         isResponding={isResponding}
         isLoadingModels={isLoadingModels}
         hasHeaderModelOptions={hasHeaderModelOptions}
-        currentChat={currentChat}
-        allChats={chatHistory}
-        onImportChats={handleImportChats}
       />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
+          <Show when={!isNewChat}>
+            <div className="chat-main__actions">
+              <ExportButton currentChat={currentChat} allChats={chatHistory} />
+            </div>
+          </Show>
           <Show when={!isNewChat}>
             <ChatWindow messages={messages} isResponding={isResponding} />
           </Show>
@@ -495,6 +497,9 @@ const App = () => {
               activeChatId={activeChatId}
               onSelectChat={handleSelectChat}
               onRemoveChat={handleRemoveChat}
+              onImportChats={handleImportChats}
+              currentChat={currentChat}
+              allChats={chatHistory}
             />
           </Show>
         </div>
