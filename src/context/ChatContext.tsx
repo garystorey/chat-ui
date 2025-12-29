@@ -1,30 +1,49 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useAtom } from "jotai";
+import { useMutation } from "@tanstack/react-query";
 import type { ConnectionStatus, ChatSummary, Message, UserInputSendPayload } from "../types";
 import {
-  useAvailableModels,
-  useChatCompletionStream,
-  useConnectionListeners,
-  useHydrateActiveChat,
-  usePersistChatHistory,
-  useRespondingStatus,
+  useLatestRef,
   useTheme,
   useToggleBodyClass,
   useUnmount,
 } from "../hooks";
 import {
+  API_BASE_URL,
   ASSISTANT_ERROR_MESSAGE,
+  CHAT_COMPLETION_PATH,
   DEFAULT_CHAT_MODEL,
   defaultChats,
 } from "../config";
 import { messagesAtom, respondingAtom } from "../atoms";
 import {
+  ApiError,
+  apiStreamRequest,
   buildChatPreview,
+  buildChatCompletionResponse,
+  buildRequest,
   cloneMessages,
   createChatRecordFromMessages,
+  extractAssistantReply,
   getId,
+  isJsonLike,
+  parseJson,
+  getChatCompletionContentText,
   toChatCompletionMessages,
 } from "../utils";
+import type {
+  ChatCompletionRequest,
+  ChatCompletionResponse,
+  ChatCompletionStreamResponse,
+} from "../types";
 
 type ChatContextValue = {
   messages: Message[];
@@ -69,13 +88,149 @@ const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const pendingRequestRef = useRef<AbortController | null>(null);
+  const streamBufferRef = useRef("");
+  const streamFlushTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const hydratedActiveChatRef = useRef(false);
+  const hasHydratedHistoryRef = useRef(false);
 
   const {
-    status: chatCompletionStatus,
+    mutate: sendChatCompletion,
     reset: resetChatCompletion,
-    send: sendChatCompletion,
-    pendingRequestRef,
-  } = useChatCompletionStream();
+    status: chatCompletionStatus,
+  } = useMutation<
+    ChatCompletionResponse,
+    ApiError,
+    {
+      body: ChatCompletionRequest;
+      signal?: AbortSignal;
+      onChunk?: (chunk: ChatCompletionStreamResponse) => void;
+    }
+  >({
+    mutationFn: async ({ body, signal, onChunk }) =>
+      apiStreamRequest<ChatCompletionStreamResponse, ChatCompletionResponse>({
+        path: CHAT_COMPLETION_PATH,
+        method: "POST",
+        body,
+        signal,
+        onMessage: onChunk,
+        buildResponse: buildChatCompletionResponse,
+      }),
+  });
+  const sendChatCompletionStream = useCallback(
+    ({
+      body,
+      onStreamUpdate,
+      onStreamComplete,
+      onError,
+      onSettled,
+    }: {
+      body: ChatCompletionRequest;
+      onStreamUpdate: (content: string) => void;
+      onStreamComplete: (content: string) => void;
+      onError: (error: unknown) => void;
+      onSettled: () => void;
+    }) => {
+      let assistantReply = "";
+
+      const flushStreamBuffer = () => {
+        if (!streamBufferRef.current) {
+          return;
+        }
+
+        assistantReply += streamBufferRef.current;
+        streamBufferRef.current = "";
+        onStreamUpdate(assistantReply);
+      };
+
+      const scheduleStreamFlush = () => {
+        if (streamFlushTimeoutRef.current) {
+          return;
+        }
+
+        streamFlushTimeoutRef.current = window.setTimeout(() => {
+          streamFlushTimeoutRef.current = null;
+          flushStreamBuffer();
+        }, 100);
+      };
+
+      const controller = new AbortController();
+      pendingRequestRef.current = controller;
+
+      sendChatCompletion(
+        {
+          body,
+          signal: controller.signal,
+          onChunk: (chunk: ChatCompletionStreamResponse) => {
+            const contentDelta = chunk?.choices?.reduce((acc, choice) => {
+              if (choice.delta?.content) {
+                const deltaText = getChatCompletionContentText(choice.delta.content);
+                if (deltaText) {
+                  return acc + deltaText;
+                }
+              }
+              return acc;
+            }, "");
+
+            if (!contentDelta) {
+              return;
+            }
+
+            streamBufferRef.current += contentDelta;
+            scheduleStreamFlush();
+          },
+        },
+        {
+          onSuccess: (response: ChatCompletionResponse) => {
+            if (streamFlushTimeoutRef.current) {
+              clearTimeout(streamFlushTimeoutRef.current);
+              streamFlushTimeoutRef.current = null;
+            }
+
+            flushStreamBuffer();
+
+            const finalAssistantReply = extractAssistantReply(response);
+            if (!finalAssistantReply) {
+              return;
+            }
+
+            assistantReply = finalAssistantReply;
+            onStreamComplete(finalAssistantReply);
+          },
+          onError: (error: unknown) => {
+            if (streamFlushTimeoutRef.current) {
+              clearTimeout(streamFlushTimeoutRef.current);
+              streamFlushTimeoutRef.current = null;
+            }
+
+            streamBufferRef.current = "";
+
+            if (error instanceof DOMException && error.name === "AbortError") {
+              return;
+            }
+
+            onError(error);
+          },
+          onSettled: () => {
+            if (pendingRequestRef.current === controller) {
+              pendingRequestRef.current = null;
+            }
+
+            if (streamFlushTimeoutRef.current) {
+              clearTimeout(streamFlushTimeoutRef.current);
+              streamFlushTimeoutRef.current = null;
+            }
+
+            streamBufferRef.current = "";
+            onSettled();
+          },
+        }
+      );
+    },
+    [sendChatCompletion]
+  );
   const isNewChat = messages.length === 0;
 
   const cancelPendingResponse = useCallback(() => {
@@ -93,25 +248,212 @@ const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
-  usePersistChatHistory(chatHistory, setChatHistory);
-  useRespondingStatus(chatCompletionStatus, setResponding);
-  useHydrateActiveChat({
-    activeChatId,
-    chatHistory,
-    setMessages,
-    setChatOpen,
-  });
-  const retryConnection = useConnectionListeners({
-    cancelPendingResponse,
-    setConnectionStatus,
-  });
+  useEffect(() => {
+    setResponding(chatCompletionStatus === "pending");
+  }, [chatCompletionStatus, setResponding]);
 
-  useAvailableModels({
-    connectionStatus,
-    setAvailableModels,
-    setSelectedModel,
-    setIsLoadingModels,
-  });
+  useEffect(() => {
+    if (hydratedActiveChatRef.current || !activeChatId) {
+      return;
+    }
+
+    const storedChat = chatHistory.find((chat) => chat.id === activeChatId);
+
+    if (!storedChat) {
+      return;
+    }
+
+    hydratedActiveChatRef.current = true;
+    setMessages(cloneMessages(storedChat.messages));
+    setChatOpen(true);
+  }, [activeChatId, chatHistory, setChatOpen, setMessages]);
+
+  useEffect(() => {
+    const CHAT_HISTORY_STORAGE_KEY = "chatHistory";
+
+    if (hasHydratedHistoryRef.current || typeof window === "undefined") {
+      return;
+    }
+
+    const storedChatHistory = window.localStorage.getItem(
+      CHAT_HISTORY_STORAGE_KEY
+    );
+
+    if (storedChatHistory) {
+      try {
+        const parsedChatHistory = JSON.parse(storedChatHistory) as ChatSummary[];
+        setChatHistory(parsedChatHistory);
+      } catch (error) {
+        console.error("Unable to parse stored chat history", error);
+      }
+    }
+
+    hasHydratedHistoryRef.current = true;
+  }, [hasHydratedHistoryRef, setChatHistory]);
+
+  useEffect(() => {
+    const CHAT_HISTORY_STORAGE_KEY = "chatHistory";
+    if (!hasHydratedHistoryRef.current || typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(
+      CHAT_HISTORY_STORAGE_KEY,
+      JSON.stringify(chatHistory)
+    );
+  }, [chatHistory]);
+
+  const cancelPendingResponseRef = useLatestRef(cancelPendingResponse);
+  const updateConnectionStatus = useCallback(
+    async (signal?: AbortSignal) => {
+      try {
+        setConnectionStatus("connecting");
+
+        const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
+        const isApiAvailable =
+          response.ok || (response.status >= 400 && response.status < 600);
+        const nextStatus: ConnectionStatus = isApiAvailable
+          ? "online"
+          : "offline";
+
+        setConnectionStatus(nextStatus);
+
+        if (isApiAvailable) {
+          cancelPendingResponseRef.current();
+        } else if (!signal?.aborted) {
+          console.info("[Connection] Unable to connect to API.");
+        }
+
+        return isApiAvailable;
+      } catch (error) {
+        if (signal?.aborted) {
+          return false;
+        }
+
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return false;
+        }
+
+        const reason =
+          error instanceof Error
+            ? error.message
+            : typeof error === "string"
+              ? error
+              : null;
+        const logMessage = reason
+          ? `[Connection] Unable to connect to API. (reason: ${reason})`
+          : `[Connection] Unable to connect to API.`;
+        console.info(logMessage);
+        setConnectionStatus("offline");
+        return false;
+      }
+    },
+    [API_BASE_URL, cancelPendingResponseRef, setConnectionStatus]
+  );
+  const retryConnection = useCallback(() => updateConnectionStatus(), [updateConnectionStatus]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    updateConnectionStatus(abortController.signal).catch(() => {
+      /* handled in retryConnection */
+    });
+
+    const handleOnline = () => {
+      updateConnectionStatus(abortController.signal).catch(() => {
+        /* handled in retryConnection */
+      });
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        updateConnectionStatus(abortController.signal).catch(() => {
+          /* handled in retryConnection */
+        });
+      }
+    };
+
+    window.addEventListener("online", handleOnline);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      abortController.abort();
+      window.removeEventListener("online", handleOnline);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [updateConnectionStatus]);
+
+  useEffect(() => {
+    if (connectionStatus !== "online") {
+      return undefined;
+    }
+
+    const abortController = new AbortController();
+    let cancelled = false;
+
+    const fetchModels = async () => {
+      setIsLoadingModels(true);
+      try {
+        const { url, requestHeaders } = buildRequest({ path: "/v1/models" });
+        const response = await fetch(url, {
+          method: "GET",
+          headers: requestHeaders,
+          signal: abortController.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Unable to load models (${response.status})`);
+        }
+
+        const data = await parseJson(response);
+
+        if (cancelled || !isJsonLike(data)) {
+          return;
+        }
+
+        const models = Array.isArray((data as { data?: unknown }).data)
+          ? ((data as { data: Array<{ id?: unknown }> }).data
+              .map((model) => model?.id)
+              .filter((id): id is string => typeof id === "string"))
+          : [];
+
+        if (!models.length) {
+          setAvailableModels([]);
+          setSelectedModel(DEFAULT_CHAT_MODEL);
+        } else {
+          const uniqueModels = Array.from(new Set(models));
+
+          setAvailableModels(uniqueModels);
+          setSelectedModel((current) => {
+            if (uniqueModels.includes(current)) {
+              return current;
+            }
+
+            if (uniqueModels.includes(DEFAULT_CHAT_MODEL)) {
+              return DEFAULT_CHAT_MODEL;
+            }
+
+            return uniqueModels[0];
+          });
+        }
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          console.error("Failed to fetch models", error);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoadingModels(false);
+        }
+      }
+    };
+
+    void fetchModels();
+
+    return () => {
+      cancelled = true;
+      abortController.abort();
+    };
+  }, [connectionStatus, setAvailableModels, setIsLoadingModels, setSelectedModel]);
 
   useUnmount(cancelPendingResponse);
 
@@ -272,7 +614,7 @@ const ChatProvider = ({ children }: { children: React.ReactNode }) => {
           skipIfUnchanged: true,
         });
 
-      sendChatCompletion({
+      sendChatCompletionStream({
         body: {
           model: selectedModel,
           messages: toChatCompletionMessages(conversationForRequest),
@@ -295,7 +637,7 @@ const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       isChatOpen,
       messages,
       resetChatCompletion,
-      sendChatCompletion,
+      sendChatCompletionStream,
       setChatOpen,
       setInputValue,
       setActiveChatId,
