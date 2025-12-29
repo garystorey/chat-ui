@@ -1,20 +1,17 @@
 import { memo, useRef } from "react";
-import type { Message } from "../../types";
 import {
   useChatLogLiveRegion,
   usePrefersReducedMotion,
   useScrollToBottom,
 } from "../../hooks";
 import { Heading, ThinkingIndicator, ChatMessage, Show, List } from "../../components";
+import { useChat } from "../../context/ChatContext";
+import type { Message } from "../../types";
 
 import "./ChatWindow.css";
 
-type ChatWindowProps = {
-  messages: Message[];
-  isResponding: boolean;
-};
-
-const ChatWindow = ({ messages, isResponding }: ChatWindowProps) => {
+const ChatWindow = () => {
+  const { messages, isResponding } = useChat();
   const messagesRef = useRef<HTMLUListElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const streamingMessageId = isResponding ? messages[messages.length - 1]?.id : undefined;

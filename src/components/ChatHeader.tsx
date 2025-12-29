@@ -1,33 +1,21 @@
-import { ConnectionStatus } from "../types";
+import { useChat } from "../context/ChatContext";
 import List from "./List";
 import Show from "./Show";
 import ThemeToggle from "./ThemeToggle";
 
-interface ChatHeaderProps {
-    handleNewChat: () => void;
-    connectionStatus: ConnectionStatus;
-    statusLabel: string;
-    retryConnection: () => void;
-    availableModels: string[];
-    selectedModel: string;
-    setSelectedModel: (model: string) => void;
-    isResponding: boolean;
-    isLoadingModels: boolean;
-    hasHeaderModelOptions: boolean;
-}
-
-function ChatHeader({
-    handleNewChat,
-    connectionStatus,
-    statusLabel,
-    retryConnection,
-    availableModels,
-    selectedModel,
-    setSelectedModel,
-    isResponding,
-    isLoadingModels,
-    hasHeaderModelOptions,
-}: ChatHeaderProps) {
+function ChatHeader() {
+    const {
+        handleNewChat,
+        connectionStatus,
+        statusLabel,
+        retryConnection,
+        availableModels,
+        selectedModel,
+        setSelectedModel,
+        isResponding,
+        isLoadingModels,
+        hasHeaderModelOptions,
+    } = useChat();
     return (
         <header className="app__topbar" aria-label="Chat controls">
             <div className="app__topbar-left">
