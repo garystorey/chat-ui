@@ -40,7 +40,7 @@ body.chat-open .input-panel {
   width: 100%;
   max-height: 11.5rem;
   min-height: 3.1rem;
-  overflow-y: hidden;
+  overflow-y: auto;
   resize: none;
   border: 0;
   padding: 0.55rem 0;
@@ -51,10 +51,44 @@ body.chat-open .input-panel {
   outline: none;
   caret-color: var(--accent);
   transition: color var(--duration-sm) var(--ease-out);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(
+      in oklab,
+      var(--accent) 50%,
+      color-mix(in oklab, var(--panel) 80%, transparent)
+    )
+    color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
 }
 
 .input-panel textarea::placeholder {
   color: color-mix(in oklab, var(--muted) 76%, transparent);
+}
+
+.input-panel textarea::-webkit-scrollbar {
+  width: 0.7rem;
+}
+
+.input-panel textarea::-webkit-scrollbar-track {
+  background: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
+  border-radius: 0.5rem;
+}
+
+.input-panel textarea::-webkit-scrollbar-thumb {
+  background: color-mix(
+    in oklab,
+    var(--accent) 45%,
+    color-mix(in oklab, var(--panel) 75%, transparent)
+  );
+  border-radius: 0.5rem;
+  border: 2px solid color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
+}
+
+.input-panel textarea::-webkit-scrollbar-thumb:hover {
+  background: color-mix(
+    in oklab,
+    var(--accent) 60%,
+    color-mix(in oklab, var(--panel) 70%, transparent)
+  );
 }
 
 .input-panel__controls {

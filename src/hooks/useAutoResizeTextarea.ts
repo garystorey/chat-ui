@@ -1,7 +1,7 @@
-import { RefObject, useEffect } from 'react';
+import { RefObject, useEffect } from "react";
 
 const useAutoResizeTextarea = (
-  ref: RefObject<HTMLTextAreaElement|null>,
+  ref: RefObject<HTMLTextAreaElement | null>,
   value: string
 ) => {
   useEffect(() => {
@@ -10,8 +10,16 @@ const useAutoResizeTextarea = (
       return;
     }
 
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    textarea.style.height = "auto";
+
+    const { maxHeight } = getComputedStyle(textarea);
+    const maxHeightValue = Number.parseFloat(maxHeight);
+    const resolvedMaxHeight = Number.isNaN(maxHeightValue)
+      ? Infinity
+      : maxHeightValue;
+
+    const nextHeight = Math.min(textarea.scrollHeight, resolvedMaxHeight);
+    textarea.style.height = `${nextHeight}px`;
   }, [ref, value]);
 };
 
