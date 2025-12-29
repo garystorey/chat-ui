@@ -6,6 +6,7 @@ import {
 } from "../../hooks";
 import { Heading, ThinkingIndicator, ChatMessage, Show, List } from "../../components";
 import { useChat } from "../../context/ChatContext";
+import type { Message } from "../../types";
 
 import "./ChatWindow.css";
 
