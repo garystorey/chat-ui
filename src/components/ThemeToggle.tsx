@@ -47,7 +47,7 @@ const ThemeToggle = () => {
           aria-label={modeLabel}
           title={modeLabel}
         >
-          <span aria-hidden="true">{isLight ? '🌙' : '☀️'}</span>
+          <span aria-hidden="true">{isLight ? '☀️' : '🌙'}</span>
         </button>
       </div>
     </div>
