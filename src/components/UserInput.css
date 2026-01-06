@@ -51,10 +51,32 @@ body.chat-open .input-panel {
   outline: none;
   caret-color: var(--accent);
   transition: color var(--duration-sm) var(--ease-out);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, var(--accent) 55%, var(--panel-border) 45%)
+    transparent;
 }
 
 .input-panel textarea::placeholder {
   color: color-mix(in oklab, var(--muted) 76%, transparent);
+}
+
+.input-panel textarea::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+.input-panel textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.input-panel textarea::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--accent) 55%, var(--panel-border) 45%);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.input-panel textarea::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--accent) 68%, var(--panel-border) 32%);
 }
 
 .input-panel__controls {
