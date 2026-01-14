@@ -49,10 +49,10 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
         hljs.highlightElement(codeElement as HTMLElement);
       }
 
-      if (pre.querySelector('.copy-code-btn')) return;
+      const existingButton = pre.querySelector<HTMLButtonElement>('.copy-code-btn');
 
       pre.classList.add('code-block');
-      const button = document.createElement('button');
+      const button = existingButton ?? document.createElement('button');
       button.type = 'button';
       button.className = 'copy-code-btn';
       button.dataset.status = 'idle';
@@ -87,7 +87,9 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
       };
 
       button.addEventListener('click', handleClick);
-      pre.insertBefore(button, pre.firstChild);
+      if (!existingButton) {
+        pre.insertBefore(button, pre.firstChild);
+      }
 
       cleanupTasks.push(() => {
         button.removeEventListener('click', handleClick);
