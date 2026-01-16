@@ -9,12 +9,14 @@ const useAvailableModels = ({
   setSelectedModel,
   setIsLoadingModels,
   onError,
+  hasUserSelectedModel,
 }: {
   connectionStatus: ConnectionStatus;
   setAvailableModels: Dispatch<SetStateAction<string[]>>;
   setSelectedModel: Dispatch<SetStateAction<string>>;
   setIsLoadingModels: Dispatch<SetStateAction<boolean>>;
   onError?: (error: unknown) => void;
+  hasUserSelectedModel: boolean;
 }) => {
   useEffect(() => {
     if (connectionStatus !== "online") {
@@ -44,11 +46,32 @@ const useAvailableModels = ({
           return;
         }
 
-        const models = Array.isArray((data as { data?: unknown }).data)
-          ? ((data as { data: Array<{ id?: unknown }> }).data
-              .map((model) => model?.id)
-              .filter((id): id is string => typeof id === "string"))
+        const modelData = Array.isArray((data as { data?: unknown }).data)
+          ? (data as { data: Array<{ id?: unknown; [key: string]: unknown }> }).data
           : [];
+        const models = modelData
+          .map((model) => model?.id)
+          .filter((id): id is string => typeof id === "string");
+        const defaultModelIdFromList = modelData.find(
+          (model) =>
+            model?.default === true ||
+            model?.is_default === true ||
+            model?.isDefault === true ||
+            model?.is_default_model === true ||
+            model?.isDefaultModel === true
+        )?.id;
+        const defaultModelIdFromResponse =
+          typeof (data as { default?: unknown }).default === "string"
+            ? (data as { default: string }).default
+            : typeof (data as { default_model?: unknown }).default_model === "string"
+              ? (data as { default_model: string }).default_model
+              : typeof (data as { defaultModel?: unknown }).defaultModel === "string"
+                ? (data as { defaultModel: string }).defaultModel
+                : undefined;
+        const defaultModelId =
+          typeof defaultModelIdFromList === "string"
+            ? defaultModelIdFromList
+            : defaultModelIdFromResponse;
 
         if (!models.length) {
           setAvailableModels([]);
@@ -58,8 +81,20 @@ const useAvailableModels = ({
 
           setAvailableModels(uniqueModels);
           setSelectedModel((current) => {
+            if (hasUserSelectedModel && uniqueModels.includes(current)) {
+              return current;
+            }
+
+            if (defaultModelId && uniqueModels.includes(defaultModelId)) {
+              return defaultModelId;
+            }
+
             if (uniqueModels.includes(current)) {
               return current;
+            }
+
+            if (hasUserSelectedModel) {
+              return uniqueModels[0];
             }
 
             if (uniqueModels.includes(DEFAULT_CHAT_MODEL)) {
@@ -87,7 +122,14 @@ const useAvailableModels = ({
       cancelled = true;
       abortController.abort();
     };
-  }, [connectionStatus, onError, setAvailableModels, setIsLoadingModels, setSelectedModel]);
+  }, [
+    connectionStatus,
+    hasUserSelectedModel,
+    onError,
+    setAvailableModels,
+    setIsLoadingModels,
+    setSelectedModel,
+  ]);
 };
 
 export default useAvailableModels;

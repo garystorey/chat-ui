@@ -1,5 +1,4 @@
 import { ConnectionStatus } from "../types";
-import List from "./List";
 import Show from "./Show";
 import ThemeToggle from "./ThemeToggle";
 
@@ -59,13 +58,11 @@ function ChatHeader({
                       disabled={isResponding || isLoadingModels}
                       aria-label="Select model"
                     >
-                        <List<string> items={availableModels} keyfield={(item) => item} as={(item) => (
-                          <option key={item} value={item}>
-                            {item.slice(item.lastIndexOf("/") + 1, item.length)}
-                          </option>
-                        )}>
-
-                        </List>
+                      {availableModels.map((item) => (
+                        <option key={item} value={item}>
+                          {item.slice(item.lastIndexOf("/") + 1, item.length)}
+                        </option>
+                      ))}
                     </select>
                   </label>
                 </Show>
