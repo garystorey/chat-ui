@@ -1,25 +1,40 @@
-import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { DEFAULT_CHAT_MODEL } from "../config";
 import { buildRequest, isJsonLike, parseJson } from "../utils";
 import type { ConnectionStatus } from "../types";
+import useLatestRef from "./useLatestRef";
 
 const useAvailableModels = ({
   connectionStatus,
+  refreshKey,
   setAvailableModels,
   setSelectedModel,
   setIsLoadingModels,
   onError,
 }: {
   connectionStatus: ConnectionStatus;
+  refreshKey: number;
   setAvailableModels: Dispatch<SetStateAction<string[]>>;
   setSelectedModel: Dispatch<SetStateAction<string>>;
   setIsLoadingModels: Dispatch<SetStateAction<boolean>>;
   onError?: (error: unknown) => void;
 }) => {
+  const onErrorRef = useLatestRef(onError);
+  const hasFetchedRef = useRef(false);
+  const refreshKeyRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (connectionStatus !== "online") {
       return undefined;
     }
+
+    const shouldRefresh = refreshKeyRef.current !== refreshKey;
+
+    if (hasFetchedRef.current && !shouldRefresh) {
+      return undefined;
+    }
+
+    refreshKeyRef.current = refreshKey;
 
     const abortController = new AbortController();
     let cancelled = false;
@@ -72,7 +87,7 @@ const useAvailableModels = ({
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Failed to fetch models", error);
-          onError?.(error);
+          onErrorRef.current?.(error);
         }
       } finally {
         if (!cancelled) {
@@ -82,12 +97,13 @@ const useAvailableModels = ({
     };
 
     void fetchModels();
+    hasFetchedRef.current = true;
 
     return () => {
       cancelled = true;
       abortController.abort();
     };
-  }, [connectionStatus, onError, setAvailableModels, setIsLoadingModels, setSelectedModel]);
+  }, [connectionStatus, refreshKey, setAvailableModels, setIsLoadingModels, setSelectedModel]);
 };
 
 export default useAvailableModels;
