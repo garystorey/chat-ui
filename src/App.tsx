@@ -277,7 +277,7 @@ const App = () => {
   }, [activeChatId, messages]);
 
   const handleSend = useCallback(
-    async ({ text }: UserInputSendPayload) => {
+    async ({ text, model }: UserInputSendPayload) => {
       if (!text) {
         return false;
       }
@@ -340,9 +340,19 @@ const App = () => {
           skipIfUnchanged: true,
         });
 
+      const modelToUse = model ?? selectedModel ?? DEFAULT_CHAT_MODEL;
+
+      if (!modelToUse) {
+        showToast({
+          type: "warning",
+          message: "Select a model before sending a message.",
+        });
+        return false;
+      }
+
       sendChatCompletion({
         body: {
-          model: selectedModel,
+          model: modelToUse,
           messages: toChatCompletionMessages(conversationForRequest),
           stream: true,
         },

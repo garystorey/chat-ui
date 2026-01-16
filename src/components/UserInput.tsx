@@ -101,10 +101,11 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         return Promise.resolve(
           onSend({
             text: trimmed,
+            model: selectedModel,
           })
         );
       },
-      [onSend, value]
+      [onSend, selectedModel, value]
     );
 
     const handleSubmit = useCallback(
