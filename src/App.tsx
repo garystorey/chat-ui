@@ -31,12 +31,24 @@ import { ASSISTANT_ERROR_MESSAGE, DEFAULT_CHAT_MODEL, defaultChats, suggestions 
 
 import "./App.css";
 
+const sortChatsByUpdatedAt = (chats: ChatSummary[]) =>
+  [...chats].sort((a, b) => b.updatedAt - a.updatedAt);
+
+const upsertChatHistory = (
+  current: ChatSummary[],
+  updatedChat: ChatSummary,
+  exists: boolean
+) =>
+  exists
+    ? current.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
+    : [updatedChat, ...current];
+
 const App = () => {
   const [messages, setMessages] = useAtom(messagesAtom);
   const [inputValue, setInputValue] = useState("");
   const [isChatOpen, setChatOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>(() =>
-    [...defaultChats].sort((a, b) => b.updatedAt - a.updatedAt)
+    sortChatsByUpdatedAt(defaultChats)
   );
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
@@ -117,11 +129,9 @@ const App = () => {
             }
           : { ...createChatRecordFromMessages(nextMessages), id: chatId };
 
-        const nextHistory = existingChat
-          ? current.map((chat) => (chat.id === chatId ? updatedChat : chat))
-          : [updatedChat, ...current];
+        const nextHistory = upsertChatHistory(current, updatedChat, Boolean(existingChat));
 
-        return nextHistory.sort((a, b) => b.updatedAt - a.updatedAt);
+        return sortChatsByUpdatedAt(nextHistory);
       });
     },
     [setChatHistory]
@@ -170,8 +180,8 @@ const App = () => {
 
     if (activeChatId) {
       setChatHistory((current) =>
-        current
-          .map((chat) =>
+        sortChatsByUpdatedAt(
+          current.map((chat) =>
             chat.id === activeChatId
               ? {
                   ...chat,
@@ -181,15 +191,13 @@ const App = () => {
                 }
               : chat
           )
-          .sort((a, b) => b.updatedAt - a.updatedAt)
+        )
       );
       return;
     }
 
     const newChat = createChatRecordFromMessages(messages);
-    setChatHistory((current) =>
-      [newChat, ...current].sort((a, b) => b.updatedAt - a.updatedAt)
-    );
+    setChatHistory((current) => sortChatsByUpdatedAt([newChat, ...current]));
   }, [activeChatId, messages]);
 
   const handleSend = useCallback(
@@ -425,7 +433,7 @@ const App = () => {
           return current;
         }
 
-        return [...newChats, ...current].sort((a, b) => b.updatedAt - a.updatedAt);
+        return sortChatsByUpdatedAt([...newChats, ...current]);
       });
     },
     []
