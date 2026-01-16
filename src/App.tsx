@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { messagesAtom } from "./atoms";
 import { ChatHeader, ExportButton, HomePanels, Show, UserInput } from "./components";
 import { ChatWindow } from "./features/";
@@ -16,7 +16,6 @@ import {
   useToggleBodyClass,
   usePersistChatHistory,
   useHydrateActiveChat,
-  useUnmount,
   useAvailableModels,
   useChatCompletionStream,
 } from "./hooks";
@@ -88,7 +87,11 @@ const App = () => {
     setIsLoadingModels,
   });
 
-  useUnmount(cancelPendingResponse);
+  useEffect(() => {
+    return () => {
+      cancelPendingResponse();
+    };
+  }, [cancelPendingResponse]);
 
   const updateActiveChat = useCallback(
     (

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useUnmount from './useUnmount';
 
 interface UseSpeechRecognitionOptions {
   locale?: string;
@@ -207,10 +206,12 @@ const useSpeechRecognition = ({
     }
   }, [supported]);
 
-  useUnmount(() => {
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-  });
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+      recognitionRef.current = null;
+    };
+  }, []);
 
   return {
     supported,
