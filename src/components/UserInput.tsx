@@ -23,11 +23,6 @@ type UserInputProps = {
   onStop: () => void;
   isResponding: boolean;
   autoSendOnSpeechEnd?: boolean;
-  availableModels: string[];
-  selectedModel: string;
-  onSelectModel: (model: string) => void;
-  isLoadingModels: boolean;
-  showModelSelect?: boolean;
   onToast?: (toast: { type: ToastType; message: string; duration?: number }) => void;
 };
 
@@ -39,11 +34,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     onStop,
     isResponding,
     autoSendOnSpeechEnd = false,
-    availableModels,
-    selectedModel,
-    onSelectModel,
-    isLoadingModels,
-    showModelSelect = true,
     onToast,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -226,13 +216,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       void sendMessage(composedText);
     }, [autoSendOnSpeechEnd, isRecording, isResponding, sendMessage, transcript]);
 
-    const handleModelChange = useCallback(
-      (event: ChangeEvent<HTMLSelectElement>) => {
-        onSelectModel(event.target.value);
-      },
-      [onSelectModel]
-    );
-
     const micButtonClasses = [
       "input-panel__icon-button",
       "input-panel__icon-button--muted",
@@ -242,8 +225,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     if (isRecording) {
       micButtonClasses.push("input-panel__icon-button--recording");
     }
-
-    const hasModelOptions = showModelSelect && availableModels.length > 0;
 
     return (
       <form
@@ -271,37 +252,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
             />
           </div>
           <div className="input-panel__controls">
-            <Show when={showModelSelect}>
-              <div className="input-panel__model-select">
-                <Show when={hasModelOptions}>
-                  <select
-                    id="modelSelect"
-                    aria-label="Model"
-                    value={selectedModel}
-                    onChange={handleModelChange}
-                    disabled={isResponding || isLoadingModels}
-                  >
-                    {availableModels.map((model) => (
-                      <option key={model} value={model}>
-                        {model}
-                      </option>
-                    ))}
-                  </select>
-                </Show>
-                <Show when={!hasModelOptions && !isLoadingModels}>
-                  <span className="input-panel__model-hint">Model list unavailable</span>
-                </Show>
-                <Show when={isLoadingModels}>
-                  <span className="input-panel__model-hint">Loading…</span>
-                </Show>
-              </div>
-
-            </Show>
-            <Show when={!showModelSelect && isLoadingModels}>
-              <div className="input-panel__model-select">
-                <span className="input-panel__model-hint">Loading models…</span>
-              </div>
-            </Show>
             <div className="input-panel__actions">
               <button
                 type="button"

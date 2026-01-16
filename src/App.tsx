@@ -562,11 +562,6 @@ const App = () => {
                 onSend={handleSend}
                 onStop={cancelPendingResponse}
                 isResponding={isResponding}
-                availableModels={availableModels}
-                selectedModel={selectedModel}
-                onSelectModel={setSelectedModel}
-                isLoadingModels={isLoadingModels}
-                showModelSelect={false}
                 onToast={showToast}
               />
             </div>
