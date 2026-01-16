@@ -58,6 +58,7 @@ const App = () => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [modelsRefreshKey, setModelsRefreshKey] = useState(0);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const {
     status: chatCompletionStatus,
@@ -138,9 +139,14 @@ const App = () => {
     cancelPendingResponse,
     setConnectionStatus,
   });
+  const handleRetryConnection = useCallback(() => {
+    setModelsRefreshKey((current) => current + 1);
+    retryConnection();
+  }, [retryConnection]);
 
   useAvailableModels({
     connectionStatus,
+    refreshKey: modelsRefreshKey,
     setAvailableModels,
     setSelectedModel,
     setIsLoadingModels,
@@ -535,7 +541,7 @@ const App = () => {
         handleNewChat={handleNewChat}
         connectionStatus={connectionStatus}
         statusLabel={statusLabel}
-        retryConnection={retryConnection}
+        retryConnection={handleRetryConnection}
         availableModels={availableModels}
         selectedModel={selectedModel}
         setSelectedModel={setSelectedModel}
