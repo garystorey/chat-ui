@@ -116,6 +116,20 @@ export type ChatCompletionStreamResponse = {
   choices: ChatCompletionStreamChoice[];
 };
 
+export type ChatCompletionStreamArgs = {
+  body: ChatCompletionRequest;
+  onStreamUpdate: (content: string) => void;
+  onStreamComplete: (content: string) => void;
+  onError: (error: unknown) => void;
+  onSettled: () => void;
+};
+
+export type ChatCompletionMutationVariables = {
+  body: ChatCompletionRequest;
+  signal?: AbortSignal;
+  onChunk?: (chunk: ChatCompletionStreamResponse) => void;
+};
+
 export type ModelInfo = {
   id: string;
   object?: string;
