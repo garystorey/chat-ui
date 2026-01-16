@@ -19,7 +19,7 @@ const useScrollToBottom = <T extends Element>(
       top: container.scrollHeight,
       behavior,
     });
-  }, [behavior, ...dependencies]);
+  }, [behavior, dependencies]);
 };
 
 export default useScrollToBottom;
