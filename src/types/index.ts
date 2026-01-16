@@ -48,6 +48,7 @@ export type ChatSummary = {
 
 export type UserInputSendPayload = {
   text: string;
+  model?: string;
 };
 
 export type ApiRequestOptions = {
