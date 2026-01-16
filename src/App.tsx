@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { messagesAtom } from "./atoms";
-import { ChatHeader, ExportButton, HomePanels, Show, UserInput } from "./components";
+import { ChatHeader, ExportButton, HomePanels, Show, ToastStack, UserInput } from "./components";
 import { ChatWindow } from "./features/";
 
 import type {
@@ -10,6 +10,7 @@ import type {
   Message,
   UserInputSendPayload,
 } from "./types";
+import type { ToastItem, ToastType } from "./components/Toast";
 import {
   useConnectionListeners,
   useTheme,
@@ -57,6 +58,7 @@ const App = () => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
@@ -78,6 +80,51 @@ const App = () => {
 
   }, [chatCompletionStatus, resetChatCompletion]);
 
+  const toastTimeoutsRef = useRef(new Map<string, number>());
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((current) => current.filter((toast) => toast.id !== id));
+    const timeout = toastTimeoutsRef.current.get(id);
+    if (timeout) {
+      window.clearTimeout(timeout);
+      toastTimeoutsRef.current.delete(id);
+    }
+  }, []);
+
+  const showToast = useCallback(
+    ({ type, message, duration = 4000 }: { type: ToastType; message: string; duration?: number }) => {
+      const id = getId();
+      setToasts((current) => [...current, { id, type, message }]);
+
+      if (duration > 0) {
+        const timeout = window.setTimeout(() => {
+          dismissToast(id);
+        }, duration);
+        toastTimeoutsRef.current.set(id, timeout);
+      }
+    },
+    [dismissToast]
+  );
+
+  useEffect(() => {
+    return () => {
+      toastTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+      toastTimeoutsRef.current.clear();
+    };
+  }, []);
+
+  const getErrorMessage = useCallback((error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    if (typeof error === "string" && error.trim().length > 0) {
+      return error;
+    }
+
+    return fallback;
+  }, []);
+
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
   usePersistChatHistory(chatHistory, setChatHistory);
@@ -97,6 +144,12 @@ const App = () => {
     setAvailableModels,
     setSelectedModel,
     setIsLoadingModels,
+    onError: (error) => {
+      showToast({
+        type: "warning",
+        message: getErrorMessage(error, "Unable to load models."),
+      });
+    },
   });
 
   useEffect(() => {
@@ -104,6 +157,23 @@ const App = () => {
       cancelPendingResponse();
     };
   }, [cancelPendingResponse]);
+
+  const previousConnectionStatusRef = useRef<ConnectionStatus>("connecting");
+
+  useEffect(() => {
+    if (
+      connectionStatus === "offline" &&
+      previousConnectionStatusRef.current !== "offline"
+    ) {
+      showToast({
+        type: "error",
+        message: "Unable to connect to the API.",
+        duration: 5000,
+      });
+    }
+
+    previousConnectionStatusRef.current = connectionStatus;
+  }, [connectionStatus, showToast]);
 
   const updateActiveChat = useCallback(
     (
@@ -240,6 +310,10 @@ const App = () => {
       const conversationForRequest = [...messages, userMessage];
       const handleCompletionError = (error: unknown) => {
         console.error("Chat completion request failed", error);
+        showToast({
+          type: "error",
+          message: getErrorMessage(error, "Unable to complete the response."),
+        });
         updateAssistantMessageContent(
           assistantMessageId,
           chatId,
@@ -289,6 +363,8 @@ const App = () => {
       selectedModel,
       updateActiveChat,
       updateAssistantMessageContent,
+      getErrorMessage,
+      showToast,
     ]
   );
 
@@ -491,6 +567,7 @@ const App = () => {
                 onSelectModel={setSelectedModel}
                 isLoadingModels={isLoadingModels}
                 showModelSelect={false}
+                onToast={showToast}
               />
             </div>
 
@@ -502,6 +579,7 @@ const App = () => {
               onSelectChat={handleSelectChat}
               onRemoveChat={handleRemoveChat}
               onImportChats={handleImportChats}
+              onToast={showToast}
               currentChat={currentChat}
               allChats={chatHistory}
             />
@@ -509,6 +587,7 @@ const App = () => {
         </div>
 
       </main>
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </article>
   );
 };

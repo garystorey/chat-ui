@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import type { ChatSummary, Suggestion } from "../types";
 import ExportButton from "./ExportButton";
 import ImportButton from "./ImportButton";
+import type { ToastType } from "./Toast";
 import ChatList from "./ChatList";
 import List from "./List";
 import Show from "./Show";
@@ -15,6 +16,7 @@ type HomePanelsProps = {
   onSelectChat: (chatId: string) => void;
   onRemoveChat: (chatId: string) => void;
   onImportChats: (chats: ChatSummary[]) => void;
+  onToast: (toast: { type: ToastType; message: string; duration?: number }) => void;
   currentChat: ChatSummary | null;
   allChats: ChatSummary[];
 };
@@ -38,6 +40,7 @@ const HomePanels = ({
   onSelectChat,
   onRemoveChat,
   onImportChats,
+  onToast,
   currentChat,
   allChats,
 }: HomePanelsProps) => {
@@ -120,7 +123,7 @@ const HomePanels = ({
                         />
                       </label>
                       <div className="recent-panel__actions">
-                        <ImportButton onImportChats={onImportChats} />
+                        <ImportButton onImportChats={onImportChats} onToast={onToast} />
                         <ExportButton currentChat={currentChat} allChats={allChats} />
                       </div>
                     </div>

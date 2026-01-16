@@ -69,9 +69,9 @@ function ChatHeader({
                     </select>
                   </label>
                 </Show>
-                <Show when={!hasHeaderModelOptions}>
+                <Show when={!hasHeaderModelOptions && isLoadingModels}>
                   <div className="app__model-hint" aria-live="polite">
-                    {isLoadingModels ? "Loading…" : "Models unavailable"}
+                    Loading…
                   </div>
                 </Show>
 
