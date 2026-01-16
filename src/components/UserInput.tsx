@@ -105,6 +105,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       [sendMessage]
     );
 
+    const handleSendClick = useCallback(() => {
+      void sendMessage();
+    }, [sendMessage]);
+
     const handleKeyDown = useCallback(
       (event: KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === "Enter" && !event.shiftKey) {
@@ -286,10 +290,11 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
             </Show>
             <Show when={!isResponding}>
               <button
-                type="submit"
+                type="button"
                 className="input-panel__submit"
                 aria-label="Send message"
                 title="Send message"
+                onClick={handleSendClick}
               >
                 <SendIcon />
               </button>
