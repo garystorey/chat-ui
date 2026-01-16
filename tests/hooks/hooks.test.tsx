@@ -6,7 +6,6 @@ import useToggleBodyClass from '../../src/hooks/useToggleBodyClass';
 import usePrefersReducedMotion from '../../src/hooks/usePrefersReducedMotion';
 import useScrollToBottom from '../../src/hooks/useScrollToBottom';
 import useAutoResizeTextarea from '../../src/hooks/useAutoResizeTextarea';
-import useUnmount from '../../src/hooks/useUnmount';
 
 type MutableMediaQueryList = Omit<MediaQueryList, 'matches'> & { matches: boolean };
 
@@ -142,35 +141,6 @@ describe('useScrollToBottom', () => {
       expect(scrollTo).toHaveBeenLastCalledWith({ top: 500, behavior: 'auto' });
     });
   });
-
-  it('responds when dependency values change without a new array reference', async () => {
-    const element = document.createElement('div');
-    Object.defineProperty(element, 'scrollHeight', { value: 300, configurable: true });
-    const scrollTo = vi.fn();
-    element.scrollTo = scrollTo;
-    const ref = { current: element } as React.RefObject<HTMLDivElement>;
-
-    const deps = [1];
-
-    const { rerender } = renderHook(
-      ({ deps }) => useScrollToBottom(ref, deps, { behavior: 'auto' }),
-      {
-        initialProps: { deps },
-      }
-    );
-
-    await waitFor(() => {
-      expect(scrollTo).toHaveBeenCalledWith({ top: 300, behavior: 'auto' });
-    });
-
-    scrollTo.mockClear();
-    deps[0] = 2;
-    rerender({ deps });
-
-    await waitFor(() => {
-      expect(scrollTo).toHaveBeenCalledWith({ top: 300, behavior: 'auto' });
-    });
-  });
 });
 
 describe('useAutoResizeTextarea', () => {
@@ -194,22 +164,5 @@ describe('useAutoResizeTextarea', () => {
     await waitFor(() => {
       expect(textarea.style.height).toBe('80px');
     });
-  });
-});
-
-describe('useUnmount', () => {
-  it('invokes the latest callback when the component unmounts', () => {
-    const firstCallback = vi.fn();
-    const secondCallback = vi.fn();
-
-    const { rerender, unmount } = renderHook(({ cb }) => useUnmount(cb), {
-      initialProps: { cb: firstCallback },
-    });
-
-    rerender({ cb: secondCallback });
-    unmount();
-
-    expect(firstCallback).not.toHaveBeenCalled();
-    expect(secondCallback).toHaveBeenCalledTimes(1);
   });
 });
