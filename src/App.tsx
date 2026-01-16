@@ -57,6 +57,7 @@ const App = () => {
   );
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
+  const [hasUserSelectedModel, setHasUserSelectedModel] = useState(false);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const {
@@ -144,6 +145,7 @@ const App = () => {
     setAvailableModels,
     setSelectedModel,
     setIsLoadingModels,
+    hasUserSelectedModel,
     onError: (error) => {
       showToast({
         type: "warning",
@@ -151,6 +153,11 @@ const App = () => {
       });
     },
   });
+
+  const handleModelChange = useCallback((model: string) => {
+    setSelectedModel(model);
+    setHasUserSelectedModel(true);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -538,7 +545,7 @@ const App = () => {
         retryConnection={retryConnection}
         availableModels={availableModels}
         selectedModel={selectedModel}
-        setSelectedModel={setSelectedModel}
+        setSelectedModel={handleModelChange}
         isResponding={isResponding}
         isLoadingModels={isLoadingModels}
         hasHeaderModelOptions={hasHeaderModelOptions}
