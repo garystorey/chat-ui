@@ -7,7 +7,6 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
-  useState,
 } from "react";
 import { MicIcon, SendIcon, StopIcon } from "./icons";
 import { combineValueWithTranscript, trimTrailingTranscript } from "../utils";
@@ -45,8 +44,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     showModelSelect = true,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [canRecord, setCanRecord] = useState(false);
-    const [recordingStatus, setRecordingStatus] = useState("");
     const manualValueRef = useRef(value);
     const lastTranscriptRef = useRef("");
     const applyingTranscriptRef = useRef(false);
@@ -61,34 +58,25 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       error: recordingError,
     } = useSpeechRecognition();
 
-    useEffect(() => {
-      setCanRecord(
-        speechSupported &&
-          typeof navigator !== "undefined" &&
-          Boolean(navigator.mediaDevices?.getUserMedia)
-      );
-    }, [speechSupported]);
+    const canRecord =
+      speechSupported &&
+      typeof navigator !== "undefined" &&
+      Boolean(navigator.mediaDevices?.getUserMedia);
+
+    const recordingStatus = recordingError
+      ? recordingError
+      : isRecording
+        ? "Recording in progress"
+        : !canRecord
+          ? "Voice input unavailable"
+          : "";
 
     useEffect(() => {
       if (recordingError) {
-        setRecordingStatus(recordingError);
         // eslint-disable-next-line no-console
         console.error("Speech recognition error:", recordingError);
-        return;
       }
-
-      if (isRecording) {
-        setRecordingStatus("Recording in progress");
-        return;
-      }
-
-      if (!canRecord) {
-        setRecordingStatus("Voice input unavailable");
-        return;
-      }
-
-      setRecordingStatus("");
-    }, [canRecord, isRecording, recordingError]);
+    }, [recordingError]);
 
     useImperativeHandle(forwardedRef, () => textareaRef.current!);
     useAutoResizeTextarea(textareaRef, value);
