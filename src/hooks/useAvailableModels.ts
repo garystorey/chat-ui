@@ -1,7 +1,8 @@
-import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { DEFAULT_CHAT_MODEL } from "../config";
 import { buildRequest, isJsonLike, parseJson } from "../utils";
 import type { ConnectionStatus } from "../types";
+import useLatestRef from "./useLatestRef";
 
 const useAvailableModels = ({
   connectionStatus,
@@ -18,10 +19,27 @@ const useAvailableModels = ({
   onError?: (error: unknown) => void;
   hasUserSelectedModel: boolean;
 }) => {
+  const onErrorRef = useLatestRef(onError);
+  const hasUserSelectedModelRef = useLatestRef(hasUserSelectedModel);
+  const lastNonConnectingStatusRef = useRef<ConnectionStatus | null>(
+    connectionStatus === "connecting" ? null : connectionStatus
+  );
+
   useEffect(() => {
-    if (connectionStatus !== "online") {
+    if (connectionStatus === "connecting") {
       return undefined;
     }
+
+    if (connectionStatus === "offline") {
+      lastNonConnectingStatusRef.current = "offline";
+      return undefined;
+    }
+
+    if (lastNonConnectingStatusRef.current === "online") {
+      return undefined;
+    }
+
+    lastNonConnectingStatusRef.current = "online";
 
     const abortController = new AbortController();
     let cancelled = false;
@@ -81,7 +99,7 @@ const useAvailableModels = ({
 
           setAvailableModels(uniqueModels);
           setSelectedModel((current) => {
-            if (hasUserSelectedModel && uniqueModels.includes(current)) {
+            if (hasUserSelectedModelRef.current && uniqueModels.includes(current)) {
               return current;
             }
 
@@ -93,7 +111,7 @@ const useAvailableModels = ({
               return current;
             }
 
-            if (hasUserSelectedModel) {
+            if (hasUserSelectedModelRef.current) {
               return uniqueModels[0];
             }
 
@@ -107,7 +125,7 @@ const useAvailableModels = ({
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Failed to fetch models", error);
-          onError?.(error);
+          onErrorRef.current?.(error);
         }
       } finally {
         if (!cancelled) {
@@ -124,8 +142,6 @@ const useAvailableModels = ({
     };
   }, [
     connectionStatus,
-    hasUserSelectedModel,
-    onError,
     setAvailableModels,
     setIsLoadingModels,
     setSelectedModel,
