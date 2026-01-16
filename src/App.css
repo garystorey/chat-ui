@@ -9,7 +9,7 @@
   max-width: 1480px;
   margin: 0 auto;
   position: relative;
-  padding: 0.75rem 0.85rem 1.5rem;
+  padding: 0.75rem 0.85rem var(--bottom-gap);
 }
 
 .app__topbar {
