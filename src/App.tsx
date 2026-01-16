@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
-import { messagesAtom, respondingAtom } from "./atoms";
+import { messagesAtom } from "./atoms";
 import { ChatHeader, ExportButton, HomePanels, Show, UserInput } from "./components";
 import { ChatWindow } from "./features/";
 
@@ -17,7 +17,6 @@ import {
   usePersistChatHistory,
   useHydrateActiveChat,
   useUnmount,
-  useRespondingStatus,
   useAvailableModels,
   useChatCompletionStream,
 } from "./hooks";
@@ -35,7 +34,6 @@ import "./App.css";
 
 const App = () => {
   const [messages, setMessages] = useAtom(messagesAtom);
-  const [isResponding, setResponding] = useAtom(respondingAtom);
   const [inputValue, setInputValue] = useState("");
   const [isChatOpen, setChatOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>(() =>
@@ -54,6 +52,7 @@ const App = () => {
     send: sendChatCompletion,
     pendingRequestRef,
   } = useChatCompletionStream();
+  const isResponding = chatCompletionStatus === "pending";
   const isNewChat = messages.length === 0;
 
   const cancelPendingResponse = useCallback(() => {
@@ -66,13 +65,11 @@ const App = () => {
       resetChatCompletion();
     }
 
-    setResponding(false);
-  }, [chatCompletionStatus, resetChatCompletion, setResponding]);
+  }, [chatCompletionStatus, resetChatCompletion]);
 
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
   usePersistChatHistory(chatHistory, setChatHistory);
-  useRespondingStatus(chatCompletionStatus, setResponding);
   useHydrateActiveChat({
     activeChatId,
     chatHistory,
@@ -246,7 +243,6 @@ const App = () => {
       });
 
       setInputValue("");
-      setResponding(true);
 
       const handleFinalAssistantReply = (finalAssistantReply: string) =>
         updateAssistantMessageContent(assistantMessageId, chatId, finalAssistantReply, {
@@ -263,9 +259,7 @@ const App = () => {
           updateAssistantMessageContent(assistantMessageId, chatId, content),
         onStreamComplete: handleFinalAssistantReply,
         onError: handleCompletionError,
-        onSettled: () => {
-          setResponding(false);
-        },
+        onSettled: () => {},
       });
 
       return true;
@@ -281,7 +275,6 @@ const App = () => {
       setInputValue,
       setActiveChatId,
       setMessages,
-      setResponding,
       selectedModel,
       updateActiveChat,
       updateAssistantMessageContent,
