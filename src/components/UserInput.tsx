@@ -14,6 +14,7 @@ import { UserInputSendPayload } from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
 import "./UserInput.css";
 import { Show } from ".";
+import type { ToastType } from "./Toast";
 
 type UserInputProps = {
   value: string;
@@ -27,6 +28,7 @@ type UserInputProps = {
   onSelectModel: (model: string) => void;
   isLoadingModels: boolean;
   showModelSelect?: boolean;
+  onToast?: (toast: { type: ToastType; message: string; duration?: number }) => void;
 };
 
 const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
@@ -42,6 +44,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     onSelectModel,
     isLoadingModels,
     showModelSelect = true,
+    onToast,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const manualValueRef = useRef(value);
@@ -75,8 +78,13 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       if (recordingError) {
         // eslint-disable-next-line no-console
         console.error("Speech recognition error:", recordingError);
+        onToast?.({
+          type: "error",
+          message: recordingError,
+          duration: 4000,
+        });
       }
-    }, [recordingError]);
+    }, [onToast, recordingError]);
 
     useImperativeHandle(forwardedRef, () => textareaRef.current!);
     useAutoResizeTextarea(textareaRef, value);

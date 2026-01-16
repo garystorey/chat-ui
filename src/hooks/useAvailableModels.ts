@@ -8,11 +8,13 @@ const useAvailableModels = ({
   setAvailableModels,
   setSelectedModel,
   setIsLoadingModels,
+  onError,
 }: {
   connectionStatus: ConnectionStatus;
   setAvailableModels: Dispatch<SetStateAction<string[]>>;
   setSelectedModel: Dispatch<SetStateAction<string>>;
   setIsLoadingModels: Dispatch<SetStateAction<boolean>>;
+  onError?: (error: unknown) => void;
 }) => {
   useEffect(() => {
     if (connectionStatus !== "online") {
@@ -70,6 +72,7 @@ const useAvailableModels = ({
       } catch (error) {
         if (!abortController.signal.aborted) {
           console.error("Failed to fetch models", error);
+          onError?.(error);
         }
       } finally {
         if (!cancelled) {
@@ -84,7 +87,7 @@ const useAvailableModels = ({
       cancelled = true;
       abortController.abort();
     };
-  }, [connectionStatus, setAvailableModels, setIsLoadingModels, setSelectedModel]);
+  }, [connectionStatus, onError, setAvailableModels, setIsLoadingModels, setSelectedModel]);
 };
 
 export default useAvailableModels;
