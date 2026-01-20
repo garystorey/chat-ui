@@ -1,4 +1,4 @@
-import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { buildRequest, isJsonLike, parseJson } from "../utils";
 import type { ConnectionStatus } from "../types";
 import useLatestRef from "./useLatestRef";
