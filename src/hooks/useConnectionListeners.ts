@@ -36,6 +36,9 @@ const useConnectionListeners = ({
 
         setConnectionStatus(nextStatus);
 
+        if (!isApiAvailable) {
+          cancelPendingResponseRef.current();
+        }
         if (!isApiAvailable && !signal?.aborted) {
           logConnectionError("Unable to connect to API.");
         }
