@@ -136,7 +136,6 @@ const App = () => {
     setChatOpen,
   });
   const retryConnection = useConnectionListeners({
-    cancelPendingResponse,
     setConnectionStatus,
   });
   const handleRetryConnection = useCallback(() => {

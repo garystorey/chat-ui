@@ -1,7 +1,6 @@
 import { useCallback, useEffect, type SetStateAction } from "react";
 
 import { API_BASE_URL } from "../config";
-import useLatestRef from "./useLatestRef";
 import { ConnectionStatus } from "../types";
 
 const logConnectionError = (message: string, error?: unknown) => {
@@ -20,15 +19,11 @@ const logConnectionError = (message: string, error?: unknown) => {
 
 type UseConnectionListenersProps = {
   setConnectionStatus: (update: SetStateAction<ConnectionStatus>) => void;
-  cancelPendingResponse: () => void;
 };
 
 const useConnectionListeners = ({
   setConnectionStatus,
-  cancelPendingResponse,
 }: UseConnectionListenersProps) => {
-  const cancelPendingResponseRef = useLatestRef(cancelPendingResponse);
-
   const updateStatus = useCallback(
     async (signal?: AbortSignal) => {
       try {
@@ -63,7 +58,7 @@ const useConnectionListeners = ({
         return false;
       }
     },
-    [cancelPendingResponseRef, setConnectionStatus]
+    [setConnectionStatus]
   );
 
   useEffect(() => {
