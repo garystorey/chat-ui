@@ -89,15 +89,8 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     useImperativeHandle(forwardedRef, () => textareaRef.current!);
     useAutoResizeTextarea(textareaRef, value);
 
-    const requiresModelSelection =
-      showModelSelect && availableModels.length > 0 && !selectedModel;
-
     const sendMessage = useCallback(
       async (overrideText?: string) => {
-        if (requiresModelSelection) {
-          return false;
-        }
-
         const messageText = overrideText ?? value;
         const trimmed = messageText.trim();
 
@@ -112,7 +105,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           })
         );
       },
-      [onSend, requiresModelSelection, value]
+      [onSend, value]
     );
 
     const handleSubmit = useCallback(
@@ -354,7 +347,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 className="input-panel__submit"
                 aria-label="Send message"
                 title="Send message"
-                disabled={requiresModelSelection}
               >
                 <SendIcon />
               </button>
