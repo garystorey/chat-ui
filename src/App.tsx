@@ -75,11 +75,8 @@ const App = () => {
       pendingRequestRef.current = null;
     }
 
-    if (chatCompletionStatus !== "idle") {
-      resetChatCompletion();
-    }
-
-  }, [chatCompletionStatus, resetChatCompletion]);
+    resetChatCompletion();
+  }, [resetChatCompletion]);
 
   const toastTimeoutsRef = useRef(new Map<string, number>());
 
@@ -281,10 +278,6 @@ const App = () => {
         return false;
       }
 
-      if (!selectedModel) {
-        return false;
-      }
-
       if (pendingRequestRef.current) {
         return false;
       }
@@ -352,6 +345,13 @@ const App = () => {
           message: "Select a model before sending a message.",
         });
         return false;
+      }
+
+      if (!model?.trim() && !selectedModel?.trim()) {
+        showToast({
+          type: "info",
+          message: `No model selected; using default model "${modelToUse}".`,
+        });
       }
 
       sendChatCompletion({
