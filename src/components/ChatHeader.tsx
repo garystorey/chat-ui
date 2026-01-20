@@ -28,6 +28,8 @@ function ChatHeader({
   isLoadingModels,
   hasHeaderModelOptions,
 }: ChatHeaderProps) {
+  const showModelPlaceholder = hasHeaderModelOptions && !selectedModel;
+
   return (
     <header className="app__topbar" aria-label="Chat controls">
       <div className="app__topbar-left">
@@ -65,6 +67,11 @@ function ChatHeader({
                 disabled={isResponding || isLoadingModels}
                 aria-label="Select model"
               >
+                <Show when={showModelPlaceholder}>
+                  <option value="" disabled>
+                    Select a model
+                  </option>
+                </Show>
                 {availableModels.map((model) => (
                   <option key={model} value={model}>
                     {model.slice(model.lastIndexOf("/") + 1, model.length)}

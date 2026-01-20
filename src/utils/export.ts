@@ -49,7 +49,8 @@ export const exportChatAsJSON = (chat: ChatSummary): string => {
     messages: chat.messages.map((msg) => ({
       id: msg.id,
       sender: msg.sender,
-      content: getMessagePlainText(msg),
+      content: msg.content,
+      ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
     })),
   };
   return JSON.stringify(exportData, null, 2);
@@ -69,7 +70,8 @@ export const exportAllChatsAsJSON = (chats: ChatSummary[]): string => {
       messages: chat.messages.map((msg) => ({
         id: msg.id,
         sender: msg.sender,
-        content: getMessagePlainText(msg),
+        content: msg.content,
+        ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
       })),
     })),
   };
@@ -172,7 +174,8 @@ const isValidMessage = (msg: unknown): msg is Message => {
   return (
     typeof m.id === 'string' &&
     (m.sender === 'user' || m.sender === 'bot') &&
-    typeof m.content === 'string'
+    typeof m.content === 'string' &&
+    (m.renderAsHtml === undefined || typeof m.renderAsHtml === 'boolean')
   );
 };
 
