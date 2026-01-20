@@ -1,14 +1,15 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import type { ChatSummary } from '../types';
 import { importChatsFromFile } from '../utils';
+import type { ToastType } from "./Toast";
 import './ImportButton.css';
 
 interface ImportButtonProps {
   onImportChats: (chats: ChatSummary[]) => void;
+  onToast: (toast: { type: ToastType; message: string; duration?: number }) => void;
 }
 
-function ImportButton({ onImportChats }: ImportButtonProps) {
-  const [importStatus, setImportStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImportClick = () => {
@@ -19,37 +20,29 @@ function ImportButton({ onImportChats }: ImportButtonProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setImportStatus(null);
-
     try {
       const result = await importChatsFromFile(file);
 
       if (result.success && result.chats.length > 0) {
         onImportChats(result.chats);
-        setImportStatus({
-          type: 'success',
-          message: `Imported ${result.chats.length} chat${result.chats.length === 1 ? '' : 's'}`,
+        onToast({
+          type: "success",
+          message: `Imported ${result.chats.length} chat${result.chats.length === 1 ? "" : "s"}`,
+          duration: 3000,
         });
-        setTimeout(() => {
-          setImportStatus(null);
-        }, 3000);
       } else {
-        setImportStatus({
-          type: 'error',
-          message: result.errors[0] || 'Import failed',
+        onToast({
+          type: "error",
+          message: result.errors[0] || "Import failed",
+          duration: 4000,
         });
-        setTimeout(() => {
-          setImportStatus(null);
-        }, 4000);
       }
     } catch (error) {
-      setImportStatus({
-        type: 'error',
-        message: `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      onToast({
+        type: "error",
+        message: `Import failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        duration: 4000,
       });
-      setTimeout(() => {
-        setImportStatus(null);
-      }, 4000);
     }
 
     event.target.value = '';
@@ -89,11 +82,6 @@ function ImportButton({ onImportChats }: ImportButtonProps) {
         style={{ display: 'none' }}
         aria-label="Import chats file"
       />
-      {importStatus && (
-        <div className={`import-button__toast import-button__toast--${importStatus.type}`}>
-          {importStatus.message}
-        </div>
-      )}
     </div>
   );
 }

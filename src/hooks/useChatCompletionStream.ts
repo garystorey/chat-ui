@@ -1,29 +1,39 @@
+import { useMutation } from "@tanstack/react-query";
 import { useCallback, useRef } from "react";
 import {
+  ApiError,
+  apiStreamRequest,
+  buildChatCompletionResponse,
   extractAssistantReply,
   getChatCompletionContentText,
 } from "../utils";
 import type {
-  ChatCompletionRequest,
+  ChatCompletionMutationVariables,
+  ChatCompletionStreamArgs,
   ChatCompletionResponse,
   ChatCompletionStreamResponse,
 } from "../types";
-import useChatCompletion from "./useChatCompletion";
-
-export type ChatCompletionStreamArgs = {
-  body: ChatCompletionRequest;
-  onStreamUpdate: (content: string) => void;
-  onStreamComplete: (content: string) => void;
-  onError: (error: unknown) => void;
-  onSettled: () => void;
-};
+import { CHAT_COMPLETION_PATH } from "../config";
 
 export default function useChatCompletionStream() {
   const {
     mutate: sendChatCompletion,
     reset: resetChatCompletion,
     status: chatCompletionStatus,
-  } = useChatCompletion();
+  } = useMutation<ChatCompletionResponse, ApiError, ChatCompletionMutationVariables>({
+    mutationKey: ["chatCompletion"],
+    networkMode: "always",
+    mutationFn: async ({ body, signal, onChunk }) => {
+      return apiStreamRequest<ChatCompletionStreamResponse, ChatCompletionResponse>({
+        path: CHAT_COMPLETION_PATH,
+        method: "POST",
+        body,
+        signal,
+        onMessage: onChunk,
+        buildResponse: buildChatCompletionResponse,
+      });
+    },
+  });
   const pendingRequestRef = useRef<AbortController | null>(null);
   const streamBufferRef = useRef("");
   const streamFlushTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(

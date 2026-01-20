@@ -7,7 +7,6 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
-  useState,
 } from "react";
 import { MicIcon, SendIcon, StopIcon } from "./icons";
 import { combineValueWithTranscript, trimTrailingTranscript } from "../utils";
@@ -15,6 +14,7 @@ import { UserInputSendPayload } from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
 import "./UserInput.css";
 import { Show } from ".";
+import type { ToastType } from "./Toast";
 
 type UserInputProps = {
   value: string;
@@ -28,6 +28,7 @@ type UserInputProps = {
   onSelectModel: (model: string) => void;
   isLoadingModels: boolean;
   showModelSelect?: boolean;
+  onToast?: (toast: { type: ToastType; message: string; duration?: number }) => void;
 };
 
 const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
@@ -43,10 +44,9 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     onSelectModel,
     isLoadingModels,
     showModelSelect = true,
+    onToast,
   }, forwardedRef) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [canRecord, setCanRecord] = useState(false);
-    const [recordingStatus, setRecordingStatus] = useState("");
     const manualValueRef = useRef(value);
     const lastTranscriptRef = useRef("");
     const applyingTranscriptRef = useRef(false);
@@ -61,34 +61,30 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       error: recordingError,
     } = useSpeechRecognition();
 
-    useEffect(() => {
-      setCanRecord(
-        speechSupported &&
-          typeof navigator !== "undefined" &&
-          Boolean(navigator.mediaDevices?.getUserMedia)
-      );
-    }, [speechSupported]);
+    const canRecord =
+      speechSupported &&
+      typeof navigator !== "undefined" &&
+      Boolean(navigator.mediaDevices?.getUserMedia);
+
+    const recordingStatus = recordingError
+      ? recordingError
+      : isRecording
+        ? "Recording in progress"
+        : !canRecord
+          ? "Voice input unavailable"
+          : "";
 
     useEffect(() => {
       if (recordingError) {
-        setRecordingStatus(recordingError);
         // eslint-disable-next-line no-console
         console.error("Speech recognition error:", recordingError);
-        return;
+        onToast?.({
+          type: "error",
+          message: recordingError,
+          duration: 4000,
+        });
       }
-
-      if (isRecording) {
-        setRecordingStatus("Recording in progress");
-        return;
-      }
-
-      if (!canRecord) {
-        setRecordingStatus("Voice input unavailable");
-        return;
-      }
-
-      setRecordingStatus("");
-    }, [canRecord, isRecording, recordingError]);
+    }, [onToast, recordingError]);
 
     useImperativeHandle(forwardedRef, () => textareaRef.current!);
     useAutoResizeTextarea(textareaRef, value);
@@ -112,6 +108,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         return Promise.resolve(
           onSend({
             text: trimmed,
+            model: selectedModel,
           })
         );
       },

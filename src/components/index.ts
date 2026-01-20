@@ -9,6 +9,8 @@ export { default as Show } from './Show';
 export { default as Suggestions } from './Suggestions';
 export { default as ThemeToggle } from './ThemeToggle';
 export { default as ThinkingIndicator } from './ThinkingIndicator';
+export { default as ToastStack } from './Toast';
+export type { ToastItem, ToastType } from './Toast';
 export { default as UserInput } from './UserInput';
 export { default as Heading } from './Heading';
 export { default as ChatHeader } from './ChatHeader';

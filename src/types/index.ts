@@ -48,6 +48,7 @@ export type ChatSummary = {
 
 export type UserInputSendPayload = {
   text: string;
+  model?: string;
 };
 
 export type ApiRequestOptions = {
@@ -114,6 +115,20 @@ export type ChatCompletionStreamChoice = {
 export type ChatCompletionStreamResponse = {
   id?: string;
   choices: ChatCompletionStreamChoice[];
+};
+
+export type ChatCompletionStreamArgs = {
+  body: ChatCompletionRequest;
+  onStreamUpdate: (content: string) => void;
+  onStreamComplete: (content: string) => void;
+  onError: (error: unknown) => void;
+  onSettled: () => void;
+};
+
+export type ChatCompletionMutationVariables = {
+  body: ChatCompletionRequest;
+  signal?: AbortSignal;
+  onChunk?: (chunk: ChatCompletionStreamResponse) => void;
 };
 
 export type ModelInfo = {

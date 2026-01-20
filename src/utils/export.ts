@@ -196,7 +196,10 @@ const normalizeChat = (chat: unknown): ChatSummary | null => {
 
   const updatedAt = parseTimestamp(c.updatedAt);
   const messages = Array.isArray(c.messages) && c.messages.every(isValidMessage)
-    ? (c.messages as Message[])
+    ? (c.messages as Message[]).map((message) => ({
+        ...message,
+        renderAsHtml: message.renderAsHtml ?? false,
+      }))
     : null;
 
   if (updatedAt === null || messages === null) return null;

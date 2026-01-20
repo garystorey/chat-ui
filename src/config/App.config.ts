@@ -1,4 +1,3 @@
-
 export const API_BASE_URL= 'http://192.168.86.28:1234'
 export const CHAT_COMPLETION_PATH = '/v1/chat/completions';
 export const DEFAULT_CHAT_MODEL = 'gpt-40-mini';

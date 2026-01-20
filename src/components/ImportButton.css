@@ -47,42 +47,6 @@
   }
 }
 
-.import-button__toast {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  z-index: 9999;
-  animation: import-toast-slide-in 0.3s ease-out;
-}
-
-@keyframes import-toast-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(1rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.import-button__toast--success {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #6ee7b7;
-}
-
-.import-button__toast--error {
-  background-color: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .import-button__btn {
@@ -95,15 +59,5 @@
     border-color: var(--hover-border-color, #505050);
   }
 
-  .import-button__toast--success {
-    background-color: #064e3b;
-    color: #6ee7b7;
-    border-color: #065f46;
-  }
-
-  .import-button__toast--error {
-    background-color: #7f1d1d;
-    color: #fca5a5;
-    border-color: #991b1b;
-  }
+  
 }

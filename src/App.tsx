@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
-import { useCallback, useMemo, useRef, useState, type MouseEvent } from "react";
-import { messagesAtom, respondingAtom } from "./atoms";
-import { ChatHeader, ExportButton, HomePanels, Show, UserInput } from "./components";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { messagesAtom } from "./atoms";
+import { ChatHeader, ExportButton, HomePanels, Show, ToastStack, UserInput } from "./components";
 import { ChatWindow } from "./features/";
 
 import type {
@@ -10,14 +10,13 @@ import type {
   Message,
   UserInputSendPayload,
 } from "./types";
+import type { ToastItem, ToastType } from "./components/Toast";
 import {
   useConnectionListeners,
   useTheme,
   useToggleBodyClass,
   usePersistChatHistory,
   useHydrateActiveChat,
-  useUnmount,
-  useRespondingStatus,
   useAvailableModels,
   useChatCompletionStream,
 } from "./hooks";
@@ -33,13 +32,24 @@ import { ASSISTANT_ERROR_MESSAGE, defaultChats, suggestions } from "./config";
 
 import "./App.css";
 
+const sortChatsByUpdatedAt = (chats: ChatSummary[]) =>
+  [...chats].sort((a, b) => b.updatedAt - a.updatedAt);
+
+const upsertChatHistory = (
+  current: ChatSummary[],
+  updatedChat: ChatSummary,
+  exists: boolean
+) =>
+  exists
+    ? current.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
+    : [updatedChat, ...current];
+
 const App = () => {
   const [messages, setMessages] = useAtom(messagesAtom);
-  const [isResponding, setResponding] = useAtom(respondingAtom);
   const [inputValue, setInputValue] = useState("");
   const [isChatOpen, setChatOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>(() =>
-    [...defaultChats].sort((a, b) => b.updatedAt - a.updatedAt)
+    sortChatsByUpdatedAt(defaultChats)
   );
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
@@ -48,12 +58,15 @@ const App = () => {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
   const [isLoadingModels, setIsLoadingModels] = useState(false);
+  const [modelsRefreshKey, setModelsRefreshKey] = useState(0);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
     send: sendChatCompletion,
     pendingRequestRef,
   } = useChatCompletionStream();
+  const isResponding = chatCompletionStatus === "pending";
   const isNewChat = messages.length === 0;
 
   const cancelPendingResponse = useCallback(() => {
@@ -66,13 +79,56 @@ const App = () => {
       resetChatCompletion();
     }
 
-    setResponding(false);
-  }, [chatCompletionStatus, resetChatCompletion, setResponding]);
+  }, [chatCompletionStatus, resetChatCompletion]);
+
+  const toastTimeoutsRef = useRef(new Map<string, number>());
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((current) => current.filter((toast) => toast.id !== id));
+    const timeout = toastTimeoutsRef.current.get(id);
+    if (timeout) {
+      window.clearTimeout(timeout);
+      toastTimeoutsRef.current.delete(id);
+    }
+  }, []);
+
+  const showToast = useCallback(
+    ({ type, message, duration = 4000 }: { type: ToastType; message: string; duration?: number }) => {
+      const id = getId();
+      setToasts((current) => [...current, { id, type, message }]);
+
+      if (duration > 0) {
+        const timeout = window.setTimeout(() => {
+          dismissToast(id);
+        }, duration);
+        toastTimeoutsRef.current.set(id, timeout);
+      }
+    },
+    [dismissToast]
+  );
+
+  useEffect(() => {
+    return () => {
+      toastTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+      toastTimeoutsRef.current.clear();
+    };
+  }, []);
+
+  const getErrorMessage = useCallback((error: unknown, fallback: string) => {
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    if (typeof error === "string" && error.trim().length > 0) {
+      return error;
+    }
+
+    return fallback;
+  }, []);
 
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
   usePersistChatHistory(chatHistory, setChatHistory);
-  useRespondingStatus(chatCompletionStatus, setResponding);
   useHydrateActiveChat({
     activeChatId,
     chatHistory,
@@ -80,18 +136,49 @@ const App = () => {
     setChatOpen,
   });
   const retryConnection = useConnectionListeners({
-    cancelPendingResponse,
     setConnectionStatus,
   });
+  const handleRetryConnection = useCallback(() => {
+    setModelsRefreshKey((current) => current + 1);
+    retryConnection();
+  }, [retryConnection]);
 
   useAvailableModels({
     connectionStatus,
+    refreshKey: modelsRefreshKey,
     setAvailableModels,
     setSelectedModel,
     setIsLoadingModels,
+    onError: (error) => {
+      showToast({
+        type: "warning",
+        message: getErrorMessage(error, "Unable to load models."),
+      });
+    },
   });
 
-  useUnmount(cancelPendingResponse);
+  useEffect(() => {
+    return () => {
+      cancelPendingResponse();
+    };
+  }, [cancelPendingResponse]);
+
+  const previousConnectionStatusRef = useRef<ConnectionStatus>("connecting");
+
+  useEffect(() => {
+    if (
+      connectionStatus === "offline" &&
+      previousConnectionStatusRef.current !== "offline"
+    ) {
+      showToast({
+        type: "error",
+        message: "Unable to connect to the API.",
+        duration: 5000,
+      });
+    }
+
+    previousConnectionStatusRef.current = connectionStatus;
+  }, [connectionStatus, showToast]);
 
   const updateActiveChat = useCallback(
     (
@@ -117,11 +204,9 @@ const App = () => {
             }
           : { ...createChatRecordFromMessages(nextMessages), id: chatId };
 
-        const nextHistory = existingChat
-          ? current.map((chat) => (chat.id === chatId ? updatedChat : chat))
-          : [updatedChat, ...current];
+        const nextHistory = upsertChatHistory(current, updatedChat, Boolean(existingChat));
 
-        return nextHistory.sort((a, b) => b.updatedAt - a.updatedAt);
+        return sortChatsByUpdatedAt(nextHistory);
       });
     },
     [setChatHistory]
@@ -170,8 +255,8 @@ const App = () => {
 
     if (activeChatId) {
       setChatHistory((current) =>
-        current
-          .map((chat) =>
+        sortChatsByUpdatedAt(
+          current.map((chat) =>
             chat.id === activeChatId
               ? {
                   ...chat,
@@ -181,19 +266,17 @@ const App = () => {
                 }
               : chat
           )
-          .sort((a, b) => b.updatedAt - a.updatedAt)
+        )
       );
       return;
     }
 
     const newChat = createChatRecordFromMessages(messages);
-    setChatHistory((current) =>
-      [newChat, ...current].sort((a, b) => b.updatedAt - a.updatedAt)
-    );
+    setChatHistory((current) => sortChatsByUpdatedAt([newChat, ...current]));
   }, [activeChatId, messages]);
 
   const handleSend = useCallback(
-    async ({ text }: UserInputSendPayload) => {
+    async ({ text, model }: UserInputSendPayload) => {
       if (!text) {
         return false;
       }
@@ -236,6 +319,10 @@ const App = () => {
       const conversationForRequest = [...messages, userMessage];
       const handleCompletionError = (error: unknown) => {
         console.error("Chat completion request failed", error);
+        showToast({
+          type: "error",
+          message: getErrorMessage(error, "Unable to complete the response."),
+        });
         updateAssistantMessageContent(
           assistantMessageId,
           chatId,
@@ -250,16 +337,26 @@ const App = () => {
       });
 
       setInputValue("");
-      setResponding(true);
 
       const handleFinalAssistantReply = (finalAssistantReply: string) =>
         updateAssistantMessageContent(assistantMessageId, chatId, finalAssistantReply, {
           skipIfUnchanged: true,
         });
 
+      const modelToUse =
+        model?.trim() || selectedModel?.trim() || DEFAULT_CHAT_MODEL;
+
+      if (!modelToUse) {
+        showToast({
+          type: "warning",
+          message: "Select a model before sending a message.",
+        });
+        return false;
+      }
+
       sendChatCompletion({
         body: {
-          model: selectedModel,
+          model: modelToUse,
           messages: toChatCompletionMessages(conversationForRequest),
           stream: true,
         },
@@ -267,9 +364,7 @@ const App = () => {
           updateAssistantMessageContent(assistantMessageId, chatId, content),
         onStreamComplete: handleFinalAssistantReply,
         onError: handleCompletionError,
-        onSettled: () => {
-          setResponding(false);
-        },
+        onSettled: () => {},
       });
 
       return true;
@@ -285,10 +380,11 @@ const App = () => {
       setInputValue,
       setActiveChatId,
       setMessages,
-      setResponding,
       selectedModel,
       updateActiveChat,
       updateAssistantMessageContent,
+      getErrorMessage,
+      showToast,
     ]
   );
 
@@ -433,7 +529,7 @@ const App = () => {
           return current;
         }
 
-        return [...newChats, ...current].sort((a, b) => b.updatedAt - a.updatedAt);
+        return sortChatsByUpdatedAt([...newChats, ...current]);
       });
     },
     []
@@ -459,7 +555,7 @@ const App = () => {
         handleNewChat={handleNewChat}
         connectionStatus={connectionStatus}
         statusLabel={statusLabel}
-        retryConnection={retryConnection}
+        retryConnection={handleRetryConnection}
         availableModels={availableModels}
         selectedModel={selectedModel}
         setSelectedModel={setSelectedModel}
@@ -491,6 +587,7 @@ const App = () => {
                 onSelectModel={setSelectedModel}
                 isLoadingModels={isLoadingModels}
                 showModelSelect={false}
+                onToast={showToast}
               />
             </div>
 
@@ -502,6 +599,7 @@ const App = () => {
               onSelectChat={handleSelectChat}
               onRemoveChat={handleRemoveChat}
               onImportChats={handleImportChats}
+              onToast={showToast}
               currentChat={currentChat}
               allChats={chatHistory}
             />
@@ -509,6 +607,7 @@ const App = () => {
         </div>
 
       </main>
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </article>
   );
 };
