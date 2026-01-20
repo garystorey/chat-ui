@@ -340,7 +340,8 @@ const App = () => {
           skipIfUnchanged: true,
         });
 
-      const modelToUse = model ?? selectedModel ?? DEFAULT_CHAT_MODEL;
+      const modelToUse =
+        model?.trim() || selectedModel?.trim() || DEFAULT_CHAT_MODEL;
 
       if (!modelToUse) {
         showToast({
