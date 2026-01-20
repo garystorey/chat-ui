@@ -1,7 +1,49 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
-import { DEFAULT_CHAT_MODEL } from "../config";
 import { buildRequest, isJsonLike, parseJson } from "../utils";
 import type { ConnectionStatus } from "../types";
+
+const DEFAULT_SERVER_MODEL = "default";
+
+const getLoadedModelId = (data: unknown): string | null => {
+  if (!isJsonLike(data)) {
+    return null;
+  }
+
+  const topLevel = data as Record<string, unknown>;
+  const loadedFromTopLevel = [
+    topLevel.loaded_model,
+    topLevel.current_model,
+    topLevel.active_model,
+    topLevel.model,
+  ].find((value) => typeof value === "string") as string | undefined;
+
+  if (loadedFromTopLevel) {
+    return loadedFromTopLevel;
+  }
+
+  const entries = Array.isArray(topLevel.data)
+    ? (topLevel.data as Array<Record<string, unknown>>)
+    : [];
+
+  const loadedEntry = entries.find((model) => {
+    const status = model?.status;
+    const state = model?.state;
+    return (
+      model?.loaded === true ||
+      model?.is_loaded === true ||
+      model?.isLoaded === true ||
+      model?.active === true ||
+      model?.is_active === true ||
+      model?.isActive === true ||
+      status === "loaded" ||
+      status === "ready" ||
+      state === "loaded" ||
+      state === "ready"
+    );
+  });
+
+  return typeof loadedEntry?.id === "string" ? loadedEntry.id : null;
+};
 
 const useAvailableModels = ({
   connectionStatus,
@@ -50,21 +92,22 @@ const useAvailableModels = ({
 
         if (!models.length) {
           setAvailableModels([]);
-          setSelectedModel(DEFAULT_CHAT_MODEL);
+          setSelectedModel("");
         } else {
           const uniqueModels = Array.from(new Set(models));
+          const loadedModelId = getLoadedModelId(data);
 
           setAvailableModels(uniqueModels);
-          setSelectedModel((current) => {
-            if (uniqueModels.includes(current)) {
-              return current;
+          setSelectedModel(() => {
+            if (loadedModelId && uniqueModels.includes(loadedModelId)) {
+              return loadedModelId;
             }
 
-            if (uniqueModels.includes(DEFAULT_CHAT_MODEL)) {
-              return DEFAULT_CHAT_MODEL;
+            if (uniqueModels.includes(DEFAULT_SERVER_MODEL)) {
+              return DEFAULT_SERVER_MODEL;
             }
 
-            return uniqueModels[0];
+            return "";
           });
         }
       } catch (error) {

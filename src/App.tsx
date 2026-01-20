@@ -29,7 +29,7 @@ import {
   toChatCompletionMessages,
 } from "./utils";
 
-import { ASSISTANT_ERROR_MESSAGE, DEFAULT_CHAT_MODEL, defaultChats, suggestions } from "./config";
+import { ASSISTANT_ERROR_MESSAGE, defaultChats, suggestions } from "./config";
 
 import "./App.css";
 
@@ -46,7 +46,7 @@ const App = () => {
     "connecting"
   );
   const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_CHAT_MODEL);
+  const [selectedModel, setSelectedModel] = useState("");
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const {
     status: chatCompletionStatus,
@@ -195,6 +195,10 @@ const App = () => {
   const handleSend = useCallback(
     async ({ text }: UserInputSendPayload) => {
       if (!text) {
+        return false;
+      }
+
+      if (!selectedModel) {
         return false;
       }
 

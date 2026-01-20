@@ -93,8 +93,15 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     useImperativeHandle(forwardedRef, () => textareaRef.current!);
     useAutoResizeTextarea(textareaRef, value);
 
+    const requiresModelSelection =
+      showModelSelect && availableModels.length > 0 && !selectedModel;
+
     const sendMessage = useCallback(
       async (overrideText?: string) => {
+        if (requiresModelSelection) {
+          return false;
+        }
+
         const messageText = overrideText ?? value;
         const trimmed = messageText.trim();
 
@@ -108,7 +115,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           })
         );
       },
-      [onSend, value]
+      [onSend, requiresModelSelection, value]
     );
 
     const handleSubmit = useCallback(
@@ -248,6 +255,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     }
 
     const hasModelOptions = showModelSelect && availableModels.length > 0;
+    const showModelPlaceholder = hasModelOptions && !selectedModel;
 
     return (
       <form
@@ -285,6 +293,11 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                     onChange={handleModelChange}
                     disabled={isResponding || isLoadingModels}
                   >
+                    <Show when={showModelPlaceholder}>
+                      <option value="" disabled>
+                        Select a model
+                      </option>
+                    </Show>
                     {availableModels.map((model) => (
                       <option key={model} value={model}>
                         {model}
@@ -344,6 +357,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 className="input-panel__submit"
                 aria-label="Send message"
                 title="Send message"
+                disabled={requiresModelSelection}
               >
                 <SendIcon />
               </button>
