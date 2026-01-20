@@ -4,7 +4,6 @@ import type {
   ChatCompletionMessage,
   ChatCompletionResponse,
   ChatCompletionChoice,
-  ChatCompletionContentPart,
   ChatCompletionStreamResponse,
 } from '../types';
 import { getId } from './id';
@@ -32,24 +31,9 @@ export const toChatCompletionMessages = (
 ): ChatCompletionMessage[] =>
   messages.map((message) => {
     const text = getMessagePlainText(message);
-    const isUserMessage = message.sender === 'user';
-    const content: ChatCompletionContentPart[] = isUserMessage
-      ? [
-          {
-            type: 'input_text',
-            text: text ?? '',
-          },
-        ]
-      : [
-          {
-            type: 'text',
-            text: text ?? '',
-          },
-        ];
-
     return {
-      role: isUserMessage ? 'user' : 'assistant',
-      content,
+      role: message.sender === 'user' ? 'user' : 'assistant',
+      content: text ?? '',
     };
   });
 
