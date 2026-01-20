@@ -21,6 +21,8 @@ export default function useChatCompletionStream() {
     reset: resetChatCompletion,
     status: chatCompletionStatus,
   } = useMutation<ChatCompletionResponse, ApiError, ChatCompletionMutationVariables>({
+    mutationKey: ["chatCompletion"],
+    networkMode: "always",
     mutationFn: async ({ body, signal, onChunk }) => {
       return apiStreamRequest<ChatCompletionStreamResponse, ChatCompletionResponse>({
         path: CHAT_COMPLETION_PATH,
