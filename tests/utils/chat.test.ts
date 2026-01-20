@@ -59,21 +59,11 @@ describe('chat utilities', () => {
     expect(completionMessages).toEqual([
       {
         role: 'user',
-        content: [
-          {
-            type: 'input_text',
-            text: 'Hello',
-          },
-        ],
+        content: 'Hello',
       },
       {
         role: 'assistant',
-        content: [
-          {
-            type: 'text',
-            text: 'Hi there',
-          },
-        ],
+        content: 'Hi there',
       },
     ]);
   });
