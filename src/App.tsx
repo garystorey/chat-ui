@@ -136,7 +136,6 @@ const App = () => {
     setChatOpen,
   });
   const retryConnection = useConnectionListeners({
-    cancelPendingResponse,
     setConnectionStatus,
   });
   const handleRetryConnection = useCallback(() => {
@@ -340,7 +339,8 @@ const App = () => {
           skipIfUnchanged: true,
         });
 
-      const modelToUse = model ?? selectedModel ?? DEFAULT_CHAT_MODEL;
+      const modelToUse =
+        model?.trim() || selectedModel?.trim() || DEFAULT_CHAT_MODEL;
 
       if (!modelToUse) {
         showToast({
