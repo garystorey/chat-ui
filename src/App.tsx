@@ -75,11 +75,8 @@ const App = () => {
       pendingRequestRef.current = null;
     }
 
-    if (chatCompletionStatus !== "idle") {
-      resetChatCompletion();
-    }
-
-  }, [chatCompletionStatus, resetChatCompletion]);
+    resetChatCompletion();
+  }, [resetChatCompletion]);
 
   const toastTimeoutsRef = useRef(new Map<string, number>());
 
