@@ -301,7 +301,7 @@ const App = () => {
 
   const handleSend = useCallback(
     async ({ text, model }: UserInputSendPayload) => {
-      if (!text) {
+      if (!text?.trim()) {
         return false;
       }
 
@@ -311,6 +311,16 @@ const App = () => {
 
       if (chatCompletionStatus === "error") {
         resetChatCompletion();
+      }
+
+      const modelToUse = model?.trim() || selectedModel?.trim();
+
+      if (!modelToUse) {
+        showToast({
+          type: "warning",
+          message: "Select a model before sending a message.",
+        });
+        return false;
       }
 
       if (!isChatOpen) {
@@ -367,23 +377,6 @@ const App = () => {
             skipIfUnchanged: true,
           },
         );
-
-      const modelToUse = model?.trim() || selectedModel?.trim();
-
-      if (!modelToUse) {
-        showToast({
-          type: "warning",
-          message: "Select a model before sending a message.",
-        });
-        return false;
-      }
-
-      if (!model?.trim() && !selectedModel?.trim()) {
-        showToast({
-          type: "info",
-          message: `No model selected; using default model "${modelToUse}".`,
-        });
-      }
 
       sendChatCompletion({
         body: {
