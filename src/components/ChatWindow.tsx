@@ -23,6 +23,14 @@ type ChatWindowProps = {
 const ChatWindow = ({ messages, isResponding }: ChatWindowProps) => {
   const messagesRef = useRef<HTMLUListElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const shouldHidePendingAssistant =
+    isResponding &&
+    messages.length > 0 &&
+    messages[messages.length - 1]?.sender === "bot" &&
+    messages[messages.length - 1]?.content.trim() === "";
+  const visibleMessages = shouldHidePendingAssistant
+    ? messages.slice(0, -1)
+    : messages;
   const streamingMessageId = isResponding
     ? messages[messages.length - 1]?.id
     : undefined;
@@ -45,7 +53,7 @@ const ChatWindow = ({ messages, isResponding }: ChatWindowProps) => {
         Conversation
       </Heading>
       <List<Message>
-        items={messages}
+        items={visibleMessages}
         keyfield="id"
         as={(message) => (
           <ChatMessage
