@@ -1,5 +1,4 @@
 import { ConnectionStatus } from "../types";
-import List from "./List";
 import Show from "./Show";
 import ThemeToggle from "./ThemeToggle";
 
