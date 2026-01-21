@@ -1,8 +1,22 @@
 import { useAtom } from "jotai";
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
 import { messagesAtom } from "./atoms";
-import { ChatHeader, ExportButton, HomePanels, Show, ToastStack, UserInput } from "./components";
-import { ChatWindow } from "./features/";
+import {
+  ChatWindow,
+  ChatHeader,
+  ExportButton,
+  HomePanels,
+  Show,
+  ToastStack,
+  UserInput,
+} from "./components";
 
 import type {
   ChatSummary,
@@ -38,7 +52,7 @@ const sortChatsByUpdatedAt = (chats: ChatSummary[]) =>
 const upsertChatHistory = (
   current: ChatSummary[],
   updatedChat: ChatSummary,
-  exists: boolean
+  exists: boolean,
 ) =>
   exists
     ? current.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
@@ -49,12 +63,11 @@ const App = () => {
   const [inputValue, setInputValue] = useState("");
   const [isChatOpen, setChatOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>(() =>
-    sortChatsByUpdatedAt(defaultChats)
+    sortChatsByUpdatedAt(defaultChats),
   );
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>(
-    "connecting"
-  );
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("connecting");
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
   const [isLoadingModels, setIsLoadingModels] = useState(false);
@@ -90,7 +103,15 @@ const App = () => {
   }, []);
 
   const showToast = useCallback(
-    ({ type, message, duration = 4000 }: { type: ToastType; message: string; duration?: number }) => {
+    ({
+      type,
+      message,
+      duration = 4000,
+    }: {
+      type: ToastType;
+      message: string;
+      duration?: number;
+    }) => {
       const id = getId();
       setToasts((current) => [...current, { id, type, message }]);
 
@@ -101,12 +122,14 @@ const App = () => {
         toastTimeoutsRef.current.set(id, timeout);
       }
     },
-    [dismissToast]
+    [dismissToast],
   );
 
   useEffect(() => {
     return () => {
-      toastTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+      toastTimeoutsRef.current.forEach((timeout) =>
+        window.clearTimeout(timeout),
+      );
       toastTimeoutsRef.current.clear();
     };
   }, []);
@@ -181,7 +204,7 @@ const App = () => {
     (
       nextMessages: Message[],
       chatId: string | null,
-      previewMessage?: Message
+      previewMessage?: Message,
     ) => {
       if (!chatId) {
         return;
@@ -201,12 +224,16 @@ const App = () => {
             }
           : { ...createChatRecordFromMessages(nextMessages), id: chatId };
 
-        const nextHistory = upsertChatHistory(current, updatedChat, Boolean(existingChat));
+        const nextHistory = upsertChatHistory(
+          current,
+          updatedChat,
+          Boolean(existingChat),
+        );
 
         return sortChatsByUpdatedAt(nextHistory);
       });
     },
-    [setChatHistory]
+    [setChatHistory],
   );
 
   const updateAssistantMessageContent = useCallback(
@@ -214,7 +241,7 @@ const App = () => {
       assistantMessageId: string,
       chatId: string,
       nextContent: string,
-      { skipIfUnchanged = false } = {}
+      { skipIfUnchanged = false } = {},
     ) => {
       setMessages((current) => {
         let previewMessage: Message | undefined;
@@ -240,7 +267,7 @@ const App = () => {
         return next;
       });
     },
-    [setMessages, updateActiveChat]
+    [setMessages, updateActiveChat],
   );
 
   const archiveCurrentConversation = useCallback(() => {
@@ -261,9 +288,9 @@ const App = () => {
                   updatedAt: Date.now(),
                   messages: cloneMessages(messages),
                 }
-              : chat
-          )
-        )
+              : chat,
+          ),
+        ),
       );
       return;
     }
@@ -329,7 +356,7 @@ const App = () => {
         updateAssistantMessageContent(
           assistantMessageId,
           chatId,
-          ASSISTANT_ERROR_MESSAGE
+          ASSISTANT_ERROR_MESSAGE,
         );
       };
 
@@ -342,9 +369,14 @@ const App = () => {
       setInputValue("");
 
       const handleFinalAssistantReply = (finalAssistantReply: string) =>
-        updateAssistantMessageContent(assistantMessageId, chatId, finalAssistantReply, {
-          skipIfUnchanged: true,
-        });
+        updateAssistantMessageContent(
+          assistantMessageId,
+          chatId,
+          finalAssistantReply,
+          {
+            skipIfUnchanged: true,
+          },
+        );
 
       sendChatCompletion({
         body: {
@@ -385,7 +417,7 @@ const App = () => {
       updateAssistantMessageContent,
       getErrorMessage,
       showToast,
-    ]
+    ],
   );
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -395,7 +427,7 @@ const App = () => {
       setInputValue(value);
       inputRef.current?.focus();
     },
-    [inputRef, setInputValue]
+    [inputRef, setInputValue],
   );
 
   const suggestionItems = useMemo(
@@ -404,7 +436,7 @@ const App = () => {
         ...suggestion,
         handleSelect: () => handleSuggestionSelect(suggestion.prompt),
       })),
-    [handleSuggestionSelect]
+    [handleSuggestionSelect],
   );
 
   const statusLabel = {
@@ -470,7 +502,7 @@ const App = () => {
       setChatOpen,
       setInputValue,
       setMessages,
-    ]
+    ],
   );
 
   const handleRemoveChat = useCallback(
@@ -514,26 +546,25 @@ const App = () => {
       setChatOpen,
       setInputValue,
       setMessages,
-    ]
+    ],
   );
 
-  const handleImportChats = useCallback(
-    (importedChats: ChatSummary[]) => {
-      if (importedChats.length === 0) return;
+  const handleImportChats = useCallback((importedChats: ChatSummary[]) => {
+    if (importedChats.length === 0) return;
 
-      setChatHistory((current) => {
-        const existingIds = new Set(current.map((chat) => chat.id));
-        const newChats = importedChats.filter((chat) => !existingIds.has(chat.id));
+    setChatHistory((current) => {
+      const existingIds = new Set(current.map((chat) => chat.id));
+      const newChats = importedChats.filter(
+        (chat) => !existingIds.has(chat.id),
+      );
 
-        if (newChats.length === 0) {
-          return current;
-        }
+      if (newChats.length === 0) {
+        return current;
+      }
 
-        return sortChatsByUpdatedAt([...newChats, ...current]);
-      });
-    },
-    []
-  );
+      return sortChatsByUpdatedAt([...newChats, ...current]);
+    });
+  }, []);
 
   const handleSkipToMessages = useCallback(
     (event: MouseEvent<HTMLAnchorElement>) => {
@@ -543,12 +574,16 @@ const App = () => {
         target.focus();
       }
     },
-    []
+    [],
   );
 
   return (
     <article className="app">
-      <a href="#messages" className="sr-only skip-link" onClick={handleSkipToMessages}>
+      <a
+        href="#messages"
+        className="sr-only skip-link"
+        onClick={handleSkipToMessages}
+      >
         Skip to conversation
       </a>
       <ChatHeader
@@ -574,22 +609,22 @@ const App = () => {
             <ChatWindow messages={messages} isResponding={isResponding} />
           </Show>
 
-            <div className="chat-main__inline-input chat-main__inline-input--home">
-              <UserInput
-                ref={inputRef}
-                value={inputValue}
-                onChange={setInputValue}
-                onSend={handleSend}
-                onStop={cancelPendingResponse}
-                isResponding={isResponding}
-                availableModels={availableModels}
-                selectedModel={selectedModel}
-                onSelectModel={setSelectedModel}
-                isLoadingModels={isLoadingModels}
-                showModelSelect={false}
-                onToast={showToast}
-              />
-            </div>
+          <div className="chat-main__inline-input chat-main__inline-input--home">
+            <UserInput
+              ref={inputRef}
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              onStop={cancelPendingResponse}
+              isResponding={isResponding}
+              availableModels={availableModels}
+              selectedModel={selectedModel}
+              onSelectModel={setSelectedModel}
+              isLoadingModels={isLoadingModels}
+              showModelSelect={false}
+              onToast={showToast}
+            />
+          </div>
 
           <Show when={isNewChat}>
             <HomePanels
@@ -605,7 +640,6 @@ const App = () => {
             />
           </Show>
         </div>
-
       </main>
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </article>
