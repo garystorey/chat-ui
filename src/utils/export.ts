@@ -205,20 +205,22 @@ const normalizeChat = (chat: unknown): ChatSummary | null => {
   };
 };
 
-const validateSingleChatJSON = (data: unknown): ChatSummary | null => {
-  return normalizeChat(data);
+const normalizeChatsCollection = (data: unknown): ChatSummary[] => {
+  if (!Array.isArray(data)) return [];
+
+  return data.map(normalizeChat).filter(Boolean) as ChatSummary[];
 };
 
 const validateMultipleChatsJSON = (data: unknown): ChatSummary[] => {
   if (Array.isArray(data)) {
-    return data.map(normalizeChat).filter(Boolean) as ChatSummary[];
+    return normalizeChatsCollection(data);
   }
 
   if (typeof data !== 'object' || data === null) return [];
   const d = data as Record<string, unknown>;
 
   if (Array.isArray(d.chats)) {
-    return d.chats.map(normalizeChat).filter(Boolean) as ChatSummary[];
+    return normalizeChatsCollection(d.chats);
   }
 
   return [];
@@ -232,7 +234,7 @@ export const parseImportedJSON = (jsonString: string): ImportResult => {
     const data = JSON.parse(jsonString);
 
     // Try to parse as single chat first
-    const singleChat = validateSingleChatJSON(data);
+    const singleChat = normalizeChat(data);
     if (singleChat) {
       chats.push(singleChat);
       return { success: true, chats, errors };
