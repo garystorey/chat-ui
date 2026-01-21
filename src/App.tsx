@@ -35,6 +35,8 @@ import {
   useChatCompletionStream,
 } from "./hooks";
 import {
+  cloneMessages,
+  createChatRecordFromMessages,
   getId,
   sortChatsByUpdatedAt,
   toChatCompletionMessages,
