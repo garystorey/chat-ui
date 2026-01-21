@@ -14,17 +14,23 @@ const formatDate = (timestamp: number): string => {
   });
 };
 
-const formatMessageAsMarkdown = (message: Message): string => {
-  const sender = message.sender === 'user' ? 'User' : 'Assistant';
+const getMessageExportDetails = (
+  message: Message
+): { senderLabel: string; content: string } => {
+  const senderLabel = message.sender === 'user' ? 'User' : 'Assistant';
   const content = getMessagePlainText(message);
-  return `### ${sender}\n\n${content}\n`;
+  return { senderLabel, content };
+};
+
+const formatMessageAsMarkdown = (message: Message): string => {
+  const { senderLabel, content } = getMessageExportDetails(message);
+  return `### ${senderLabel}\n\n${content}\n`;
 };
 
 const formatMessageAsText = (message: Message): string => {
-  const sender = message.sender === 'user' ? 'User' : 'Assistant';
-  const content = getMessagePlainText(message);
+  const { senderLabel, content } = getMessageExportDetails(message);
   const separator = '-'.repeat(50);
-  return `${separator}\n${sender}:\n${separator}\n\n${content}\n\n`;
+  return `${separator}\n${senderLabel}:\n${separator}\n\n${content}\n\n`;
 };
 
 export const exportChatAsMarkdown = (chat: ChatSummary): string => {
@@ -70,22 +76,13 @@ export const exportAllChatsAsJSON = (chats: ChatSummary[]): string => {
   return JSON.stringify(exportData, null, 2);
 };
 
-const getMimeType = (format: ExportFormat): string => {
-  const mimeTypes: Record<ExportFormat, string> = {
-    markdown: 'text/markdown',
-    json: 'application/json',
-    text: 'text/plain',
-  };
-  return mimeTypes[format];
-};
-
-const getFileExtension = (format: ExportFormat): string => {
-  const extensions: Record<ExportFormat, string> = {
-    markdown: 'md',
-    json: 'json',
-    text: 'txt',
-  };
-  return extensions[format];
+const FORMAT_CONFIG: Record<
+  ExportFormat,
+  { mimeType: string; extension: string }
+> = {
+  markdown: { mimeType: 'text/markdown', extension: 'md' },
+  json: { mimeType: 'application/json', extension: 'json' },
+  text: { mimeType: 'text/plain', extension: 'txt' },
 };
 
 const sanitizeFilename = (filename: string): string => {
@@ -101,8 +98,7 @@ export const downloadFile = (
   filename: string,
   format: ExportFormat
 ): void => {
-  const mimeType = getMimeType(format);
-  const extension = getFileExtension(format);
+  const { mimeType, extension } = FORMAT_CONFIG[format];
   const sanitized = sanitizeFilename(filename);
   const fullFilename = `${sanitized}.${extension}`;
 
