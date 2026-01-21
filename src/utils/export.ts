@@ -39,20 +39,24 @@ export const exportChatAsText = (chat: ChatSummary): string => {
   return header + messages;
 };
 
+export const serializeMessage = (msg: Message) => ({
+  id: msg.id,
+  sender: msg.sender,
+  content: msg.content,
+  ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
+});
+
+export const serializeChat = (chat: ChatSummary) => ({
+  title: chat.title,
+  id: chat.id,
+  preview: chat.preview,
+  updatedAt: chat.updatedAt,
+  updatedAtFormatted: formatDate(chat.updatedAt),
+  messages: chat.messages.map(serializeMessage),
+});
+
 export const exportChatAsJSON = (chat: ChatSummary): string => {
-  const exportData = {
-    title: chat.title,
-    id: chat.id,
-    preview: chat.preview,
-    updatedAt: chat.updatedAt,
-    updatedAtFormatted: formatDate(chat.updatedAt),
-    messages: chat.messages.map((msg) => ({
-      id: msg.id,
-      sender: msg.sender,
-      content: msg.content,
-      ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
-    })),
-  };
+  const exportData = serializeChat(chat);
   return JSON.stringify(exportData, null, 2);
 };
 
@@ -61,19 +65,7 @@ export const exportAllChatsAsJSON = (chats: ChatSummary[]): string => {
     exportedAt: Date.now(),
     exportedAtFormatted: formatDate(Date.now()),
     totalChats: chats.length,
-    chats: chats.map((chat) => ({
-      title: chat.title,
-      id: chat.id,
-      preview: chat.preview,
-      updatedAt: chat.updatedAt,
-      updatedAtFormatted: formatDate(chat.updatedAt),
-      messages: chat.messages.map((msg) => ({
-        id: msg.id,
-        sender: msg.sender,
-        content: msg.content,
-        ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
-      })),
-    })),
+    chats: chats.map(serializeChat),
   };
   return JSON.stringify(exportData, null, 2);
 };
