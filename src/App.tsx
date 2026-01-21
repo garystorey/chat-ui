@@ -35,28 +35,15 @@ import {
   useChatCompletionStream,
 } from "./hooks";
 import {
-  buildChatPreview,
-  cloneMessages,
-  createChatRecordFromMessages,
   getId,
+  sortChatsByUpdatedAt,
   toChatCompletionMessages,
+  upsertChatHistoryWithMessages,
 } from "./utils";
 
 import { ASSISTANT_ERROR_MESSAGE, defaultChats, suggestions } from "./config";
 
 import "./App.css";
-
-const sortChatsByUpdatedAt = (chats: ChatSummary[]) =>
-  [...chats].sort((a, b) => b.updatedAt - a.updatedAt);
-
-const upsertChatHistory = (
-  current: ChatSummary[],
-  updatedChat: ChatSummary,
-  exists: boolean,
-) =>
-  exists
-    ? current.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
-    : [updatedChat, ...current];
 
 const App = () => {
   const [messages, setMessages] = useAtom(messagesAtom);
@@ -210,27 +197,13 @@ const App = () => {
         return;
       }
 
-      const previewCandidate =
-        previewMessage ?? nextMessages[nextMessages.length - 1];
-
       setChatHistory((current) => {
-        const existingChat = current.find((chat) => chat.id === chatId);
-        const updatedChat = existingChat
-          ? {
-              ...existingChat,
-              preview: buildChatPreview(previewCandidate, existingChat.preview),
-              updatedAt: Date.now(),
-              messages: cloneMessages(nextMessages),
-            }
-          : { ...createChatRecordFromMessages(nextMessages), id: chatId };
-
-        const nextHistory = upsertChatHistory(
+        return upsertChatHistoryWithMessages(
           current,
-          updatedChat,
-          Boolean(existingChat),
+          chatId,
+          nextMessages,
+          previewMessage,
         );
-
-        return sortChatsByUpdatedAt(nextHistory);
       });
     },
     [setChatHistory],
@@ -276,27 +249,11 @@ const App = () => {
     }
 
     const lastMessage = messages[messages.length - 1];
+    const chatId = activeChatId ?? getId();
 
-    if (activeChatId) {
-      setChatHistory((current) =>
-        sortChatsByUpdatedAt(
-          current.map((chat) =>
-            chat.id === activeChatId
-              ? {
-                  ...chat,
-                  preview: buildChatPreview(lastMessage, chat.preview),
-                  updatedAt: Date.now(),
-                  messages: cloneMessages(messages),
-                }
-              : chat,
-          ),
-        ),
-      );
-      return;
-    }
-
-    const newChat = createChatRecordFromMessages(messages);
-    setChatHistory((current) => sortChatsByUpdatedAt([newChat, ...current]));
+    setChatHistory((current) =>
+      upsertChatHistoryWithMessages(current, chatId, messages, lastMessage),
+    );
   }, [activeChatId, messages]);
 
   const handleSend = useCallback(
