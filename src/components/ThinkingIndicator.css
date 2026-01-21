@@ -17,7 +17,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: color-mix(in oklab, var(--accent) 90%, white 10%);
+  color: color-mix(in oklab, var(--accent) 90%, var(--brand-shell) 10%);
 }
 
 .thinking-indicator__orb {

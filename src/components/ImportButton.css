@@ -9,9 +9,9 @@
   gap: 0.5rem;
   padding: 0.5rem 0.75rem;
   background-color: transparent;
-  border: 1px solid var(--border-color, #e0e0e0);
+  border: 1px solid var(--panel-border);
   border-radius: 0.375rem;
-  color: var(--text-color, #333);
+  color: var(--text);
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
@@ -19,13 +19,13 @@
 }
 
 .import-button__btn:hover {
-  background-color: var(--hover-bg-color, #f5f5f5);
-  border-color: var(--hover-border-color, #d0d0d0);
+  background-color: color-mix(in oklab, var(--panel) 90%, var(--accent) 10%);
+  border-color: color-mix(in oklab, var(--panel-border) 70%, var(--accent) 30%);
 }
 
 .import-button__btn:focus-visible {
-  outline: 2px solid var(--focus-color, #3b82f6);
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .import-button__icon {
@@ -44,18 +44,5 @@
 
   .import-button__btn {
     padding: 0.5rem;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .import-button__btn {
-    border-color: var(--border-color, #404040);
-    color: var(--text-color, #e0e0e0);
-  }
-
-  .import-button__btn:hover {
-    background-color: var(--hover-bg-color, #2a2a2a);
-    border-color: var(--hover-border-color, #505050);
   }
 }

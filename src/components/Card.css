@@ -89,7 +89,7 @@
   border: none;
   background: linear-gradient(
     135deg,
-    color-mix(in oklab, var(--accent-cta-start) 85%, white 15%),
+    color-mix(in oklab, var(--accent-cta-start) 85%, var(--brand-shell) 15%),
     var(--accent-cta-end)
   );
   color: var(--accent-cta-text);

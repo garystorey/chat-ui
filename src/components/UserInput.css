@@ -277,7 +277,7 @@ body.chat-open .input-panel {
 .input-panel__submit {
   background: linear-gradient(
     135deg,
-    color-mix(in oklab, var(--accent) 90%, white 10%),
+    color-mix(in oklab, var(--accent) 90%, var(--brand-shell) 10%),
     var(--accent-strong)
   );
   border: none;
