@@ -286,15 +286,25 @@ const App = () => {
         resetChatCompletion();
       }
 
-      if (!isChatOpen) {
-        setChatOpen(true);
+      const modelToUse =
+        model?.trim() || selectedModel?.trim() || DEFAULT_CHAT_MODEL;
+
+      if (!modelToUse) {
+        showToast({
+          type: "warning",
+          message: "Select a model before sending a message.",
+        });
+        return false;
+      }
+
+      if (!model?.trim() && !selectedModel?.trim()) {
+        showToast({
+          type: "info",
+          message: `No model selected; using default model "${modelToUse}".`,
+        });
       }
 
       const chatId = activeChatId ?? getId();
-
-      if (!activeChatId) {
-        setActiveChatId(chatId);
-      }
 
       const userMessage: Message = {
         id: getId(),
@@ -336,24 +346,6 @@ const App = () => {
           skipIfUnchanged: true,
         });
 
-      const modelToUse =
-        model?.trim() || selectedModel?.trim() || DEFAULT_CHAT_MODEL;
-
-      if (!modelToUse) {
-        showToast({
-          type: "warning",
-          message: "Select a model before sending a message.",
-        });
-        return false;
-      }
-
-      if (!model?.trim() && !selectedModel?.trim()) {
-        showToast({
-          type: "info",
-          message: `No model selected; using default model "${modelToUse}".`,
-        });
-      }
-
       sendChatCompletion({
         body: {
           model: modelToUse,
@@ -366,6 +358,14 @@ const App = () => {
         onError: handleCompletionError,
         onSettled: () => {},
       });
+
+      if (!isChatOpen) {
+        setChatOpen(true);
+      }
+
+      if (!activeChatId) {
+        setActiveChatId(chatId);
+      }
 
       return true;
     },
