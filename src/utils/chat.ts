@@ -138,3 +138,30 @@ export const createChatRecordFromMessages = (messages: Message[]): ChatSummary =
     messages: cloneMessages(messages),
   };
 };
+
+export const sortChatsByUpdatedAt = (chats: ChatSummary[]) =>
+  [...chats].sort((a, b) => b.updatedAt - a.updatedAt);
+
+export const upsertChatHistoryWithMessages = (
+  chatHistory: ChatSummary[],
+  chatId: string,
+  messages: Message[],
+  previewMessage?: Message
+): ChatSummary[] => {
+  const previewCandidate = previewMessage ?? messages[messages.length - 1];
+  const existingChat = chatHistory.find((chat) => chat.id === chatId);
+  const updatedChat = existingChat
+    ? {
+        ...existingChat,
+        preview: buildChatPreview(previewCandidate, existingChat.preview),
+        updatedAt: Date.now(),
+        messages: cloneMessages(messages),
+      }
+    : { ...createChatRecordFromMessages(messages), id: chatId };
+
+  const nextHistory = existingChat
+    ? chatHistory.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
+    : [updatedChat, ...chatHistory];
+
+  return sortChatsByUpdatedAt(nextHistory);
+};
