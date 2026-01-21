@@ -100,7 +100,7 @@
   --icon-strong: color-mix(in oklab, var(--text) 92%, white 8%);
 
   --focus-ring:
-    0 0 0 2px rgba(255, 248, 243, 0.9),
+    0 0 0 2px color-mix(in oklab, var(--brand-shell) 88%, transparent),
     0 0 0 4px color-mix(in oklab, var(--accent) 85%, transparent);
 }
 
