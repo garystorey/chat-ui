@@ -417,19 +417,21 @@ const App = () => {
     };
   }, [activeChatId, messages, chatHistory]);
 
-  const handleNewChat = useCallback(() => {
-    cancelPendingResponse();
-    archiveCurrentConversation();
+  const resetChatState = useCallback(() => {
     setMessages([]);
     setActiveChatId(null);
     setInputValue("");
     setChatOpen(false);
+  }, [setActiveChatId, setChatOpen, setInputValue, setMessages]);
+
+  const handleNewChat = useCallback(() => {
+    cancelPendingResponse();
+    archiveCurrentConversation();
+    resetChatState();
   }, [
     archiveCurrentConversation,
     cancelPendingResponse,
-    setChatOpen,
-    setInputValue,
-    setMessages,
+    resetChatState,
   ]);
 
   const handleSelectChat = useCallback(
@@ -484,19 +486,13 @@ const App = () => {
       cancelPendingResponse();
 
       if (isRemovingActiveChat) {
-        setActiveChatId(null);
-        setMessages([]);
-        setChatOpen(false);
-        setInputValue("");
+        resetChatState();
       }
     },
     [
       activeChatId,
       cancelPendingResponse,
-      setActiveChatId,
-      setChatOpen,
-      setInputValue,
-      setMessages,
+      resetChatState,
     ],
   );
 
