@@ -8,8 +8,6 @@ A React/TypeScript interface for chatting with any OpenAI compatible endpoint.
 - Model picker populated from the `/v1/models` API
 - Chat history with recent search, plus import/export
 - Suggested prompts for quick starts
-- Optional voice input via browser speech recognition (when supported)
+- Optional voice input via browser speech recognition \*
 
-## **Note:**
-
-- Voice input relies on browser speech recognition support and microphone permissions.
+\* Voice input relies on browser speech recognition support and microphone permissions.
