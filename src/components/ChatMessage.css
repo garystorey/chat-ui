@@ -106,7 +106,7 @@
 .message .copy-code-btn:hover,
 .message .copy-code-btn:focus-visible {
   background: color-mix(in oklab, var(--accent) 14%, var(--panel) 86%);
-  color: color-mix(in oklab, var(--text) 94%, white 6%);
+  color: color-mix(in oklab, var(--text) 94%, var(--panel-solid) 6%);
 }
 
 .message .copy-code-btn__icon {

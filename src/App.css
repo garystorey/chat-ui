@@ -65,9 +65,13 @@
 .app__new-chat:hover,
 .app__new-chat:focus-visible {
   transform: translateY(-1px);
-  filter: brightness(1.05);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--accent-cta-start) 85%, var(--brand-shell) 15%),
+    color-mix(in oklab, var(--accent-cta-end) 85%, var(--brand-shell) 15%)
+  );
   outline: none;
-  box-shadow: var(--shadow), var(--focus-ring);
+  box-shadow: var(--shadow), var(--glow), var(--focus-ring);
 }
 
 .app__status {
@@ -369,7 +373,7 @@
 .sidebar__chat-remove:hover,
 .sidebar__chat-remove:focus-visible {
   background: color-mix(in oklab, var(--panel) 88%, var(--accent) 12%);
-  color: color-mix(in oklab, var(--text) 85%, white 15%);
+  color: color-mix(in oklab, var(--text) 85%, var(--panel-solid) 15%);
   border-color: color-mix(in oklab, var(--panel-border) 45%, var(--accent) 55%);
   outline: none;
 }
@@ -466,17 +470,17 @@
   0% {
     box-shadow:
       0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
-      0 0 0 0 rgba(46, 204, 113, 0.35);
+      0 0 0 0 color-mix(in oklab, var(--status-online) 35%, transparent);
   }
   50% {
     box-shadow:
       0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
-      0 0 0 10px rgba(46, 204, 113, 0.12);
+      0 0 0 10px color-mix(in oklab, var(--status-online) 12%, transparent);
   }
   100% {
     box-shadow:
       0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
-      0 0 0 0 rgba(46, 204, 113, 0.08);
+      0 0 0 0 color-mix(in oklab, var(--status-online) 8%, transparent);
   }
 }
 
