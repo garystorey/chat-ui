@@ -71,6 +71,15 @@ export default function useChatCompletionStream() {
         }, 100);
       };
 
+      const clearStreamState = () => {
+        if (streamFlushTimeoutRef.current) {
+          clearTimeout(streamFlushTimeoutRef.current);
+          streamFlushTimeoutRef.current = null;
+        }
+
+        streamBufferRef.current = "";
+      };
+
       const controller = new AbortController();
       pendingRequestRef.current = controller;
 
@@ -99,12 +108,8 @@ export default function useChatCompletionStream() {
         },
         {
           onSuccess: (response: ChatCompletionResponse) => {
-            if (streamFlushTimeoutRef.current) {
-              clearTimeout(streamFlushTimeoutRef.current);
-              streamFlushTimeoutRef.current = null;
-            }
-
             flushStreamBuffer();
+            clearStreamState();
 
             const finalAssistantReply = extractAssistantReply(response);
             if (!finalAssistantReply) {
@@ -115,12 +120,7 @@ export default function useChatCompletionStream() {
             onStreamComplete(finalAssistantReply);
           },
           onError: (error: unknown) => {
-            if (streamFlushTimeoutRef.current) {
-              clearTimeout(streamFlushTimeoutRef.current);
-              streamFlushTimeoutRef.current = null;
-            }
-
-            streamBufferRef.current = "";
+            clearStreamState();
 
             if (error instanceof DOMException && error.name === "AbortError") {
               return;
@@ -133,12 +133,7 @@ export default function useChatCompletionStream() {
               pendingRequestRef.current = null;
             }
 
-            if (streamFlushTimeoutRef.current) {
-              clearTimeout(streamFlushTimeoutRef.current);
-              streamFlushTimeoutRef.current = null;
-            }
-
-            streamBufferRef.current = "";
+            clearStreamState();
             onSettled();
           },
         }
