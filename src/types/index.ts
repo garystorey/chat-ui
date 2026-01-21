@@ -1,20 +1,20 @@
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = "light" | "dark";
 
 export type ThemeId =
-  | 'dava-orange'
-  | 'dragula'
-  | 'ayu'
-  | 'one-dark-pro'
-  | 'cappuccino'
-  | 'owl'
-  | 'monokai-pro'
-  | 'github'
-  | 'solarized'
-  | 'nord'
-  | 'tokyo-night'
-  | 'material-theme'
-  | 'gruvbox'
-  | 'high-contrast';
+  | "dava-orange"
+  | "dragula"
+  | "ayu"
+  | "one-dark-pro"
+  | "cappuccino"
+  | "owl"
+  | "monokai-pro"
+  | "github"
+  | "solarized"
+  | "nord"
+  | "tokyo-night"
+  | "material-theme"
+  | "gruvbox"
+  | "high-contrast";
 
 export type ThemePreference = {
   id: ThemeId;
@@ -23,11 +23,9 @@ export type ThemePreference = {
 
 export type ConnectionStatus = "online" | "offline" | "connecting";
 
-
-
 export type Message = {
   id: string;
-  sender: 'user' | 'bot';
+  sender: "user" | "bot";
   content: string;
   renderAsHtml?: boolean;
 };
@@ -70,16 +68,15 @@ export type ApiStreamRequestOptions<TMessage, TResponse> = {
   buildResponse: (messages: TMessage[]) => TResponse;
 };
 
-
-export type ChatCompletionRole = 'system' | 'user' | 'assistant';
+export type ChatCompletionRole = "system" | "user" | "assistant";
 
 export type ChatCompletionContentPart =
   | {
-      type: 'text' | 'output_text';
+      type: "text" | "output_text";
       text: string;
     }
   | {
-      type: 'input_text';
+      type: "input_text";
       text: string;
     };
 
@@ -151,4 +148,19 @@ export type Suggestion = {
   icon: string;
   handleSelect: () => void;
 };
-  
+
+export type ToastType = "success" | "error" | "warning" | "info";
+
+export type ToastItem = {
+  id: string;
+  message: string;
+  type: ToastType;
+  title?: string;
+};
+
+export type HomeTab = {
+  id: "suggestions" | "recent";
+  label: string;
+  tabId: string;
+  panelId: string;
+};

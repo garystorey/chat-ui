@@ -1,23 +1,23 @@
-import type { ChatSummary, Message } from '../types';
-import { buildChatPreview, getMessagePlainText } from './chat';
+import type { ChatSummary, Message } from "../types";
+import { buildChatPreview, getMessagePlainText } from "./chat";
 
-export type ExportFormat = 'markdown' | 'json' | 'text';
+export type ExportFormat = "markdown" | "json" | "text";
 
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp);
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
 const getMessageExportDetails = (
-  message: Message
+  message: Message,
 ): { senderLabel: string; content: string } => {
-  const senderLabel = message.sender === 'user' ? 'User' : 'Assistant';
+  const senderLabel = message.sender === "user" ? "User" : "Assistant";
   const content = getMessagePlainText(message);
   return { senderLabel, content };
 };
@@ -29,19 +29,19 @@ const formatMessageAsMarkdown = (message: Message): string => {
 
 const formatMessageAsText = (message: Message): string => {
   const { senderLabel, content } = getMessageExportDetails(message);
-  const separator = '-'.repeat(50);
+  const separator = "-".repeat(50);
   return `${separator}\n${senderLabel}:\n${separator}\n\n${content}\n\n`;
 };
 
 export const exportChatAsMarkdown = (chat: ChatSummary): string => {
   const header = `# ${chat.title}\n\n**Last Updated:** ${formatDate(chat.updatedAt)}\n\n---\n\n`;
-  const messages = chat.messages.map(formatMessageAsMarkdown).join('\n');
+  const messages = chat.messages.map(formatMessageAsMarkdown).join("\n");
   return header + messages;
 };
 
 export const exportChatAsText = (chat: ChatSummary): string => {
-  const header = `${chat.title}\nLast Updated: ${formatDate(chat.updatedAt)}\n\n${'='.repeat(70)}\n\n`;
-  const messages = chat.messages.map(formatMessageAsText).join('');
+  const header = `${chat.title}\nLast Updated: ${formatDate(chat.updatedAt)}\n\n${"=".repeat(70)}\n\n`;
+  const messages = chat.messages.map(formatMessageAsText).join("");
   return header + messages;
 };
 
@@ -80,15 +80,15 @@ const FORMAT_CONFIG: Record<
   ExportFormat,
   { mimeType: string; extension: string }
 > = {
-  markdown: { mimeType: 'text/markdown', extension: 'md' },
-  json: { mimeType: 'application/json', extension: 'json' },
-  text: { mimeType: 'text/plain', extension: 'txt' },
+  markdown: { mimeType: "text/markdown", extension: "md" },
+  json: { mimeType: "application/json", extension: "json" },
+  text: { mimeType: "text/plain", extension: "txt" },
 };
 
 const sanitizeFilename = (filename: string): string => {
   return filename
-    .replace(/[^a-z0-9_\-\s]/gi, '')
-    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9_\-\s]/gi, "")
+    .replace(/\s+/g, "-")
     .toLowerCase()
     .substring(0, 50);
 };
@@ -96,7 +96,7 @@ const sanitizeFilename = (filename: string): string => {
 export const downloadFile = (
   content: string,
   filename: string,
-  format: ExportFormat
+  format: ExportFormat,
 ): void => {
   const { mimeType, extension } = FORMAT_CONFIG[format];
   const sanitized = sanitizeFilename(filename);
@@ -104,7 +104,7 @@ export const downloadFile = (
 
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = fullFilename;
   document.body.appendChild(link);
@@ -117,13 +117,13 @@ export const exportChat = (chat: ChatSummary, format: ExportFormat): void => {
   let content: string;
 
   switch (format) {
-    case 'markdown':
+    case "markdown":
       content = exportChatAsMarkdown(chat);
       break;
-    case 'json':
+    case "json":
       content = exportChatAsJSON(chat);
       break;
-    case 'text':
+    case "text":
       content = exportChatAsText(chat);
       break;
     default:
@@ -135,16 +135,16 @@ export const exportChat = (chat: ChatSummary, format: ExportFormat): void => {
 
 export const exportAllChats = (
   chats: ChatSummary[],
-  format: ExportFormat = 'json'
+  format: ExportFormat = "json",
 ): void => {
-  const timestamp = formatDate(Date.now()).replace(/[^a-z0-9]/gi, '-');
+  const timestamp = formatDate(Date.now()).replace(/[^a-z0-9]/gi, "-");
   const filename = `chat-history-${timestamp}`;
 
-  if (format === 'json') {
+  if (format === "json") {
     const content = exportAllChatsAsJSON(chats);
-    downloadFile(content, filename, 'json');
+    downloadFile(content, filename, "json");
   } else {
-    throw new Error('Only JSON format is supported for exporting all chats');
+    throw new Error("Only JSON format is supported for exporting all chats");
   }
 };
 
@@ -157,19 +157,19 @@ export type ImportResult = {
 };
 
 const isValidMessage = (msg: unknown): msg is Message => {
-  if (typeof msg !== 'object' || msg === null) return false;
+  if (typeof msg !== "object" || msg === null) return false;
   const m = msg as Record<string, unknown>;
   return (
-    typeof m.id === 'string' &&
-    (m.sender === 'user' || m.sender === 'bot') &&
-    typeof m.content === 'string' &&
-    (m.renderAsHtml === undefined || typeof m.renderAsHtml === 'boolean')
+    typeof m.id === "string" &&
+    (m.sender === "user" || m.sender === "bot") &&
+    typeof m.content === "string" &&
+    (m.renderAsHtml === undefined || typeof m.renderAsHtml === "boolean")
   );
 };
 
 const parseTimestamp = (value: unknown): number | null => {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string') {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) return parsed;
   }
@@ -177,24 +177,26 @@ const parseTimestamp = (value: unknown): number | null => {
 };
 
 const normalizeChat = (chat: unknown): ChatSummary | null => {
-  if (typeof chat !== 'object' || chat === null) return null;
+  if (typeof chat !== "object" || chat === null) return null;
 
   const c = chat as Record<string, unknown>;
-  if (typeof c.id !== 'string' || typeof c.title !== 'string') return null;
+  if (typeof c.id !== "string" || typeof c.title !== "string") return null;
 
   const updatedAt = parseTimestamp(c.updatedAt);
-  const messages = Array.isArray(c.messages) && c.messages.every(isValidMessage)
-    ? (c.messages as Message[]).map((message) => ({
-        ...message,
-        renderAsHtml: message.renderAsHtml ?? false,
-      }))
-    : null;
+  const messages =
+    Array.isArray(c.messages) && c.messages.every(isValidMessage)
+      ? (c.messages as Message[]).map((message) => ({
+          ...message,
+          renderAsHtml: message.renderAsHtml ?? false,
+        }))
+      : null;
 
   if (updatedAt === null || messages === null) return null;
 
-  const preview = typeof c.preview === 'string'
-    ? c.preview
-    : buildChatPreview(messages[messages.length - 1], c.title);
+  const preview =
+    typeof c.preview === "string"
+      ? c.preview
+      : buildChatPreview(messages[messages.length - 1], c.title);
 
   return {
     id: c.id,
@@ -216,7 +218,7 @@ const validateMultipleChatsJSON = (data: unknown): ChatSummary[] => {
     return normalizeChatsCollection(data);
   }
 
-  if (typeof data !== 'object' || data === null) return [];
+  if (typeof data !== "object" || data === null) return [];
   const d = data as Record<string, unknown>;
 
   if (Array.isArray(d.chats)) {
@@ -247,10 +249,12 @@ export const parseImportedJSON = (jsonString: string): ImportResult => {
       return { success: true, chats, errors };
     }
 
-    errors.push('Invalid JSON structure: Expected chat or chats array');
+    errors.push("Invalid JSON structure: Expected chat or chats array");
     return { success: false, chats: [], errors };
   } catch (error) {
-    errors.push(`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    errors.push(
+      `Failed to parse JSON: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
     return { success: false, chats: [], errors };
   }
 };
@@ -260,24 +264,26 @@ export const readFileAsText = (file: File): Promise<string> => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const result = event.target?.result;
-      if (typeof result === 'string') {
+      if (typeof result === "string") {
         resolve(result);
       } else {
-        reject(new Error('Failed to read file as text'));
+        reject(new Error("Failed to read file as text"));
       }
     };
-    reader.onerror = () => reject(new Error('File reading failed'));
+    reader.onerror = () => reject(new Error("File reading failed"));
     reader.readAsText(file);
   });
 };
 
-export const importChatsFromFile = async (file: File): Promise<ImportResult> => {
+export const importChatsFromFile = async (
+  file: File,
+): Promise<ImportResult> => {
   try {
-    if (!file.name.endsWith('.json')) {
+    if (!file.name.endsWith(".json")) {
       return {
         success: false,
         chats: [],
-        errors: ['Only JSON files are supported for import'],
+        errors: ["Only JSON files are supported for import"],
       };
     }
 
@@ -287,7 +293,9 @@ export const importChatsFromFile = async (file: File): Promise<ImportResult> => 
     return {
       success: false,
       chats: [],
-      errors: [`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      errors: [
+        `Import failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      ],
     };
   }
 };

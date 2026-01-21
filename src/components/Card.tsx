@@ -1,8 +1,8 @@
-import { ComponentProps, memo, useCallback, useId } from 'react';
-import Heading from './Heading';
-import './Card.css';
+import { ComponentProps, memo, useCallback, useId } from "react";
+import Heading from "./Heading";
+import "./Card.css";
 
-type CardProps = ComponentProps<'div'> & {
+type CardProps = ComponentProps<"div"> & {
   title: string;
   description: string;
   label: string;
@@ -10,7 +10,15 @@ type CardProps = ComponentProps<'div'> & {
   onSelect: () => void;
 };
 
-function Card ({ title, description, label, icon, onSelect, className="", ...props }: CardProps) {
+function Card({
+  title,
+  description,
+  label,
+  icon,
+  onSelect,
+  className = "",
+  ...props
+}: CardProps) {
   const titleId = useId();
   const descriptionId = useId();
 
@@ -18,7 +26,7 @@ function Card ({ title, description, label, icon, onSelect, className="", ...pro
     onSelect();
   }, [onSelect]);
 
-  const classes =`suggestion-card ${className}`.trim();
+  const classes = `suggestion-card ${className}`.trim();
 
   return (
     <div
@@ -52,6 +60,6 @@ function Card ({ title, description, label, icon, onSelect, className="", ...pro
       </button>
     </div>
   );
-};
+}
 
 export default memo(Card);

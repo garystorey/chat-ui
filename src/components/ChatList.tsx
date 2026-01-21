@@ -17,19 +17,27 @@ function ChatList({
   onSelectChat,
   onRemoveChat,
 }: ChatListProps) {
-      return (
-        <nav className="sidebar__chats" aria-label="Previous chats">
-        <Heading as="h2" size="medium" variant="caps"  >Chats</Heading>
-        <List<PreviewChat>
-          className="sidebar__chat-list"
+  return (
+    <nav className="sidebar__chats" aria-label="Previous chats">
+      <Heading as="h2" size="medium" variant="caps">
+        Chats
+      </Heading>
+      <List<PreviewChat>
+        className="sidebar__chat-list"
         items={chats}
         keyfield="id"
         as={(chat) => (
-          <ChatListItem chat={chat} activeChatId={activeChatId} onSelectChat={onSelectChat} onRemoveChat={onRemoveChat} />
-        )} />
-        <Show when={chats.length === 0}>
-          <div className="sidebar__empty">No chats found</div>
-        </Show> 
+          <ChatListItem
+            chat={chat}
+            activeChatId={activeChatId}
+            onSelectChat={onSelectChat}
+            onRemoveChat={onRemoveChat}
+          />
+        )}
+      />
+      <Show when={chats.length === 0}>
+        <div className="sidebar__empty">No chats found</div>
+      </Show>
     </nav>
   );
 }

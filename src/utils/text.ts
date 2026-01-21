@@ -1,6 +1,6 @@
 export const truncate = (value: string, maxLength: number) => {
   if (!value) {
-    return '';
+    return "";
   }
 
   if (value.length <= maxLength) {
@@ -10,21 +10,22 @@ export const truncate = (value: string, maxLength: number) => {
   return `${value.slice(0, maxLength - 1).trimEnd()}…`;
 };
 
-export const normalizeWhitespace = (value: string) => value.replace(/\s+/g, ' ').trim();
+export const normalizeWhitespace = (value: string) =>
+  value.replace(/\s+/g, " ").trim();
 
 export const getPlainTextFromHtml = (value: string) => {
   if (!value) {
-    return '';
+    return "";
   }
 
-  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    const container = document.createElement('div');
+  if (typeof window !== "undefined" && typeof document !== "undefined") {
+    const container = document.createElement("div");
     container.innerHTML = value;
-    const text = container.textContent ?? container.innerText ?? '';
+    const text = container.textContent ?? container.innerText ?? "";
     return normalizeWhitespace(text);
   }
 
-  return normalizeWhitespace(value.replace(/<[^>]*>/g, ' '));
+  return normalizeWhitespace(value.replace(/<[^>]*>/g, " "));
 };
 
 export const trimTrailingTranscript = (value: string, transcript: string) => {
@@ -33,17 +34,22 @@ export const trimTrailingTranscript = (value: string, transcript: string) => {
   }
 
   if (value === transcript) {
-    return '';
+    return "";
   }
 
   if (value.endsWith(transcript)) {
-    return value.slice(0, value.length - transcript.length).replace(/[ \t]*$/, '');
+    return value
+      .slice(0, value.length - transcript.length)
+      .replace(/[ \t]*$/, "");
   }
 
   return value;
 };
 
-export const combineValueWithTranscript = (value: string, transcript: string) => {
+export const combineValueWithTranscript = (
+  value: string,
+  transcript: string,
+) => {
   if (!transcript) {
     return value;
   }
@@ -53,7 +59,7 @@ export const combineValueWithTranscript = (value: string, transcript: string) =>
   }
 
   const needsSeparator =
-    !value.endsWith(' ') && !value.endsWith('\n') && !value.endsWith('\t');
+    !value.endsWith(" ") && !value.endsWith("\n") && !value.endsWith("\t");
 
-  return `${value}${needsSeparator ? ' ' : ''}${transcript}`;
+  return `${value}${needsSeparator ? " " : ""}${transcript}`;
 };

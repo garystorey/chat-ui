@@ -44,7 +44,11 @@
 }
 
 .app__new-chat {
-  background: linear-gradient(135deg, var(--accent-cta-start), var(--accent-cta-end));
+  background: linear-gradient(
+    135deg,
+    var(--accent-cta-start),
+    var(--accent-cta-end)
+  );
   border: 1px solid color-mix(in oklab, var(--accent-strong) 80%, transparent);
   color: var(--accent-cta-text);
   border-radius: 0.9rem;
@@ -52,7 +56,8 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: var(--shadow-soft);
-  transition: transform var(--duration-sm) var(--ease-out),
+  transition:
+    transform var(--duration-sm) var(--ease-out),
     filter var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
 }
@@ -95,14 +100,16 @@
 
 .app__status-dot--online {
   background: var(--status-online);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
     0 0 0 0 color-mix(in oklab, var(--status-online) 45%, transparent);
   animation: statusPulse 2.4s ease-in-out infinite;
 }
 
 .app__status-dot--connecting {
   background: var(--status-connecting);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
     0 0 0 0 color-mix(in oklab, var(--status-connecting) 38%, transparent);
   animation: statusPulse 2.4s ease-in-out infinite;
 }
@@ -254,7 +261,8 @@
   padding: 0.5rem 0.75rem;
   cursor: pointer;
   border-radius: 0.6rem;
-  transition: color var(--duration-sm) var(--ease-out),
+  transition:
+    color var(--duration-sm) var(--ease-out),
     background-color var(--duration-sm) var(--ease-out);
 }
 
@@ -311,7 +319,8 @@
   cursor: pointer;
   display: grid;
   gap: 0.2rem;
-  transition: background-color var(--duration-sm) var(--ease-out),
+  transition:
+    background-color var(--duration-sm) var(--ease-out),
     border-color var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out),
     transform var(--duration-sm) var(--ease-out);
@@ -351,7 +360,8 @@
   border-radius: 0.65rem;
   padding: 0.55rem 0.65rem;
   cursor: pointer;
-  transition: background-color var(--duration-sm) var(--ease-out),
+  transition:
+    background-color var(--duration-sm) var(--ease-out),
     color var(--duration-sm) var(--ease-out),
     border-color var(--duration-sm) var(--ease-out);
 }
@@ -454,15 +464,18 @@
 
 @keyframes statusPulse {
   0% {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+    box-shadow:
+      0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
       0 0 0 0 rgba(46, 204, 113, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+    box-shadow:
+      0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
       0 0 0 10px rgba(46, 204, 113, 0.12);
   }
   100% {
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
+    box-shadow:
+      0 0 0 4px color-mix(in oklab, var(--panel-solid) 76%, transparent),
       0 0 0 0 rgba(46, 204, 113, 0.08);
   }
 }

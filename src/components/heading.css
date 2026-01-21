@@ -2,7 +2,6 @@
   margin: 0;
 }
 
-
 .header_variant_standard {
   text-decoration: none;
   text-transform: none;
@@ -21,8 +20,6 @@
   text-decoration: underline;
 }
 
-
-
 .header_size_small {
   font-size: 0.875rem;
 }
@@ -33,7 +30,7 @@
 
 .header_size_large {
   font-size: 1.125rem;
-} 
+}
 
 .header_text-align_left {
   text-align: left;
@@ -50,4 +47,3 @@
 .header_text-align_indent {
   text-indent: 1.5rem;
 }
-

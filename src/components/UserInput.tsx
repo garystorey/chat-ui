@@ -10,11 +10,10 @@ import {
 } from "react";
 import { MicIcon, SendIcon, StopIcon } from "./icons";
 import { combineValueWithTranscript, trimTrailingTranscript } from "../utils";
-import { UserInputSendPayload } from "../types";
+import { ToastType, UserInputSendPayload } from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
-import "./UserInput.css";
 import { Show } from ".";
-import type { ToastType } from "./Toast";
+import "./UserInput.css";
 
 type UserInputProps = {
   value: string;
@@ -24,20 +23,27 @@ type UserInputProps = {
   isResponding: boolean;
   autoSendOnSpeechEnd?: boolean;
   sendPayload?: Omit<UserInputSendPayload, "text">;
-  onToast?: (toast: { type: ToastType; message: string; duration?: number }) => void;
+  onToast?: (toast: {
+    type: ToastType;
+    message: string;
+    duration?: number;
+  }) => void;
 };
 
 const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
-  ({
-    value,
-    onChange,
-    onSend,
-    onStop,
-    isResponding,
-    autoSendOnSpeechEnd = false,
-    sendPayload,
-    onToast,
-  }, forwardedRef) => {
+  (
+    {
+      value,
+      onChange,
+      onSend,
+      onStop,
+      isResponding,
+      autoSendOnSpeechEnd = false,
+      sendPayload,
+      onToast,
+    },
+    forwardedRef,
+  ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const manualValueRef = useRef(value);
     const lastTranscriptRef = useRef("");
@@ -94,10 +100,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           onSend({
             text: trimmed,
             ...sendPayload,
-          })
+          }),
         );
       },
-      [onSend, sendPayload, value]
+      [onSend, sendPayload, value],
     );
 
     const handleSubmit = useCallback(
@@ -105,7 +111,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         event.preventDefault();
         void sendMessage();
       },
-      [sendMessage]
+      [sendMessage],
     );
 
     const handleKeyDown = useCallback(
@@ -115,7 +121,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           void sendMessage();
         }
       },
-      [sendMessage]
+      [sendMessage],
     );
 
     const handleChange = useCallback(
@@ -123,11 +129,11 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         const nextValue = event.target.value;
         manualValueRef.current = trimTrailingTranscript(
           nextValue,
-          lastTranscriptRef.current
+          lastTranscriptRef.current,
         );
         onChange(nextValue);
       },
-      [onChange]
+      [onChange],
     );
 
     const handleToggleRecording = useCallback(() => {
@@ -170,7 +176,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
 
       manualValueRef.current = trimTrailingTranscript(
         value,
-        lastTranscriptRef.current
+        lastTranscriptRef.current,
       );
     }, [value]);
 
@@ -181,7 +187,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
 
       const combinedValue = combineValueWithTranscript(
         manualValueRef.current,
-        transcript
+        transcript,
       );
 
       lastTranscriptRef.current = transcript;
@@ -209,7 +215,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
 
       const composedText = combineValueWithTranscript(
         manualValueRef.current,
-        transcript
+        transcript,
       ).trim();
 
       if (!composedText) {
@@ -217,7 +223,13 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       }
 
       void sendMessage(composedText);
-    }, [autoSendOnSpeechEnd, isRecording, isResponding, sendMessage, transcript]);
+    }, [
+      autoSendOnSpeechEnd,
+      isRecording,
+      isResponding,
+      sendMessage,
+      transcript,
+    ]);
 
     const micButtonClasses = [
       "input-panel__icon-button",
@@ -260,7 +272,9 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 type="button"
                 className={micButtonClasses.join(" ")}
                 onClick={handleToggleRecording}
-                aria-label={isRecording ? "Stop voice input" : "Start voice input"}
+                aria-label={
+                  isRecording ? "Stop voice input" : "Start voice input"
+                }
                 title={isRecording ? "Stop voice input" : "Start voice input"}
                 disabled={isResponding || !canRecord}
               >
@@ -304,7 +318,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         </div>
       </form>
     );
-  }
+  },
 );
 
 UserInput.displayName = "UserInput";

@@ -5,9 +5,9 @@ import type {
   ChatCompletionResponse,
   ChatCompletionChoice,
   ChatCompletionStreamResponse,
-} from '../types';
-import { getId } from './id';
-import { getPlainTextFromHtml, normalizeWhitespace, truncate } from './text';
+} from "../types";
+import { getId } from "./id";
+import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "./text";
 
 export const cloneMessages = (items: Message[]): Message[] =>
   items.map((item) => ({
@@ -16,7 +16,7 @@ export const cloneMessages = (items: Message[]): Message[] =>
 
 export const getMessagePlainText = (message?: Message) => {
   if (!message) {
-    return '';
+    return "";
   }
 
   if (message.renderAsHtml) {
@@ -27,34 +27,36 @@ export const getMessagePlainText = (message?: Message) => {
 };
 
 export const toChatCompletionMessages = (
-  messages: Message[]
+  messages: Message[],
 ): ChatCompletionMessage[] =>
   messages.map((message) => {
     const text = getMessagePlainText(message);
     return {
-      role: message.sender === 'user' ? 'user' : 'assistant',
-      content: text ?? '',
+      role: message.sender === "user" ? "user" : "assistant",
+      content: text ?? "",
     };
   });
 
 export const getChatCompletionContentText = (
-  content: ChatCompletionMessage['content'] | undefined
+  content: ChatCompletionMessage["content"] | undefined,
 ) => {
   if (!content) {
-    return '';
+    return "";
   }
 
-  if (typeof content === 'string') {
+  if (typeof content === "string") {
     return content;
   }
 
   return content
-    .map((part) => ('text' in part && typeof part.text === 'string' ? part.text : ''))
-    .join('');
+    .map((part) =>
+      "text" in part && typeof part.text === "string" ? part.text : "",
+    )
+    .join("");
 };
 
 export const buildChatCompletionResponse = (
-  chunks: ChatCompletionStreamResponse[]
+  chunks: ChatCompletionStreamResponse[],
 ): ChatCompletionResponse => {
   if (!chunks.length) {
     return { choices: [] };
@@ -66,7 +68,7 @@ export const buildChatCompletionResponse = (
     chunk.choices?.forEach((choice) => {
       const existing = aggregated.get(choice.index) ?? {
         index: choice.index,
-        message: { role: 'assistant', content: '' },
+        message: { role: "assistant", content: "" },
         finish_reason: null,
       };
 
@@ -76,7 +78,7 @@ export const buildChatCompletionResponse = (
       if (choice.delta?.content) {
         const deltaText = getChatCompletionContentText(choice.delta.content);
         if (deltaText) {
-          existing.message.content = `${existing.message.content ?? ''}${deltaText}`;
+          existing.message.content = `${existing.message.content ?? ""}${deltaText}`;
         }
       }
       if (choice.finish_reason !== undefined) {
@@ -95,37 +97,44 @@ export const buildChatCompletionResponse = (
 
 export const extractAssistantReply = (response: ChatCompletionResponse) => {
   if (!response?.choices?.length) {
-    return '';
+    return "";
   }
 
   const assistantChoice = response.choices.find(
-    (choice: ChatCompletionChoice) => choice.message.role === 'assistant'
+    (choice: ChatCompletionChoice) => choice.message.role === "assistant",
   );
-  const content = getChatCompletionContentText(assistantChoice?.message?.content);
+  const content = getChatCompletionContentText(
+    assistantChoice?.message?.content,
+  );
   return content.trim();
 };
 
 const buildChatText = (
   message: Message | undefined,
   fallback: string,
-  maxLength: number
+  maxLength: number,
 ) => {
-  const text = getMessagePlainText(message) || getPlainTextFromHtml(fallback) || 'Conversation';
-  return truncate(text, maxLength) || 'Conversation';
+  const text =
+    getMessagePlainText(message) ||
+    getPlainTextFromHtml(fallback) ||
+    "Conversation";
+  return truncate(text, maxLength) || "Conversation";
 };
 
-export const buildChatTitle = (
-  message?: Message,
-  fallback = 'Conversation'
-) => buildChatText(message, fallback, 60);
+export const buildChatTitle = (message?: Message, fallback = "Conversation") =>
+  buildChatText(message, fallback, 60);
 
 export const buildChatPreview = (
   message?: Message,
-  fallback = 'Conversation'
+  fallback = "Conversation",
 ) => buildChatText(message, fallback, 80);
 
-export const createChatRecordFromMessages = (messages: Message[]): ChatSummary => {
-  const firstUserMessage = messages.find((message) => message.sender === 'user');
+export const createChatRecordFromMessages = (
+  messages: Message[],
+): ChatSummary => {
+  const firstUserMessage = messages.find(
+    (message) => message.sender === "user",
+  );
   const lastMessage = messages[messages.length - 1];
   const title = buildChatTitle(firstUserMessage);
   const preview = buildChatPreview(lastMessage, title);
@@ -146,7 +155,7 @@ export const upsertChatHistoryWithMessages = (
   chatHistory: ChatSummary[],
   chatId: string,
   messages: Message[],
-  previewMessage?: Message
+  previewMessage?: Message,
 ): ChatSummary[] => {
   const previewCandidate = previewMessage ?? messages[messages.length - 1];
   const existingChat = chatHistory.find((chat) => chat.id === chatId);
@@ -160,7 +169,9 @@ export const upsertChatHistoryWithMessages = (
     : { ...createChatRecordFromMessages(messages), id: chatId };
 
   const nextHistory = existingChat
-    ? chatHistory.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
+    ? chatHistory.map((chat) =>
+        chat.id === updatedChat.id ? updatedChat : chat,
+      )
     : [updatedChat, ...chatHistory];
 
   return sortChatsByUpdatedAt(nextHistory);

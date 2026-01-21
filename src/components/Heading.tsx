@@ -22,12 +22,9 @@ export function Heading({
   children,
   ...props
 }: HeadingProps) {
-
-
-
   let classes = `header header_variant_${variant} header_size_${size} header_text-align_${textAlign}`;
 
-  classes += className ? ` ${className}` : ""
+  classes += className ? ` ${className}` : "";
   classes = classes.trim();
 
   return createElement(as, { ...props, className: classes }, children);

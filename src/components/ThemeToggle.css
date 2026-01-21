@@ -28,7 +28,8 @@
   font: inherit;
   min-height: 2.6rem;
   cursor: pointer;
-  transition: border-color var(--duration-sm) var(--ease-out),
+  transition:
+    border-color var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
 }
 
@@ -49,7 +50,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background-color var(--duration-sm) var(--ease-out),
+  transition:
+    background-color var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out),
     transform var(--duration-sm) var(--ease-out);
 }

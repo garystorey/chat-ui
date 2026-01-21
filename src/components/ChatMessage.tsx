@@ -1,8 +1,8 @@
-import hljs from 'highlight.js';
-import { memo, useEffect, useMemo, useRef } from 'react';
-import type { Message } from '../types';
-import { renderMarkdown } from '../utils';
-import './ChatMessage.css';
+import hljs from "highlight.js";
+import { memo, useEffect, useMemo, useRef } from "react";
+import type { Message } from "../types";
+import { renderMarkdown } from "../utils";
+import "./ChatMessage.css";
 
 const copyIcon = `
   <svg
@@ -40,59 +40,64 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
     const container = bodyRef.current;
     if (!container) return;
 
-    const preElements = Array.from(container.querySelectorAll('pre'));
+    const preElements = Array.from(container.querySelectorAll("pre"));
     const cleanupTasks: Array<() => void> = [];
 
     preElements.forEach((pre) => {
-      const codeElement = pre.querySelector('code');
-      if (codeElement && !codeElement.classList.contains('hljs')) {
+      const codeElement = pre.querySelector("code");
+      if (codeElement && !codeElement.classList.contains("hljs")) {
         hljs.highlightElement(codeElement as HTMLElement);
       }
 
-      const existingButton = pre.querySelector<HTMLButtonElement>('.copy-code-btn');
+      const existingButton =
+        pre.querySelector<HTMLButtonElement>(".copy-code-btn");
 
-      pre.classList.add('code-block');
-      const button = existingButton ?? document.createElement('button');
-      button.type = 'button';
-      button.className = 'copy-code-btn';
-      button.dataset.status = 'idle';
-      button.setAttribute('aria-live', 'polite');
+      pre.classList.add("code-block");
+      const button = existingButton ?? document.createElement("button");
+      button.type = "button";
+      button.className = "copy-code-btn";
+      button.dataset.status = "idle";
+      button.setAttribute("aria-live", "polite");
       button.innerHTML = `${copyIcon}<span class="sr-only">Copy code</span>`;
 
-      const label = button.querySelector<HTMLSpanElement>('.sr-only');
+      const label = button.querySelector<HTMLSpanElement>(".sr-only");
 
-      const updateLabel = (text: string, status: 'idle' | 'copied' | 'error') => {
+      const updateLabel = (
+        text: string,
+        status: "idle" | "copied" | "error",
+      ) => {
         if (label) {
           label.textContent = text;
         }
 
-        button.setAttribute('aria-label', text);
+        button.setAttribute("aria-label", text);
         button.dataset.status = status;
       };
 
-      updateLabel('Copy code', 'idle');
+      updateLabel("Copy code", "idle");
 
       const handleClick = async () => {
-        const codeContent = pre.querySelector('code')?.innerText ?? pre.innerText;
+        const codeContent =
+          pre.querySelector("code")?.innerText ?? pre.innerText;
         try {
           await navigator.clipboard.writeText(codeContent);
-          updateLabel('Copied!', 'copied');
+          updateLabel("Copied!", "copied");
         } catch (error) {
-          updateLabel('Copy failed', 'error');
+          updateLabel("Copy failed", "error");
         } finally {
           setTimeout(() => {
-            updateLabel('Copy code', 'idle');
+            updateLabel("Copy code", "idle");
           }, 1500);
         }
       };
 
-      button.addEventListener('click', handleClick);
+      button.addEventListener("click", handleClick);
       if (!existingButton) {
         pre.insertBefore(button, pre.firstChild);
       }
 
       cleanupTasks.push(() => {
-        button.removeEventListener('click', handleClick);
+        button.removeEventListener("click", handleClick);
       });
     });
 
@@ -101,10 +106,14 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
     };
   }, [content, isStreaming]);
 
-  const ariaLabel = message.sender === 'user' ? 'User message' : 'Assistant message';
+  const ariaLabel =
+    message.sender === "user" ? "User message" : "Assistant message";
 
   return (
-    <article className={`message message--${message.sender}`} aria-label={ariaLabel}>
+    <article
+      className={`message message--${message.sender}`}
+      aria-label={ariaLabel}
+    >
       <div
         className="message__body"
         ref={bodyRef}

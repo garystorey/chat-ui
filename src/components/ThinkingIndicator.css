@@ -4,7 +4,11 @@
   gap: 0.75rem;
   padding: 0.65rem 0.95rem;
   border-radius: 0.95rem;
-  background: color-mix(in oklab, var(--panel-solid) 92%, var(--brand-shell) 8%);
+  background: color-mix(
+    in oklab,
+    var(--panel-solid) 92%,
+    var(--brand-shell) 8%
+  );
   border: 1px solid color-mix(in oklab, var(--panel-border) 78%, transparent);
   box-shadow: var(--shadow-soft);
 }

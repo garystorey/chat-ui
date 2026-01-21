@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface UseSpeechRecognitionOptions {
   locale?: string;
@@ -59,16 +59,17 @@ declare global {
   }
 }
 
-const getSpeechRecognitionConstructor = (): SpeechRecognitionWithVendor | null => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
+const getSpeechRecognitionConstructor =
+  (): SpeechRecognitionWithVendor | null => {
+    if (typeof window === "undefined") {
+      return null;
+    }
 
-  const speechRecognition = window.SpeechRecognition;
-  const webkitSpeechRecognition = window.webkitSpeechRecognition;
+    const speechRecognition = window.SpeechRecognition;
+    const webkitSpeechRecognition = window.webkitSpeechRecognition;
 
-  return speechRecognition || webkitSpeechRecognition || null;
-};
+    return speechRecognition || webkitSpeechRecognition || null;
+  };
 
 const useSpeechRecognition = ({
   locale,
@@ -76,11 +77,11 @@ const useSpeechRecognition = ({
   silenceTimeoutMs = 2500,
 }: UseSpeechRecognitionOptions = {}) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
+  const [transcript, setTranscript] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const finalTranscriptRef = useRef('');
+  const finalTranscriptRef = useRef("");
   const silenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const SpeechRecognitionConstructor = useMemo(
@@ -126,20 +127,22 @@ const useSpeechRecognition = ({
 
   const handleResult = useCallback(
     (event: SpeechRecognitionEvent) => {
-      let interimTranscript = '';
+      let interimTranscript = "";
 
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
-        const text = result[0]?.transcript ?? '';
+        const text = result[0]?.transcript ?? "";
 
         if (result.isFinal) {
-          finalTranscriptRef.current = `${finalTranscriptRef.current} ${text}`.trim();
+          finalTranscriptRef.current =
+            `${finalTranscriptRef.current} ${text}`.trim();
         } else {
           interimTranscript += text;
         }
       }
 
-      const combinedTranscript = `${finalTranscriptRef.current} ${interimTranscript}`.trim();
+      const combinedTranscript =
+        `${finalTranscriptRef.current} ${interimTranscript}`.trim();
       setTranscript(combinedTranscript);
 
       scheduleAutoStop();
@@ -147,11 +150,14 @@ const useSpeechRecognition = ({
     [scheduleAutoStop],
   );
 
-  const handleError = useCallback((event: SpeechRecognitionErrorEvent) => {
-    setError(event.error);
-    resetState();
-    recognitionRef.current = null;
-  }, [resetState]);
+  const handleError = useCallback(
+    (event: SpeechRecognitionErrorEvent) => {
+      setError(event.error);
+      resetState();
+      recognitionRef.current = null;
+    },
+    [resetState],
+  );
 
   const handleEnd = useCallback(() => {
     resetState();
@@ -160,17 +166,17 @@ const useSpeechRecognition = ({
 
   const start = useCallback(async () => {
     if (!supported) {
-      setError('Speech recognition is not supported in this browser.');
+      setError("Speech recognition is not supported in this browser.");
       return;
     }
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError('Microphone access is not available in this browser.');
+      setError("Microphone access is not available in this browser.");
       return;
     }
 
     if (!SpeechRecognitionConstructor) {
-      setError('Speech recognition is not supported in this browser.');
+      setError("Speech recognition is not supported in this browser.");
       return;
     }
 
@@ -178,13 +184,13 @@ const useSpeechRecognition = ({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
     } catch (permissionError) {
-      setError('Microphone permission was denied.');
+      setError("Microphone permission was denied.");
       return;
     }
 
     setError(null);
-    finalTranscriptRef.current = '';
-    setTranscript('');
+    finalTranscriptRef.current = "";
+    setTranscript("");
 
     const recognition = new SpeechRecognitionConstructor();
     recognition.lang = locale ?? recognition.lang;
@@ -198,11 +204,19 @@ const useSpeechRecognition = ({
     setIsRecording(true);
     recognition.start();
     scheduleAutoStop();
-  }, [SpeechRecognitionConstructor, handleEnd, handleError, handleResult, locale, scheduleAutoStop, supported]);
+  }, [
+    SpeechRecognitionConstructor,
+    handleEnd,
+    handleError,
+    handleResult,
+    locale,
+    scheduleAutoStop,
+    supported,
+  ]);
 
   useEffect(() => {
     if (!supported) {
-      setError('Speech recognition is not supported in this browser.');
+      setError("Speech recognition is not supported in this browser.");
     }
   }, [supported]);
 

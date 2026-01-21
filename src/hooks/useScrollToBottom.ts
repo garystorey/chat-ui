@@ -1,4 +1,4 @@
-import { DependencyList, RefObject, useEffect } from 'react';
+import { DependencyList, RefObject, useEffect } from "react";
 
 type UseScrollToBottomOptions = {
   behavior?: ScrollBehavior;
@@ -7,7 +7,7 @@ type UseScrollToBottomOptions = {
 const useScrollToBottom = <T extends Element>(
   ref: RefObject<T | null>,
   dependencies: DependencyList = [],
-  { behavior = 'smooth' }: UseScrollToBottomOptions = {}
+  { behavior = "smooth" }: UseScrollToBottomOptions = {},
 ) => {
   useEffect(() => {
     const container = ref.current;

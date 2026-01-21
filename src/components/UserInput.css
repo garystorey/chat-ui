@@ -52,7 +52,11 @@ body.chat-open .input-panel {
   caret-color: var(--accent);
   transition: color var(--duration-sm) var(--ease-out);
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--accent) 55%, var(--panel-border) 45%)
+  scrollbar-color: color-mix(
+      in oklab,
+      var(--accent) 55%,
+      var(--panel-border) 45%
+    )
     transparent;
 }
 
@@ -154,7 +158,8 @@ body.chat-open .input-panel {
   font: inherit;
   min-height: 2.6rem;
   cursor: pointer;
-  transition: border-color var(--duration-sm) var(--ease-out),
+  transition:
+    border-color var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
 }
 
@@ -189,7 +194,8 @@ body.chat-open .input-panel {
   background: color-mix(in oklab, var(--panel) 94%, transparent 6%);
   color: var(--icon-strong);
   cursor: pointer;
-  transition: filter var(--duration-sm) var(--ease-out),
+  transition:
+    filter var(--duration-sm) var(--ease-out),
     transform var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
 }
@@ -210,7 +216,8 @@ body.chat-open .input-panel {
 }
 
 .input-panel__icon-button--mic:focus-visible {
-  box-shadow: var(--focus-ring),
+  box-shadow:
+    var(--focus-ring),
     0 0 0 3px color-mix(in oklab, var(--accent) 24%, transparent);
 }
 
@@ -218,7 +225,8 @@ body.chat-open .input-panel {
   background: color-mix(in oklab, var(--accent) 14%, var(--panel-solid) 86%);
   color: var(--accent);
   border-color: color-mix(in oklab, var(--accent) 36%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 12%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--accent) 12%, transparent);
   animation: input-panel__recording-pulse 1.5s ease-in-out infinite;
 }
 
@@ -246,14 +254,17 @@ body.chat-open .input-panel {
 
 @keyframes input-panel__recording-pulse {
   0% {
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 12%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--accent) 12%, transparent);
   }
   50% {
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent),
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklab, var(--accent) 30%, transparent),
       0 0 0 5px color-mix(in oklab, var(--accent) 16%, transparent);
   }
   100% {
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 12%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--accent) 12%, transparent);
   }
 }
 
@@ -264,7 +275,11 @@ body.chat-open .input-panel {
 }
 
 .input-panel__submit {
-  background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 90%, white 10%), var(--accent-strong));
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--accent) 90%, white 10%),
+    var(--accent-strong)
+  );
   border: none;
   color: var(--accent-button-text);
   font-size: 1rem;
@@ -276,7 +291,8 @@ body.chat-open .input-panel {
   align-items: center;
   justify-content: center;
   min-width: 3.2rem;
-  transition: transform var(--duration-sm) var(--ease-out),
+  transition:
+    transform var(--duration-sm) var(--ease-out),
     filter var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
 }

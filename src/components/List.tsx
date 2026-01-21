@@ -1,7 +1,7 @@
-import type { ComponentPropsWithoutRef, ForwardedRef, ReactNode } from 'react';
-import { forwardRef } from 'react';
+import type { ComponentPropsWithoutRef, ForwardedRef, ReactNode } from "react";
+import { forwardRef } from "react";
 
-type ListProps<ListItem> = ComponentPropsWithoutRef<'ul'> & {
+type ListProps<ListItem> = ComponentPropsWithoutRef<"ul"> & {
   items: ListItem[];
   keyfield: keyof ListItem | ((item: ListItem) => string);
   limit?: number;
@@ -10,10 +10,10 @@ type ListProps<ListItem> = ComponentPropsWithoutRef<'ul'> & {
 
 function ListInner<ListItem>(
   { items, keyfield, limit = -1, as, ...props }: ListProps<ListItem>,
-  ref: ForwardedRef<HTMLUListElement>
+  ref: ForwardedRef<HTMLUListElement>,
 ) {
   const getKey =
-    typeof keyfield === 'function'
+    typeof keyfield === "function"
       ? keyfield
       : (item: ListItem) => String(item[keyfield]);
 
@@ -29,7 +29,7 @@ function ListInner<ListItem>(
 }
 
 const List = forwardRef(ListInner) as <ListItem>(
-  props: ListProps<ListItem> & { ref?: ForwardedRef<HTMLUListElement> }
+  props: ListProps<ListItem> & { ref?: ForwardedRef<HTMLUListElement> },
 ) => ReturnType<typeof ListInner>;
 
 export default List;

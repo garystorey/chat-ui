@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import type { ChatSummary } from '../types';
-import { exportChat, exportAllChats, type ExportFormat } from '../utils';
-import './ExportButton.css';
+import { useState, useRef, useEffect } from "react";
+import type { ChatSummary } from "../types";
+import { exportChat, exportAllChats, type ExportFormat } from "../utils";
+import "./ExportButton.css";
 
 interface ExportButtonProps {
   currentChat: ChatSummary | null;
@@ -20,11 +20,11 @@ function ExportButton({ currentChat, allChats }: ExportButtonProps) {
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
@@ -36,11 +36,12 @@ function ExportButton({ currentChat, allChats }: ExportButtonProps) {
 
   const handleExportAll = () => {
     if (allChats.length === 0) return;
-    exportAllChats(allChats, 'json');
+    exportAllChats(allChats, "json");
     setIsOpen(false);
   };
 
-  const hasCurrentChat = currentChat !== null && currentChat.messages.length > 0;
+  const hasCurrentChat =
+    currentChat !== null && currentChat.messages.length > 0;
   const hasChats = allChats.length > 0;
 
   return (
@@ -79,7 +80,7 @@ function ExportButton({ currentChat, allChats }: ExportButtonProps) {
               <button
                 type="button"
                 className="export-button__item"
-                onClick={() => handleExportCurrent('markdown')}
+                onClick={() => handleExportCurrent("markdown")}
                 role="menuitem"
               >
                 Export as Markdown (.md)
@@ -87,7 +88,7 @@ function ExportButton({ currentChat, allChats }: ExportButtonProps) {
               <button
                 type="button"
                 className="export-button__item"
-                onClick={() => handleExportCurrent('json')}
+                onClick={() => handleExportCurrent("json")}
                 role="menuitem"
               >
                 Export as JSON
@@ -95,7 +96,7 @@ function ExportButton({ currentChat, allChats }: ExportButtonProps) {
               <button
                 type="button"
                 className="export-button__item"
-                onClick={() => handleExportCurrent('text')}
+                onClick={() => handleExportCurrent("text")}
                 role="menuitem"
               >
                 Export as Text (.txt)

@@ -1,11 +1,11 @@
-import { atom } from 'jotai';
-import { Message, ThemePreference } from '../types';
+import { atom } from "jotai";
+import { Message, ThemePreference } from "../types";
 
-export const THEME_STORAGE_KEY = 'chat-ui-theme-preference';
+export const THEME_STORAGE_KEY = "chat-ui-theme-preference";
 
 const getInitialThemePreference = (): ThemePreference => {
-  if (typeof window === 'undefined') {
-    return { id: 'dava-orange', mode: 'dark' };
+  if (typeof window === "undefined") {
+    return { id: "dava-orange", mode: "dark" };
   }
 
   const storedPreference = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -18,11 +18,11 @@ const getInitialThemePreference = (): ThemePreference => {
         return parsedPreference;
       }
     } catch (error) {
-      console.warn('Invalid theme preference found in storage', error);
+      console.warn("Invalid theme preference found in storage", error);
     }
   }
 
-  return { id: 'dava-orange', mode: 'dark' };
+  return { id: "dava-orange", mode: "dark" };
 };
 
 export const messagesAtom = atom<Message[]>([]);

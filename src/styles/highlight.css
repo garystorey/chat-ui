@@ -42,7 +42,11 @@
 
 .hljs-built_in,
 .hljs-symbol {
-  color: color-mix(in oklab, var(--code-accent-strong) 82%, var(--code-plain) 18%);
+  color: color-mix(
+    in oklab,
+    var(--code-accent-strong) 82%,
+    var(--code-plain) 18%
+  );
 }
 
 .hljs-comment,
@@ -88,7 +92,11 @@
 
 .hljs-deletion {
   color: var(--code-accent-strong);
-  background-color: color-mix(in oklab, var(--code-accent-strong) 12%, transparent);
+  background-color: color-mix(
+    in oklab,
+    var(--code-accent-strong) 12%,
+    transparent
+  );
 }
 
 .hljs-char.escape_,
@@ -98,4 +106,5 @@
 .hljs-punctuation,
 .hljs-tag {
   /* intentionally inherit */
+  color: inherit; /* adding for linting purposes */
 }

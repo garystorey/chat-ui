@@ -1,36 +1,41 @@
 import { useMemo, useState } from "react";
-
-import type { ChatSummary, Suggestion } from "../types";
+import type { ChatSummary, HomeTab, Suggestion, ToastType } from "../types";
 import ExportButton from "./ExportButton";
 import ImportButton from "./ImportButton";
-import type { ToastType } from "./Toast";
 import ChatList from "./ChatList";
 import List from "./List";
 import Show from "./Show";
 import Suggestions from "./Suggestions";
 
-type HomePanelsProps = {
+export type HomePanelsProps = {
   suggestionItems: Suggestion[];
   chatHistory: ChatSummary[];
   activeChatId: string | null;
   onSelectChat: (chatId: string) => void;
   onRemoveChat: (chatId: string) => void;
   onImportChats: (chats: ChatSummary[]) => void;
-  onToast: (toast: { type: ToastType; message: string; duration?: number }) => void;
+  onToast: (toast: {
+    type: ToastType;
+    message: string;
+    duration?: number;
+  }) => void;
   currentChat: ChatSummary | null;
   allChats: ChatSummary[];
 };
 
-type HomeTab = {
-  id: "suggestions" | "recent";
-  label: string;
-  tabId: string;
-  panelId: string;
-};
-
 const tabs: HomeTab[] = [
-  { id: "suggestions", label: "Suggestions", tabId: "tab-start", panelId: "panel-start" },
-  { id: "recent", label: "Recent", tabId: "tab-recent", panelId: "panel-recent" },
+  {
+    id: "suggestions",
+    label: "Suggestions",
+    tabId: "tab-start",
+    panelId: "panel-start",
+  },
+  {
+    id: "recent",
+    label: "Recent",
+    tabId: "tab-recent",
+    panelId: "panel-recent",
+  },
 ];
 
 const HomePanels = ({
@@ -62,7 +67,11 @@ const HomePanels = ({
 
   return (
     <section className="home-panels" aria-label="Start and recent chats">
-      <div className="home-panels__tabs" role="tablist" aria-label="Start and recent tabs">
+      <div
+        className="home-panels__tabs"
+        role="tablist"
+        aria-label="Start and recent tabs"
+      >
         <List<HomeTab>
           className="home-panels__tab-list"
           items={tabs}
@@ -92,7 +101,11 @@ const HomePanels = ({
           as={(tab) => (
             <Show when={activeTab === tab.id}>
               <Show when={tab.id === "suggestions"}>
-                <div role="tabpanel" id={tab.panelId} aria-labelledby={tab.tabId}>
+                <div
+                  role="tabpanel"
+                  id={tab.panelId}
+                  aria-labelledby={tab.tabId}
+                >
                   <Suggestions
                     suggestions={suggestionItems}
                     classes={["suggestions", "home-panels__suggestions"]}
@@ -109,8 +122,14 @@ const HomePanels = ({
                   <div className="recent-panel__header">
                     <h2 className="recent-panel__title">Recent chats</h2>
                     <div className="recent-panel__controls">
-                      <label className="recent-panel__search" htmlFor="recentSearch">
-                        <span className="recent-panel__search-icon" aria-hidden="true">
+                      <label
+                        className="recent-panel__search"
+                        htmlFor="recentSearch"
+                      >
+                        <span
+                          className="recent-panel__search-icon"
+                          aria-hidden="true"
+                        >
                           🔍
                         </span>
                         <span className="sr-only">Search chats</span>
@@ -118,13 +137,21 @@ const HomePanels = ({
                           id="recentSearch"
                           type="search"
                           value={searchTerm}
-                          onChange={(event) => setSearchTerm(event.target.value)}
+                          onChange={(event) =>
+                            setSearchTerm(event.target.value)
+                          }
                           placeholder="Search chats"
                         />
                       </label>
                       <div className="recent-panel__actions">
-                        <ImportButton onImportChats={onImportChats} onToast={onToast} />
-                        <ExportButton currentChat={currentChat} allChats={allChats} />
+                        <ImportButton
+                          onImportChats={onImportChats}
+                          onToast={onToast}
+                        />
+                        <ExportButton
+                          currentChat={currentChat}
+                          allChats={allChats}
+                        />
                       </div>
                     </div>
                   </div>

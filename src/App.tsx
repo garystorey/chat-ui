@@ -22,9 +22,10 @@ import type {
   ChatSummary,
   ConnectionStatus,
   Message,
+  ToastItem,
+  ToastType,
   UserInputSendPayload,
 } from "./types";
-import type { ToastItem, ToastType } from "./components/Toast";
 import {
   useConnectionListeners,
   useTheme,
@@ -428,11 +429,7 @@ const App = () => {
     cancelPendingResponse();
     archiveCurrentConversation();
     resetChatState();
-  }, [
-    archiveCurrentConversation,
-    cancelPendingResponse,
-    resetChatState,
-  ]);
+  }, [archiveCurrentConversation, cancelPendingResponse, resetChatState]);
 
   const handleSelectChat = useCallback(
     (chatId: string) => {
@@ -489,11 +486,7 @@ const App = () => {
         resetChatState();
       }
     },
-    [
-      activeChatId,
-      cancelPendingResponse,
-      resetChatState,
-    ],
+    [activeChatId, cancelPendingResponse, resetChatState],
   );
 
   const handleImportChats = useCallback((importedChats: ChatSummary[]) => {

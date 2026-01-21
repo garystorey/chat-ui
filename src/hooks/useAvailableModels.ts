@@ -102,9 +102,9 @@ const useAvailableModels = ({
         }
 
         const models = Array.isArray((data as { data?: unknown }).data)
-          ? ((data as { data: Array<{ id?: unknown }> }).data
+          ? (data as { data: Array<{ id?: unknown }> }).data
               .map((model) => model?.id)
-              .filter((id): id is string => typeof id === "string"))
+              .filter((id): id is string => typeof id === "string")
           : [];
 
         if (!models.length) {
@@ -146,7 +146,13 @@ const useAvailableModels = ({
       cancelled = true;
       abortController.abort();
     };
-  }, [connectionStatus, refreshKey, setAvailableModels, setIsLoadingModels, setSelectedModel]);
+  }, [
+    connectionStatus,
+    refreshKey,
+    setAvailableModels,
+    setIsLoadingModels,
+    setSelectedModel,
+  ]);
 };
 
 export default useAvailableModels;

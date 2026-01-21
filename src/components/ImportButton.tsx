@@ -1,12 +1,16 @@
-import { useRef } from 'react';
-import type { ChatSummary } from '../types';
-import { importChatsFromFile } from '../utils';
-import type { ToastType } from "./Toast";
-import './ImportButton.css';
+import { useRef } from "react";
+import type { ChatSummary, ToastType } from "../types";
+import { importChatsFromFile } from "../utils";
+
+import "./ImportButton.css";
 
 interface ImportButtonProps {
   onImportChats: (chats: ChatSummary[]) => void;
-  onToast: (toast: { type: ToastType; message: string; duration?: number }) => void;
+  onToast: (toast: {
+    type: ToastType;
+    message: string;
+    duration?: number;
+  }) => void;
 }
 
 function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
@@ -16,7 +20,9 @@ function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -45,7 +51,7 @@ function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
       });
     }
 
-    event.target.value = '';
+    event.target.value = "";
   };
 
   return (
@@ -79,7 +85,7 @@ function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
         type="file"
         accept=".json"
         onChange={handleFileChange}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         aria-label="Import chats file"
       />
     </div>

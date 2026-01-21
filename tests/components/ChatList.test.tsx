@@ -1,7 +1,7 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
-import ChatList from '../../src/components/ChatList';
-import type { PreviewChat } from '../../src/types';
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import ChatList from "../../src/components/ChatList";
+import type { PreviewChat } from "../../src/types";
 
 afterEach(() => {
   cleanup();
@@ -13,8 +13,8 @@ const buildChat = (id: number): PreviewChat => ({
   preview: `Preview ${id}`,
 });
 
-describe('ChatList', () => {
-  it('renders a chat item for each provided chat', () => {
+describe("ChatList", () => {
+  it("renders a chat item for each provided chat", () => {
     const chats = [buildChat(1), buildChat(2)];
 
     render(
@@ -23,27 +23,27 @@ describe('ChatList', () => {
         activeChatId={null}
         onSelectChat={vi.fn()}
         onRemoveChat={vi.fn()}
-      />
+      />,
     );
 
-    expect(screen.queryByText('No chats found')).toBeNull();
-    expect(screen.getAllByRole('listitem')).toHaveLength(chats.length);
+    expect(screen.queryByText("No chats found")).toBeNull();
+    expect(screen.getAllByRole("listitem")).toHaveLength(chats.length);
     chats.forEach((chat) => {
       expect(screen.getByText(chat.title)).toBeInTheDocument();
       expect(screen.getByText(chat.preview)).toBeInTheDocument();
     });
   });
 
-  it('renders the empty state when there are no chats', () => {
+  it("renders the empty state when there are no chats", () => {
     render(
       <ChatList
         chats={[]}
         activeChatId={null}
         onSelectChat={vi.fn()}
         onRemoveChat={vi.fn()}
-      />
+      />,
     );
 
-    expect(screen.getByText('No chats found')).toBeInTheDocument();
+    expect(screen.getByText("No chats found")).toBeInTheDocument();
   });
 });

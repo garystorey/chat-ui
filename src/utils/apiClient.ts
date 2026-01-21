@@ -4,21 +4,21 @@ import { buildRequest, parseJson, isJsonLike, ApiError } from "./request";
 const parseSseEvents = <TMessage>(
   chunk: string,
   flush: boolean,
-  handleEvent: (data: string) => boolean
+  handleEvent: (data: string) => boolean,
 ) => {
-  const normalized = chunk.replace(/\r\n/g, '\n');
-  const segments = normalized.split('\n\n');
-  const remainder = flush ? '' : segments.pop() ?? '';
+  const normalized = chunk.replace(/\r\n/g, "\n");
+  const segments = normalized.split("\n\n");
+  const remainder = flush ? "" : (segments.pop() ?? "");
 
   for (const segment of segments) {
-    const lines = segment.split('\n');
+    const lines = segment.split("\n");
     const dataLines: string[] = [];
     for (const line of lines) {
-      if (!line || line.startsWith(':')) {
+      if (!line || line.startsWith(":")) {
         continue;
       }
-      if (line.startsWith('data:')) {
-        dataLines.push(line.replace(/^data:\s*/, ''));
+      if (line.startsWith("data:")) {
+        dataLines.push(line.replace(/^data:\s*/, ""));
       }
     }
 
@@ -26,10 +26,10 @@ const parseSseEvents = <TMessage>(
       continue;
     }
 
-    const data = dataLines.join('\n');
+    const data = dataLines.join("\n");
     const shouldStop = handleEvent(data);
     if (shouldStop) {
-      return { remainder: '', shouldStop: true };
+      return { remainder: "", shouldStop: true };
     }
   }
 
@@ -38,7 +38,7 @@ const parseSseEvents = <TMessage>(
 
 export async function apiStreamRequest<TMessage, TResponse>({
   path,
-  method = 'GET',
+  method = "GET",
   body,
   headers,
   signal,
@@ -51,7 +51,7 @@ export async function apiStreamRequest<TMessage, TResponse>({
     method,
     body,
     headers: {
-      Accept: 'text/event-stream',
+      Accept: "text/event-stream",
       ...headers,
     },
     signal,
@@ -69,34 +69,35 @@ export async function apiStreamRequest<TMessage, TResponse>({
     const message =
       (errorData &&
       isJsonLike(errorData) &&
-      'message' in errorData &&
-      typeof (errorData as Record<string, unknown>).message === 'string'
+      "message" in errorData &&
+      typeof (errorData as Record<string, unknown>).message === "string"
         ? (errorData as Record<string, string>).message
-        : response.statusText) || 'Request failed';
+        : response.statusText) || "Request failed";
 
     throw new ApiError(message, response.status, errorData);
   }
 
-  const contentType = response.headers.get('content-type') ?? '';
+  const contentType = response.headers.get("content-type") ?? "";
 
-  if (!response.body || !contentType.includes('text/event-stream')) {
+  if (!response.body || !contentType.includes("text/event-stream")) {
     const data = await parseJson(response);
     return data as TResponse;
   }
 
   const reader = response.body.getReader();
-  const decoder = new TextDecoder('utf-8');
+  const decoder = new TextDecoder("utf-8");
   const messages: TMessage[] = [];
-  let buffer = '';
+  let buffer = "";
   let shouldStop = false;
-  const parse = parseMessage ?? ((data: string) => JSON.parse(data) as TMessage);
+  const parse =
+    parseMessage ?? ((data: string) => JSON.parse(data) as TMessage);
 
   while (!shouldStop) {
     const { value, done } = await reader.read();
     buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
 
     const result = parseSseEvents<TMessage>(buffer, done, (data) => {
-      if (data === '[DONE]') {
+      if (data === "[DONE]") {
         shouldStop = true;
         return true;
       }
@@ -105,7 +106,7 @@ export async function apiStreamRequest<TMessage, TResponse>({
         messages.push(message);
         onMessage?.(message);
       } catch (error) {
-        console.error('Failed to parse stream message', error);
+        console.error("Failed to parse stream message", error);
       }
       return false;
     });

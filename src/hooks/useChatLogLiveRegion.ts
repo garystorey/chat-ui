@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Message } from '../types';
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Message } from "../types";
 
-type LiveRegionMode = 'polite' | 'off';
+type LiveRegionMode = "polite" | "off";
 
 type ChatLogLiveRegionOptions = {
   messages: Message[];
@@ -10,13 +10,13 @@ type ChatLogLiveRegionOptions = {
 
 type ChatLogLiveRegionResult = {
   liveMode: LiveRegionMode;
-  ariaRelevant: 'additions text';
+  ariaRelevant: "additions text";
   ariaAtomic: boolean;
 };
 
 const getLatestBotMessage = (messages: Message[]) => {
   for (let i = messages.length - 1; i >= 0; i -= 1) {
-    if (messages[i].sender === 'bot') {
+    if (messages[i].sender === "bot") {
       return messages[i];
     }
   }
@@ -27,54 +27,69 @@ const useChatLogLiveRegion = ({
   messages,
   isResponding,
 }: ChatLogLiveRegionOptions): ChatLogLiveRegionResult => {
-  const [liveMode, setLiveMode] = useState<LiveRegionMode>('polite');
-  const lastAnnouncedContentRef = useRef('');
+  const [liveMode, setLiveMode] = useState<LiveRegionMode>("polite");
+  const lastAnnouncedContentRef = useRef("");
   const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     const latestBotMessage = getLatestBotMessage(messages);
-    const latestContent = latestBotMessage?.content ?? '';
+    const latestContent = latestBotMessage?.content ?? "";
 
     if (!isResponding) {
       lastAnnouncedContentRef.current = latestContent;
-      if (rafIdRef.current !== null && typeof cancelAnimationFrame === 'function') {
+      if (
+        rafIdRef.current !== null &&
+        typeof cancelAnimationFrame === "function"
+      ) {
         cancelAnimationFrame(rafIdRef.current);
       }
-      setLiveMode('polite');
+      setLiveMode("polite");
       return;
     }
 
-    if (latestContent === lastAnnouncedContentRef.current || latestContent.length === 0) {
+    if (
+      latestContent === lastAnnouncedContentRef.current ||
+      latestContent.length === 0
+    ) {
       return;
     }
 
     lastAnnouncedContentRef.current = latestContent;
-    setLiveMode('off');
+    setLiveMode("off");
 
-    if (rafIdRef.current !== null && typeof cancelAnimationFrame === 'function') {
+    if (
+      rafIdRef.current !== null &&
+      typeof cancelAnimationFrame === "function"
+    ) {
       cancelAnimationFrame(rafIdRef.current);
     }
 
-    if (typeof requestAnimationFrame === 'function') {
+    if (typeof requestAnimationFrame === "function") {
       rafIdRef.current = requestAnimationFrame(() => {
         rafIdRef.current = null;
-        setLiveMode('polite');
+        setLiveMode("polite");
       });
     } else {
-      setLiveMode('polite');
+      setLiveMode("polite");
     }
   }, [isResponding, messages]);
 
-  useEffect(() => () => {
-    if (rafIdRef.current !== null && typeof cancelAnimationFrame === 'function') {
-      cancelAnimationFrame(rafIdRef.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (
+        rafIdRef.current !== null &&
+        typeof cancelAnimationFrame === "function"
+      ) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    },
+    [],
+  );
 
   return useMemo(
     () => ({
       liveMode,
-      ariaRelevant: 'additions text',
+      ariaRelevant: "additions text",
       ariaAtomic: false,
     }),
     [liveMode],

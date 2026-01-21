@@ -1,13 +1,5 @@
+import { ToastItem, ToastType } from "../types";
 import "./Toast.css";
-
-export type ToastType = "success" | "error" | "warning" | "info";
-
-export type ToastItem = {
-  id: string;
-  message: string;
-  type: ToastType;
-  title?: string;
-};
 
 type ToastStackProps = {
   toasts: ToastItem[];
@@ -22,7 +14,12 @@ const toastLabelMap: Record<ToastType, string> = {
 };
 
 const ToastStack = ({ toasts, onDismiss }: ToastStackProps) => (
-  <div className="toast-stack" role="region" aria-live="polite" aria-label="Notifications">
+  <div
+    className="toast-stack"
+    role="region"
+    aria-live="polite"
+    aria-label="Notifications"
+  >
     {toasts.map((toast) => (
       <div
         key={toast.id}
@@ -31,7 +28,9 @@ const ToastStack = ({ toasts, onDismiss }: ToastStackProps) => (
         aria-label={toastLabelMap[toast.type]}
       >
         <div className="toast__body">
-          {toast.title ? <span className="toast__title">{toast.title}</span> : null}
+          {toast.title ? (
+            <span className="toast__title">{toast.title}</span>
+          ) : null}
           <span className="toast__message">{toast.message}</span>
         </div>
         <button
@@ -40,7 +39,7 @@ const ToastStack = ({ toasts, onDismiss }: ToastStackProps) => (
           onClick={() => onDismiss(toast.id)}
           aria-label={`Dismiss ${toastLabelMap[toast.type]} notification`}
         >
-          ×
+          &times;
         </button>
       </div>
     ))}

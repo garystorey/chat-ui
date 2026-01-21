@@ -20,11 +20,18 @@ export default function useChatCompletionStream() {
     mutate: sendChatCompletion,
     reset: resetChatCompletion,
     status: chatCompletionStatus,
-  } = useMutation<ChatCompletionResponse, ApiError, ChatCompletionMutationVariables>({
+  } = useMutation<
+    ChatCompletionResponse,
+    ApiError,
+    ChatCompletionMutationVariables
+  >({
     mutationKey: ["chatCompletion"],
     networkMode: "always",
     mutationFn: async ({ body, signal, onChunk }) => {
-      return apiStreamRequest<ChatCompletionStreamResponse, ChatCompletionResponse>({
+      return apiStreamRequest<
+        ChatCompletionStreamResponse,
+        ChatCompletionResponse
+      >({
         path: CHAT_COMPLETION_PATH,
         method: "POST",
         body,
@@ -37,7 +44,7 @@ export default function useChatCompletionStream() {
   const pendingRequestRef = useRef<AbortController | null>(null);
   const streamBufferRef = useRef("");
   const streamFlushTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
+    null,
   );
 
   const send = useCallback(
@@ -90,7 +97,9 @@ export default function useChatCompletionStream() {
           onChunk: (chunk: ChatCompletionStreamResponse) => {
             const contentDelta = chunk?.choices?.reduce((acc, choice) => {
               if (choice.delta?.content) {
-                const deltaText = getChatCompletionContentText(choice.delta.content);
+                const deltaText = getChatCompletionContentText(
+                  choice.delta.content,
+                );
                 if (deltaText) {
                   return acc + deltaText;
                 }
@@ -136,10 +145,10 @@ export default function useChatCompletionStream() {
             clearStreamState();
             onSettled();
           },
-        }
+        },
       );
     },
-    [sendChatCompletion]
+    [sendChatCompletion],
   );
 
   return {

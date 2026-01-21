@@ -1,10 +1,10 @@
-import './ThinkingIndicator.css';
+import "./ThinkingIndicator.css";
 
 type ThinkingIndicatorProps = {
   label?: string;
 };
 
-const ThinkingIndicator = ({ label = 'Working' }: ThinkingIndicatorProps) => (
+const ThinkingIndicator = ({ label = "Working" }: ThinkingIndicatorProps) => (
   <div className="thinking-indicator" role="status" aria-live="polite">
     <span className="thinking-indicator__orbs" aria-hidden="true">
       <span className="thinking-indicator__orb" />

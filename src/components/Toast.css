@@ -17,7 +17,8 @@
   max-width: min(28rem, 92vw);
   padding: 0.9rem 1rem;
   border-radius: 0.85rem;
-  border: 1px solid color-mix(in oklab, var(--toast-accent) 42%, var(--panel-border) 58%);
+  border: 1px solid
+    color-mix(in oklab, var(--toast-accent) 42%, var(--panel-border) 58%);
   background: color-mix(in oklab, var(--toast-accent) 16%, var(--panel) 84%);
   color: var(--text);
   box-shadow: var(--shadow-soft);
@@ -68,7 +69,8 @@
   cursor: pointer;
   padding: 0.15rem;
   border-radius: 0.35rem;
-  transition: background var(--duration-sm) var(--ease-out),
+  transition:
+    background var(--duration-sm) var(--ease-out),
     color var(--duration-sm) var(--ease-out);
 }
 

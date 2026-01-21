@@ -1,23 +1,23 @@
-import { useAtom } from 'jotai';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { themeAtom, THEME_STORAGE_KEY } from '../atoms';
-import { ThemeId, ThemeMode } from '../types';
-import { THEME_OPTIONS } from '../config/themes';
-import useToggleBodyClass from './useToggleBodyClass';
+import { useAtom } from "jotai";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { themeAtom, THEME_STORAGE_KEY } from "../atoms";
+import { ThemeId, ThemeMode } from "../types";
+import { THEME_OPTIONS } from "../config/themes";
+import useToggleBodyClass from "./useToggleBodyClass";
 
-const prefersDarkSchemeQuery = '(prefers-color-scheme: dark)';
+const prefersDarkSchemeQuery = "(prefers-color-scheme: dark)";
 const getPreferredThemeMode = (mediaQuery: { matches: boolean }): ThemeMode =>
-  mediaQuery.matches ? 'dark' : 'light';
+  mediaQuery.matches ? "dark" : "light";
 
 const getNextThemeMode = (current: ThemeMode): ThemeMode =>
-  (current === 'light' ? 'dark' : 'light');
+  current === "light" ? "dark" : "light";
 
 const useTheme = () => {
   const [themePreference, setThemePreference] = useAtom(themeAtom);
   const hasUserPreference = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return undefined;
     }
 
@@ -48,18 +48,18 @@ const useTheme = () => {
       );
     };
 
-    mediaQueryList.addEventListener('change', handleChange);
+    mediaQueryList.addEventListener("change", handleChange);
 
     return () => {
-      mediaQueryList.removeEventListener('change', handleChange);
+      mediaQueryList.removeEventListener("change", handleChange);
     };
   }, [setThemePreference]);
 
-  useToggleBodyClass('light', themePreference.mode === 'light');
-  useToggleBodyClass('dark', themePreference.mode === 'dark');
+  useToggleBodyClass("light", themePreference.mode === "light");
+  useToggleBodyClass("dark", themePreference.mode === "dark");
 
   useEffect(() => {
-    if (typeof document === 'undefined') {
+    if (typeof document === "undefined") {
       return;
     }
 
@@ -67,12 +67,15 @@ const useTheme = () => {
   }, [themePreference.id]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
     hasUserPreference.current = true;
-    window.localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(themePreference));
+    window.localStorage.setItem(
+      THEME_STORAGE_KEY,
+      JSON.stringify(themePreference),
+    );
   }, [themePreference]);
 
   const toggleMode = useCallback(() => {
@@ -104,9 +107,14 @@ const useTheme = () => {
     [setThemePreference],
   );
 
-  const isLight = useMemo(() => themePreference.mode === 'light', [themePreference.mode]);
+  const isLight = useMemo(
+    () => themePreference.mode === "light",
+    [themePreference.mode],
+  );
   const activeTheme = useMemo(
-    () => THEME_OPTIONS.find((option) => option.id === themePreference.id) ?? THEME_OPTIONS[0],
+    () =>
+      THEME_OPTIONS.find((option) => option.id === themePreference.id) ??
+      THEME_OPTIONS[0],
     [themePreference.id],
   );
 

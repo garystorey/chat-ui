@@ -1,6 +1,6 @@
-import DOMPurify from 'dompurify';
-import hljs from 'highlight.js';
-import { marked } from 'marked';
+import DOMPurify from "dompurify";
+import hljs from "highlight.js";
+import { marked } from "marked";
 
 marked.setOptions({
   highlight(code: string, language?: string) {
@@ -11,7 +11,7 @@ marked.setOptions({
   },
   breaks: true,
   gfm: true,
-  langPrefix: 'hljs language-',
+  langPrefix: "hljs language-",
 } as any);
 
 export function renderMarkdown(text: string): string {

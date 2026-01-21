@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 const classUsageCounts = new Map<string, number>();
 
 const useToggleBodyClass = (className: string, active: boolean) => {
   useEffect(() => {
-    if (typeof document === 'undefined' || !active) {
+    if (typeof document === "undefined" || !active) {
       return;
     }
 

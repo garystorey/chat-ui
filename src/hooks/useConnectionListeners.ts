@@ -32,7 +32,9 @@ const useConnectionListeners = ({
         const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
         const isApiAvailable =
           response.ok || (response.status >= 400 && response.status < 600);
-        const nextStatus: ConnectionStatus = isApiAvailable ? "online" : "offline";
+        const nextStatus: ConnectionStatus = isApiAvailable
+          ? "online"
+          : "offline";
 
         setConnectionStatus(nextStatus);
 
@@ -55,7 +57,7 @@ const useConnectionListeners = ({
         return false;
       }
     },
-    [setConnectionStatus]
+    [setConnectionStatus],
   );
 
   useEffect(() => {
