@@ -9,7 +9,7 @@
   word-wrap: break-word;
   border: 1px solid var(--panel-border);
   animation: messageIn var(--duration-md) var(--ease-out) both;
-  background: color-mix(in oklab, var(--panel) 94%, var(--bg) 6%);
+  background-color: color-mix(in oklab, var(--panel) 94%, var(--bg) 6%);
   color: var(--text);
   box-shadow: var(--shadow-soft);
   position: relative;
@@ -31,7 +31,7 @@
 .message--bot {
   margin-right: auto;
   border-bottom-left-radius: 0.5rem;
-  background: var(--bot-msg-bg);
+  background-color: var(--bot-msg-bg);
   color: var(--bot-msg-text);
 }
 
@@ -67,7 +67,7 @@
   padding: 2.25rem 0.75rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--panel-border);
-  background: var(--code-surface);
+  background-color: var(--code-surface);
   color: var(--code-plain);
   position: relative;
 }
@@ -87,7 +87,7 @@
   padding: 0.4rem 0.55rem;
   border-radius: 6px;
   border: 1px solid var(--panel-border);
-  background: var(--panel-overlay-strong);
+  background-color: var(--panel-overlay-strong);
   color: var(--text);
   font-size: 0.85rem;
   min-width: 2.5rem;
@@ -105,7 +105,7 @@
 
 .message .copy-code-btn:hover,
 .message .copy-code-btn:focus-visible {
-  background: color-mix(in oklab, var(--accent) 14%, var(--panel) 86%);
+  background-color: color-mix(in oklab, var(--accent) 14%, var(--panel) 86%);
   color: color-mix(in oklab, var(--text) 94%, var(--panel-solid) 6%);
 }
 
@@ -115,12 +115,12 @@
 }
 
 .message .copy-code-btn[data-status="copied"] {
-  background: color-mix(in oklab, var(--accent) 20%, var(--panel) 80%);
+  background-color: color-mix(in oklab, var(--accent) 20%, var(--panel) 80%);
   border-color: color-mix(in oklab, var(--accent) 30%, var(--panel-border) 70%);
 }
 
 .message .copy-code-btn[data-status="error"] {
-  background: color-mix(in oklab, var(--status-error) 22%, var(--panel) 78%);
+  background-color: color-mix(in oklab, var(--status-error) 22%, var(--panel) 78%);
   border-color: color-mix(
     in oklab,
     var(--status-error) 30%,
