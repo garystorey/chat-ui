@@ -55,6 +55,9 @@ export const getChatCompletionContentText = (
     .join("");
 };
 
+export const stripAssistantArtifacts = (text: string) =>
+  text.replace(/\s*<(?:begin_of_box|end_of_box)>\s*/g, "");
+
 export const buildChatCompletionResponse = (
   chunks: ChatCompletionStreamResponse[],
 ): ChatCompletionResponse => {
@@ -106,7 +109,7 @@ export const extractAssistantReply = (response: ChatCompletionResponse) => {
   const content = getChatCompletionContentText(
     assistantChoice?.message?.content,
   );
-  return content.trim();
+  return stripAssistantArtifacts(content).trim();
 };
 
 const buildChatText = (

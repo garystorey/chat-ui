@@ -6,6 +6,7 @@ import {
   buildChatCompletionResponse,
   extractAssistantReply,
   getChatCompletionContentText,
+  stripAssistantArtifacts,
 } from "../utils";
 import type {
   ChatCompletionMutationVariables,
@@ -101,7 +102,7 @@ export default function useChatCompletionStream() {
                   choice.delta.content,
                 );
                 if (deltaText) {
-                  return acc + deltaText;
+                  return acc + stripAssistantArtifacts(deltaText);
                 }
               }
               return acc;
