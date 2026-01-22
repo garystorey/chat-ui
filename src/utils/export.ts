@@ -207,22 +207,21 @@ const normalizeChat = (chat: unknown): ChatSummary | null => {
   };
 };
 
-const normalizeChatsCollection = (data: unknown): ChatSummary[] => {
-  if (!Array.isArray(data)) return [];
+export const parseChatPayload = (data: unknown): ChatSummary[] => {
+  const singleChat = normalizeChat(data);
+  if (singleChat) return [singleChat];
 
-  return data.map(normalizeChat).filter(Boolean) as ChatSummary[];
-};
-
-const validateMultipleChatsJSON = (data: unknown): ChatSummary[] => {
   if (Array.isArray(data)) {
-    return normalizeChatsCollection(data);
+    return data.map(normalizeChat).filter(Boolean) as ChatSummary[];
   }
 
   if (typeof data !== "object" || data === null) return [];
-  const d = data as Record<string, unknown>;
+  const payload = data as Record<string, unknown>;
 
-  if (Array.isArray(d.chats)) {
-    return normalizeChatsCollection(d.chats);
+  if (Array.isArray(payload.chats)) {
+    return payload.chats
+      .map(normalizeChat)
+      .filter(Boolean) as ChatSummary[];
   }
 
   return [];
@@ -235,17 +234,9 @@ export const parseImportedJSON = (jsonString: string): ImportResult => {
   try {
     const data = JSON.parse(jsonString);
 
-    // Try to parse as single chat first
-    const singleChat = normalizeChat(data);
-    if (singleChat) {
-      chats.push(singleChat);
-      return { success: true, chats, errors };
-    }
-
-    // Try to parse as multiple chats
-    const multipleChats = validateMultipleChatsJSON(data);
-    if (multipleChats.length > 0) {
-      chats.push(...multipleChats);
+    const parsedChats = parseChatPayload(data);
+    if (parsedChats.length > 0) {
+      chats.push(...parsedChats);
       return { success: true, chats, errors };
     }
 
