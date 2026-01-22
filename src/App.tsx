@@ -190,26 +190,33 @@ const App = () => {
     previousConnectionStatusRef.current = connectionStatus;
   }, [connectionStatus, showToast]);
 
+  const persistChatHistory = useCallback(
+    (chatId: string | null, nextMessages: Message[], previewMessage?: Message) => {
+      if (!chatId) {
+        return;
+      }
+
+      setChatHistory((current) =>
+        upsertChatHistoryWithMessages(
+          current,
+          chatId,
+          nextMessages,
+          previewMessage,
+        ),
+      );
+    },
+    [setChatHistory],
+  );
+
   const updateActiveChat = useCallback(
     (
       nextMessages: Message[],
       chatId: string | null,
       previewMessage?: Message,
     ) => {
-      if (!chatId) {
-        return;
-      }
-
-      setChatHistory((current) => {
-        return upsertChatHistoryWithMessages(
-          current,
-          chatId,
-          nextMessages,
-          previewMessage,
-        );
-      });
+      persistChatHistory(chatId, nextMessages, previewMessage);
     },
-    [setChatHistory],
+    [persistChatHistory],
   );
 
   const updateAssistantMessageContent = useCallback(
@@ -254,10 +261,8 @@ const App = () => {
     const lastMessage = messages[messages.length - 1];
     const chatId = activeChatId ?? getId();
 
-    setChatHistory((current) =>
-      upsertChatHistoryWithMessages(current, chatId, messages, lastMessage),
-    );
-  }, [activeChatId, messages]);
+    persistChatHistory(chatId, messages, lastMessage);
+  }, [activeChatId, messages, persistChatHistory]);
 
   const handleSend = useCallback(
     async ({ text, model }: UserInputSendPayload) => {
