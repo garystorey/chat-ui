@@ -113,14 +113,18 @@ const useAvailableModels = ({
         } else {
           const uniqueModels = Array.from(new Set(models));
           const loadedModelId = getLoadedModelId(data);
+          const nextModels =
+            loadedModelId && !uniqueModels.includes(loadedModelId)
+              ? [loadedModelId, ...uniqueModels]
+              : uniqueModels;
 
-          setAvailableModels(uniqueModels);
+          setAvailableModels(nextModels);
           setSelectedModel(() => {
-            if (loadedModelId && uniqueModels.includes(loadedModelId)) {
+            if (loadedModelId) {
               return loadedModelId;
             }
 
-            if (uniqueModels.includes(DEFAULT_SERVER_MODEL)) {
+            if (nextModels.includes(DEFAULT_SERVER_MODEL)) {
               return DEFAULT_SERVER_MODEL;
             }
 
