@@ -15,6 +15,37 @@ import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
 import { Show } from ".";
 import "./UserInput.css";
 
+const useTranscriptValue = (initialValue: string) => {
+  const manualValueRef = useRef(initialValue);
+  const lastTranscriptRef = useRef("");
+  const applyingTranscriptRef = useRef(false);
+
+  const applyUserInput = useCallback((nextValue: string) => {
+    manualValueRef.current = trimTrailingTranscript(
+      nextValue,
+      lastTranscriptRef.current,
+    );
+    return nextValue;
+  }, []);
+
+  const applyTranscript = useCallback((transcript: string) => {
+    const combinedValue = combineValueWithTranscript(
+      manualValueRef.current,
+      transcript,
+    );
+    lastTranscriptRef.current = transcript;
+    return combinedValue;
+  }, []);
+
+  return {
+    manualValueRef,
+    lastTranscriptRef,
+    applyingTranscriptRef,
+    applyUserInput,
+    applyTranscript,
+  };
+};
+
 type UserInputProps = {
   value: string;
   onChange: (value: string) => void;
@@ -45,9 +76,13 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     forwardedRef,
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const manualValueRef = useRef(value);
-    const lastTranscriptRef = useRef("");
-    const applyingTranscriptRef = useRef(false);
+    const {
+      manualValueRef,
+      lastTranscriptRef,
+      applyingTranscriptRef,
+      applyUserInput,
+      applyTranscript,
+    } = useTranscriptValue(value);
     const wasRecordingRef = useRef(false);
 
     const {
@@ -126,14 +161,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
 
     const handleChange = useCallback(
       (event: ChangeEvent<HTMLTextAreaElement>) => {
-        const nextValue = event.target.value;
-        manualValueRef.current = trimTrailingTranscript(
-          nextValue,
-          lastTranscriptRef.current,
-        );
+        const nextValue = applyUserInput(event.target.value);
         onChange(nextValue);
       },
-      [onChange],
+      [applyUserInput, onChange],
     );
 
     const handleToggleRecording = useCallback(() => {
@@ -185,12 +216,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         return;
       }
 
-      const combinedValue = combineValueWithTranscript(
-        manualValueRef.current,
-        transcript,
-      );
-
-      lastTranscriptRef.current = transcript;
+      const combinedValue = applyTranscript(transcript);
 
       if (combinedValue === value) {
         return;
@@ -198,7 +224,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
 
       applyingTranscriptRef.current = true;
       onChange(combinedValue);
-    }, [isRecording, onChange, transcript, value]);
+    }, [applyTranscript, isRecording, onChange, transcript, value]);
 
     useEffect(() => {
       const wasRecording = wasRecordingRef.current;
@@ -213,10 +239,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         return;
       }
 
-      const composedText = combineValueWithTranscript(
-        manualValueRef.current,
-        transcript,
-      ).trim();
+      const composedText = applyTranscript(transcript).trim();
 
       if (!composedText) {
         return;
@@ -227,6 +250,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       autoSendOnSpeechEnd,
       isRecording,
       isResponding,
+      applyTranscript,
       sendMessage,
       transcript,
     ]);
