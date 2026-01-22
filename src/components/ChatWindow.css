@@ -3,7 +3,7 @@
   max-width: var(--max-chat-width);
   margin: 0 auto;
   border-radius: 1rem;
-  background: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
+  background-color: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
   display: flex;
   flex-direction: column;
   overflow: hidden;

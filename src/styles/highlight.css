@@ -1,6 +1,6 @@
 /* Theme-aware syntax highlighting that follows the current UI colors */
 .hljs {
-  background: transparent;
+  background-color: transparent;
   color: var(--code-plain);
 }
 

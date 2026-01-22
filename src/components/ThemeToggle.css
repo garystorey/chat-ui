@@ -23,7 +23,7 @@
   padding: 0.55rem 0.75rem;
   border-radius: 0.75rem;
   border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
-  background: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
+  background-color: color-mix(in oklab, var(--panel-solid) 92%, transparent 8%);
   color: var(--text);
   font: inherit;
   min-height: 2.6rem;
@@ -39,7 +39,7 @@
 }
 
 .theme-toggle__mode {
-  background: color-mix(in oklab, var(--panel) 92%, transparent 8%);
+  background-color: color-mix(in oklab, var(--panel) 92%, transparent 8%);
   color: var(--text);
   border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
   font-size: 1.05rem;
@@ -57,7 +57,7 @@
 }
 
 .theme-toggle__mode:hover {
-  background: color-mix(in oklab, var(--accent) 12%, var(--panel) 88%);
+  background-color: color-mix(in oklab, var(--accent) 12%, var(--panel) 88%);
   transform: translateY(-1px);
 }
 

@@ -24,7 +24,7 @@
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: currentColor;
+  background-color: currentColor;
   opacity: 0.3;
   animation: thinking-indicator-bounce 1.2s infinite ease-in-out;
 }

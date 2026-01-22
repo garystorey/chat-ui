@@ -121,7 +121,7 @@ a {
 body {
   margin: 0;
   font-family: var(--font-body);
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--text);
   display: flex;
   flex-direction: column;
@@ -890,7 +890,7 @@ button {
   position: absolute;
   left: 1rem;
   top: -40px;
-  background: var(--panel-solid);
+  background-color: var(--panel-solid);
   color: var(--text);
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
