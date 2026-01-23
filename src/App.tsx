@@ -208,17 +208,6 @@ const App = () => {
     [setChatHistory],
   );
 
-  const updateActiveChat = useCallback(
-    (
-      nextMessages: Message[],
-      chatId: string | null,
-      previewMessage?: Message,
-    ) => {
-      persistChatHistory(chatId, nextMessages, previewMessage);
-    },
-    [persistChatHistory],
-  );
-
   const updateAssistantMessageContent = useCallback(
     (
       assistantMessageId: string,
@@ -244,13 +233,13 @@ const App = () => {
         });
 
         if (previewMessage) {
-          updateActiveChat(next, chatId, previewMessage);
+          persistChatHistory(chatId, next, previewMessage);
         }
 
         return next;
       });
     },
-    [setMessages, updateActiveChat],
+    [persistChatHistory, setMessages],
   );
 
   const archiveCurrentConversation = useCallback(() => {
@@ -327,7 +316,7 @@ const App = () => {
 
       setMessages((current) => {
         const next = [...current, userMessage, assistantMessage];
-        updateActiveChat(next, chatId, userMessage);
+        persistChatHistory(chatId, next, userMessage);
         return next;
       });
 
@@ -370,7 +359,6 @@ const App = () => {
       setActiveChatId,
       setMessages,
       selectedModel,
-      updateActiveChat,
       updateAssistantMessageContent,
       getErrorMessage,
       showToast,
