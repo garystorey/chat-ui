@@ -61,44 +61,15 @@ const Panel = ({
   </Component>
 );
 
-type RecentPanelHeaderProps = {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  onImportChats: (chats: ChatSummary[]) => void;
-  onToast: (toast: { type: ToastType; message: string; duration?: number }) => void;
-  currentChat: ChatSummary | null;
-  allChats: ChatSummary[];
+type PanelHeaderProps = {
+  title: string;
+  children?: ReactNode;
 };
 
-const RecentPanelHeader = ({
-  searchTerm,
-  onSearchChange,
-  onImportChats,
-  onToast,
-  currentChat,
-  allChats,
-}: RecentPanelHeaderProps) => (
+const PanelHeader = ({ title, children }: PanelHeaderProps) => (
   <div className="recent-panel__header">
-    <h2 className="recent-panel__title">Recent chats</h2>
-    <div className="recent-panel__controls">
-      <label className="recent-panel__search" htmlFor="recentSearch">
-        <span className="recent-panel__search-icon" aria-hidden="true">
-          🔍
-        </span>
-        <span className="sr-only">Search chats</span>
-        <input
-          id="recentSearch"
-          type="search"
-          value={searchTerm}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search chats"
-        />
-      </label>
-      <div className="recent-panel__actions">
-        <ImportButton onImportChats={onImportChats} onToast={onToast} />
-        <ExportButton currentChat={currentChat} allChats={allChats} />
-      </div>
-    </div>
+    <h2 className="recent-panel__title">{title}</h2>
+    {children ? <div className="recent-panel__controls">{children}</div> : null}
   </div>
 );
 
@@ -160,6 +131,7 @@ const HomePanels = ({
       <div className="home-panels__body">
         <Show when={activeTab === "suggestions"}>
           <Panel panelId={suggestionsTab.panelId} tabId={suggestionsTab.tabId}>
+            <PanelHeader title="Suggestions" />
             <Suggestions
               suggestions={suggestionItems}
               classes={["suggestions", "home-panels__suggestions"]}
@@ -173,14 +145,25 @@ const HomePanels = ({
             panelId={recentTab.panelId}
             tabId={recentTab.tabId}
           >
-            <RecentPanelHeader
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              onImportChats={onImportChats}
-              onToast={onToast}
-              currentChat={currentChat}
-              allChats={allChats}
-            />
+            <PanelHeader title="Recent chats">
+              <label className="recent-panel__search" htmlFor="recentSearch">
+                <span className="recent-panel__search-icon" aria-hidden="true">
+                  🔍
+                </span>
+                <span className="sr-only">Search chats</span>
+                <input
+                  id="recentSearch"
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search chats"
+                />
+              </label>
+              <div className="recent-panel__actions">
+                <ImportButton onImportChats={onImportChats} onToast={onToast} />
+                <ExportButton currentChat={currentChat} allChats={allChats} />
+              </div>
+            </PanelHeader>
             <div className="recent-panel__list">
               <ChatList
                 chats={filteredChats}
