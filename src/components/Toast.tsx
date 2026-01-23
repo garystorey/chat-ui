@@ -28,9 +28,6 @@ const ToastStack = ({ toasts, onDismiss }: ToastStackProps) => (
         aria-label={toastLabelMap[toast.type]}
       >
         <div className="toast__body">
-          {toast.title ? (
-            <span className="toast__title">{toast.title}</span>
-          ) : null}
           <span className="toast__message">{toast.message}</span>
         </div>
         <button
