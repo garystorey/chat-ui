@@ -36,7 +36,7 @@ function ExportButton({ currentChat, allChats }: ExportButtonProps) {
 
   const handleExportAll = () => {
     if (allChats.length === 0) return;
-    exportAllChats(allChats, "json");
+    exportAllChats(allChats);
     setIsOpen(false);
   };
 

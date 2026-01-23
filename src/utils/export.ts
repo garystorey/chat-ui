@@ -67,9 +67,10 @@ export const exportChatAsJSON = (chat: ChatSummary): string => {
 };
 
 export const exportAllChatsAsJSON = (chats: ChatSummary[]): string => {
+  const exportedAt = Date.now();
   const exportData = {
-    exportedAt: Date.now(),
-    exportedAtFormatted: formatDate(Date.now()),
+    exportedAt,
+    exportedAtFormatted: formatDate(exportedAt),
     totalChats: chats.length,
     chats: chats.map(serializeChat),
   };
@@ -114,38 +115,22 @@ export const downloadFile = (
 };
 
 export const exportChat = (chat: ChatSummary, format: ExportFormat): void => {
-  let content: string;
-
-  switch (format) {
-    case "markdown":
-      content = exportChatAsMarkdown(chat);
-      break;
-    case "json":
-      content = exportChatAsJSON(chat);
-      break;
-    case "text":
-      content = exportChatAsText(chat);
-      break;
-    default:
-      throw new Error(`Unknown export format: ${format}`);
-  }
+  const formatters: Record<ExportFormat, (data: ChatSummary) => string> = {
+    markdown: exportChatAsMarkdown,
+    json: exportChatAsJSON,
+    text: exportChatAsText,
+  };
+  const formatter = formatters[format];
+  const content = formatter(chat);
 
   downloadFile(content, chat.title, format);
 };
 
-export const exportAllChats = (
-  chats: ChatSummary[],
-  format: ExportFormat = "json",
-): void => {
+export const exportAllChats = (chats: ChatSummary[]): void => {
   const timestamp = formatDate(Date.now()).replace(/[^a-z0-9]/gi, "-");
   const filename = `chat-history-${timestamp}`;
-
-  if (format === "json") {
-    const content = exportAllChatsAsJSON(chats);
-    downloadFile(content, filename, "json");
-  } else {
-    throw new Error("Only JSON format is supported for exporting all chats");
-  }
+  const content = exportAllChatsAsJSON(chats);
+  downloadFile(content, filename, "json");
 };
 
 // Import functionality

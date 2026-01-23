@@ -1,4 +1,4 @@
-import { ComponentProps, memo, useCallback, useId } from "react";
+import { ComponentProps, memo, useId } from "react";
 import Heading from "./Heading";
 import "./Card.css";
 
@@ -21,10 +21,6 @@ function Card({
 }: CardProps) {
   const titleId = useId();
   const descriptionId = useId();
-
-  const handleClick = useCallback(() => {
-    onSelect();
-  }, [onSelect]);
 
   const classes = `suggestion-card ${className}`.trim();
 
@@ -53,7 +49,7 @@ function Card({
       <button
         type="button"
         className="suggestion-card__cta"
-        onClick={handleClick}
+        onClick={onSelect}
         aria-describedby={`${titleId} ${descriptionId}`}
       >
         {label}
