@@ -155,7 +155,6 @@ export type ToastItem = {
   id: string;
   message: string;
   type: ToastType;
-  title?: string;
 };
 
 export type HomeTab = {
