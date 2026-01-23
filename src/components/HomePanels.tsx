@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import type { ChatSummary, HomeTab, Suggestion, ToastType } from "../types";
 import ExportButton from "./ExportButton";
 import ImportButton from "./ImportButton";
@@ -37,6 +37,70 @@ const tabs: HomeTab[] = [
     panelId: "panel-recent",
   },
 ];
+
+const suggestionsTab = tabs[0];
+const recentTab = tabs[1];
+
+type PanelProps = {
+  panelId: string;
+  tabId: string;
+  className?: string;
+  as?: "div" | "section";
+  children: ReactNode;
+};
+
+const Panel = ({
+  panelId,
+  tabId,
+  className,
+  as: Component = "div",
+  children,
+}: PanelProps) => (
+  <Component role="tabpanel" id={panelId} aria-labelledby={tabId} className={className}>
+    {children}
+  </Component>
+);
+
+type RecentPanelHeaderProps = {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  onImportChats: (chats: ChatSummary[]) => void;
+  onToast: (toast: { type: ToastType; message: string; duration?: number }) => void;
+  currentChat: ChatSummary | null;
+  allChats: ChatSummary[];
+};
+
+const RecentPanelHeader = ({
+  searchTerm,
+  onSearchChange,
+  onImportChats,
+  onToast,
+  currentChat,
+  allChats,
+}: RecentPanelHeaderProps) => (
+  <div className="recent-panel__header">
+    <h2 className="recent-panel__title">Recent chats</h2>
+    <div className="recent-panel__controls">
+      <label className="recent-panel__search" htmlFor="recentSearch">
+        <span className="recent-panel__search-icon" aria-hidden="true">
+          🔍
+        </span>
+        <span className="sr-only">Search chats</span>
+        <input
+          id="recentSearch"
+          type="search"
+          value={searchTerm}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder="Search chats"
+        />
+      </label>
+      <div className="recent-panel__actions">
+        <ImportButton onImportChats={onImportChats} onToast={onToast} />
+        <ExportButton currentChat={currentChat} allChats={allChats} />
+      </div>
+    </div>
+  </div>
+);
 
 const HomePanels = ({
   suggestionItems,
@@ -94,80 +158,39 @@ const HomePanels = ({
         />
       </div>
       <div className="home-panels__body">
-        <List<HomeTab>
-          className="home-panels__panel-list"
-          items={tabs}
-          keyfield="panelId"
-          as={(tab) => (
-            <Show when={activeTab === tab.id}>
-              <Show when={tab.id === "suggestions"}>
-                <div
-                  role="tabpanel"
-                  id={tab.panelId}
-                  aria-labelledby={tab.tabId}
-                >
-                  <Suggestions
-                    suggestions={suggestionItems}
-                    classes={["suggestions", "home-panels__suggestions"]}
-                  />
-                </div>
-              </Show>
-              <Show when={tab.id === "recent"}>
-                <section
-                  className="recent-panel"
-                  role="tabpanel"
-                  id={tab.panelId}
-                  aria-labelledby={tab.tabId}
-                >
-                  <div className="recent-panel__header">
-                    <h2 className="recent-panel__title">Recent chats</h2>
-                    <div className="recent-panel__controls">
-                      <label
-                        className="recent-panel__search"
-                        htmlFor="recentSearch"
-                      >
-                        <span
-                          className="recent-panel__search-icon"
-                          aria-hidden="true"
-                        >
-                          🔍
-                        </span>
-                        <span className="sr-only">Search chats</span>
-                        <input
-                          id="recentSearch"
-                          type="search"
-                          value={searchTerm}
-                          onChange={(event) =>
-                            setSearchTerm(event.target.value)
-                          }
-                          placeholder="Search chats"
-                        />
-                      </label>
-                      <div className="recent-panel__actions">
-                        <ImportButton
-                          onImportChats={onImportChats}
-                          onToast={onToast}
-                        />
-                        <ExportButton
-                          currentChat={currentChat}
-                          allChats={allChats}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="recent-panel__list">
-                    <ChatList
-                      chats={filteredChats}
-                      activeChatId={activeChatId}
-                      onSelectChat={onSelectChat}
-                      onRemoveChat={onRemoveChat}
-                    />
-                  </div>
-                </section>
-              </Show>
-            </Show>
-          )}
-        />
+        <Show when={activeTab === "suggestions"}>
+          <Panel panelId={suggestionsTab.panelId} tabId={suggestionsTab.tabId}>
+            <Suggestions
+              suggestions={suggestionItems}
+              classes={["suggestions", "home-panels__suggestions"]}
+            />
+          </Panel>
+        </Show>
+        <Show when={activeTab === "recent"}>
+          <Panel
+            as="section"
+            className="recent-panel"
+            panelId={recentTab.panelId}
+            tabId={recentTab.tabId}
+          >
+            <RecentPanelHeader
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onImportChats={onImportChats}
+              onToast={onToast}
+              currentChat={currentChat}
+              allChats={allChats}
+            />
+            <div className="recent-panel__list">
+              <ChatList
+                chats={filteredChats}
+                activeChatId={activeChatId}
+                onSelectChat={onSelectChat}
+                onRemoveChat={onRemoveChat}
+              />
+            </div>
+          </Panel>
+        </Show>
       </div>
     </section>
   );
