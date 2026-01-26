@@ -13,6 +13,7 @@ import {
 import { ImageIcon, MicIcon, SendIcon, StopIcon } from "./icons";
 import {
   combineValueWithTranscript,
+  formatErrorMessage,
   getId,
   trimTrailingTranscript,
 } from "../utils";
@@ -345,10 +346,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           } catch (error) {
             onToast?.({
               type: "error",
-              message:
-                error instanceof Error
-                  ? error.message
-                  : "Unable to attach image.",
+              message: formatErrorMessage(error, "Unable to attach image."),
             });
           }
         }

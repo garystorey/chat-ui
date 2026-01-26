@@ -53,6 +53,8 @@
   font-size: 0.9rem;
   line-height: 1.4;
   color: color-mix(in oklab, var(--text) 92%, transparent);
+  white-space: pre-line;
+  word-break: break-word;
 }
 
 .toast__dismiss {
