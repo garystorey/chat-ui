@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { ChatSummary, ToastType } from "../types";
-import { importChatsFromFile } from "../utils";
+import { formatErrorMessage, importChatsFromFile } from "../utils";
 
 import "./ImportButton.css";
 
@@ -46,7 +46,7 @@ function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
     } catch (error) {
       onToast({
         type: "error",
-        message: `Import failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        message: formatErrorMessage(error, "Import failed."),
         duration: 4000,
       });
     }
