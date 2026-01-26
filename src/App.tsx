@@ -38,6 +38,7 @@ import {
 import {
   cloneMessages,
   createChatRecordFromMessages,
+  formatErrorMessage,
   getId,
   sortChatsByUpdatedAt,
   toChatCompletionMessages,
@@ -124,18 +125,6 @@ const App = () => {
     };
   }, []);
 
-  const getErrorMessage = useCallback((error: unknown, fallback: string) => {
-    if (error instanceof Error && error.message) {
-      return error.message;
-    }
-
-    if (typeof error === "string" && error.trim().length > 0) {
-      return error;
-    }
-
-    return fallback;
-  }, []);
-
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
   usePersistChatHistory(chatHistory, setChatHistory);
@@ -162,7 +151,7 @@ const App = () => {
     onError: (error) => {
       showToast({
         type: "warning",
-        message: getErrorMessage(error, "Unable to load models."),
+        message: formatErrorMessage(error, "Unable to load models."),
       });
     },
   });
@@ -309,7 +298,7 @@ const App = () => {
         console.error("Chat completion request failed", error);
         showToast({
           type: "error",
-          message: getErrorMessage(error, "Unable to complete the response."),
+          message: formatErrorMessage(error, "Unable to complete the response."),
         });
         updateAssistantMessageContent(
           assistantMessageId,
@@ -364,7 +353,6 @@ const App = () => {
       setMessages,
       selectedModel,
       updateAssistantMessageContent,
-      getErrorMessage,
       showToast,
     ],
   );
