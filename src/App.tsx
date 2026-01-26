@@ -254,8 +254,11 @@ const App = () => {
   }, [activeChatId, messages, persistChatHistory]);
 
   const handleSend = useCallback(
-    async ({ text, model }: UserInputSendPayload) => {
-      if (!text?.trim()) {
+    async ({ text, attachments, model }: UserInputSendPayload) => {
+      const trimmedText = text?.trim() ?? "";
+      const hasAttachments = (attachments ?? []).length > 0;
+
+      if (!trimmedText && !hasAttachments) {
         return false;
       }
 
@@ -290,7 +293,8 @@ const App = () => {
       const userMessage: Message = {
         id: getId(),
         sender: "user",
-        content: text,
+        content: trimmedText,
+        attachments: attachments?.length ? attachments : undefined,
       };
 
       const assistantMessageId = getId();

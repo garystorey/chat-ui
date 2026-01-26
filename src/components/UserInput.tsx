@@ -7,10 +7,16 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
+  type DragEvent,
 } from "react";
-import { MicIcon, SendIcon, StopIcon } from "./icons";
-import { combineValueWithTranscript, trimTrailingTranscript } from "../utils";
-import { ToastType, UserInputSendPayload } from "../types";
+import { ImageIcon, MicIcon, SendIcon, StopIcon } from "./icons";
+import {
+  combineValueWithTranscript,
+  getId,
+  trimTrailingTranscript,
+} from "../utils";
+import { MessageAttachment, ToastType, UserInputSendPayload } from "../types";
 import { useAutoResizeTextarea, useSpeechRecognition } from "../hooks";
 import { Show } from ".";
 import "./UserInput.css";
@@ -61,6 +67,23 @@ type UserInputProps = {
   }) => void;
 };
 
+const MAX_IMAGE_ATTACHMENTS = 4;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+const readFileAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Unable to read image data"));
+      }
+    };
+    reader.onerror = () => reject(new Error("Unable to read image file"));
+    reader.readAsDataURL(file);
+  });
+
 const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
   (
     {
@@ -76,6 +99,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
     forwardedRef,
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const {
       manualValueRef,
       lastTranscriptRef,
@@ -84,6 +108,8 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       applyTranscript,
     } = useTranscriptValue(value);
     const wasRecordingRef = useRef(false);
+    const [attachments, setAttachments] = useState<MessageAttachment[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
 
     const {
       supported: speechSupported,
@@ -127,18 +153,28 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         const messageText = overrideText ?? value;
         const trimmed = messageText.trim();
 
-        if (!trimmed) {
+        if (!trimmed && attachments.length === 0) {
           return false;
         }
 
-        return Promise.resolve(
+        const didSend = await Promise.resolve(
           onSend({
             text: trimmed,
+            attachments: attachments.length ? attachments : undefined,
             ...sendPayload,
           }),
         );
+
+        if (didSend) {
+          setAttachments([]);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+
+        return didSend;
       },
-      [onSend, sendPayload, value],
+      [attachments, onSend, sendPayload, value],
     );
 
     const handleSubmit = useCallback(
@@ -255,6 +291,112 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
       transcript,
     ]);
 
+    const handleFileClick = useCallback(() => {
+      if (isResponding) {
+        return;
+      }
+
+      fileInputRef.current?.click();
+    }, [isResponding]);
+
+    const processFiles = useCallback(
+      async (files: File[]) => {
+        if (!files.length) {
+          return;
+        }
+
+        if (attachments.length + files.length > MAX_IMAGE_ATTACHMENTS) {
+          onToast?.({
+            type: "warning",
+            message: `You can attach up to ${MAX_IMAGE_ATTACHMENTS} images.`,
+          });
+          return;
+        }
+
+        const nextAttachments: MessageAttachment[] = [];
+
+        for (const file of files) {
+          if (!file.type.startsWith("image/")) {
+            onToast?.({
+              type: "warning",
+              message: `${file.name} is not an image file.`,
+            });
+            continue;
+          }
+
+          if (file.size > MAX_IMAGE_BYTES) {
+            onToast?.({
+              type: "warning",
+              message: `${file.name} exceeds the 5MB limit.`,
+            });
+            continue;
+          }
+
+          try {
+            const url = await readFileAsDataUrl(file);
+            nextAttachments.push({
+              id: getId(),
+              type: "image",
+              name: file.name,
+              mimeType: file.type,
+              size: file.size,
+              url,
+            });
+          } catch (error) {
+            onToast?.({
+              type: "error",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Unable to attach image.",
+            });
+          }
+        }
+
+        if (nextAttachments.length > 0) {
+          setAttachments((current) => [...current, ...nextAttachments]);
+        }
+      },
+      [attachments.length, onToast],
+    );
+
+    const handleFileChange = useCallback(
+      async (event: ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(event.target.files ?? []);
+        await processFiles(files);
+        event.target.value = "";
+      },
+      [processFiles],
+    );
+
+    const handleDrop = useCallback(
+      async (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        setIsDragging(false);
+        const files = Array.from(event.dataTransfer.files ?? []);
+        await processFiles(files);
+      },
+      [processFiles],
+    );
+
+    const handleDragOver = useCallback(
+      (event: DragEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        if (!isDragging) {
+          setIsDragging(true);
+        }
+      },
+      [isDragging],
+    );
+
+    const handleDragLeave = useCallback(() => {
+      setIsDragging(false);
+    }, []);
+
+    const handleRemoveAttachment = useCallback((id: string) => {
+      setAttachments((current) => current.filter((item) => item.id !== id));
+    }, []);
+
     const micButtonClasses = [
       "input-panel__icon-button",
       "input-panel__icon-button--muted",
@@ -290,8 +432,64 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
+          <div
+            className={`input-panel__dropzone${
+              isDragging ? " input-panel__dropzone--active" : ""
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            aria-label="Image drop zone"
+          >
+            <span className="sr-only">
+              Drop an image here or use the upload button. Up to{" "}
+              {MAX_IMAGE_ATTACHMENTS} images.
+            </span>
+            {attachments.length > 0 && (
+              <ul className="input-panel__attachment-list">
+                {attachments.map((attachment) => (
+                  <li key={attachment.id} className="input-panel__attachment">
+                    <span className="input-panel__attachment-name">
+                      {attachment.name}
+                    </span>
+                    <button
+                      type="button"
+                      className="input-panel__attachment-remove"
+                      onClick={() => handleRemoveAttachment(attachment.id)}
+                      aria-label={`Remove ${attachment.name}`}
+                    >
+                      <span className="sr-only">Remove</span>
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="input-panel__controls">
             <div className="input-panel__actions">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="input-panel__file-input"
+                onChange={handleFileChange}
+                aria-hidden="true"
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                className="input-panel__icon-button"
+                onClick={handleFileClick}
+                aria-label="Add images"
+                title="Add images"
+                disabled={
+                  isResponding || attachments.length >= MAX_IMAGE_ATTACHMENTS
+                }
+              >
+                <ImageIcon />
+              </button>
               <button
                 type="button"
                 className={micButtonClasses.join(" ")}

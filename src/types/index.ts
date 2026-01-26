@@ -28,6 +28,7 @@ export type Message = {
   sender: "user" | "bot";
   content: string;
   renderAsHtml?: boolean;
+  attachments?: MessageAttachment[];
 };
 
 export type PreviewChat = {
@@ -46,6 +47,7 @@ export type ChatSummary = {
 
 export type UserInputSendPayload = {
   text: string;
+  attachments?: MessageAttachment[];
   model?: string;
 };
 
@@ -78,7 +80,25 @@ export type ChatCompletionContentPart =
   | {
       type: "input_text";
       text: string;
-    };
+    }
+  | ChatCompletionImageContentPart;
+
+export type ChatCompletionImageContentPart = {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "low" | "high";
+  };
+};
+
+export type MessageAttachment = {
+  id: string;
+  type: "image";
+  name: string;
+  mimeType: string;
+  size: number;
+  url: string;
+};
 
 export type ChatCompletionMessage = {
   role: ChatCompletionRole;
