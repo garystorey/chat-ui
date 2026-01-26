@@ -144,7 +144,7 @@ export default function useChatCompletionStream() {
             }
 
             clearStreamState();
-            onSettled();
+            onSettled?.();
           },
         },
       );

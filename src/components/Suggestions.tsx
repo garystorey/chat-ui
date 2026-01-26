@@ -2,7 +2,6 @@ import { memo } from "react";
 import Card from "./Card";
 import Heading from "./Heading";
 import { Suggestion } from "../types";
-import "./Card.css";
 import List from "./List";
 
 type SuggesionsProps = {
