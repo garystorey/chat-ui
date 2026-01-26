@@ -119,9 +119,13 @@ const useAvailableModels = ({
               : uniqueModels;
 
           setAvailableModels(nextModels);
-          setSelectedModel(() => {
+          setSelectedModel((currentSelected) => {
             if (loadedModelId) {
               return loadedModelId;
+            }
+
+            if (currentSelected && nextModels.includes(currentSelected)) {
+              return currentSelected;
             }
 
             if (nextModels.includes(DEFAULT_SERVER_MODEL)) {
