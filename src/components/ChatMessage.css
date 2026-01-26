@@ -39,6 +39,40 @@
   display: block;
 }
 
+.message__attachments {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.message__attachments:first-child {
+  margin-top: 0;
+}
+
+.message__attachment {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.message__attachment-image {
+  width: 100%;
+  height: auto;
+  border-radius: 0.6rem;
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  box-shadow: var(--shadow-soft);
+  background-color: var(--panel-solid);
+}
+
+.message__attachment-caption {
+  font-size: 0.75rem;
+  color: inherit;
+  opacity: 0.8;
+  word-break: break-word;
+}
+
 .message :where(p, li, ul, ol, blockquote) {
   color: inherit;
 }

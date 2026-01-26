@@ -14,26 +14,95 @@ export const cloneMessages = (items: Message[]): Message[] =>
     ...item,
   }));
 
+export const getMessageTextContent = (message?: Message) => {
+  if (!message) {
+    return "";
+  }
+
+  return message.renderAsHtml
+    ? getPlainTextFromHtml(message.content)
+    : normalizeWhitespace(message.content);
+};
+
 export const getMessagePlainText = (message?: Message) => {
   if (!message) {
     return "";
   }
 
-  if (message.renderAsHtml) {
-    return getPlainTextFromHtml(message.content);
+  const baseText = getMessageTextContent(message);
+  const attachmentSummary = message.attachments?.length
+    ? `Image attachment${message.attachments.length > 1 ? "s" : ""} (${
+        message.attachments.length
+      })`
+    : "";
+
+  if (baseText && attachmentSummary) {
+    return `${baseText}\n${attachmentSummary}`;
   }
 
-  return normalizeWhitespace(message.content);
+  return baseText || attachmentSummary;
 };
 
 export const toChatCompletionMessages = (
   messages: Message[],
 ): ChatCompletionMessage[] =>
   messages.map((message) => {
-    const text = getMessagePlainText(message);
+    const text = getMessageTextContent(message);
+    const attachments = message.attachments ?? [];
+    const attachmentUrls = attachments
+      .map((attachment) => {
+        const url = attachment.url.trim();
+        if (!url) {
+          return null;
+        }
+
+        const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
+
+        if (url.startsWith("data:")) {
+          const base64Part = url.split(",", 2)[1];
+          if (base64Part && base64Pattern.test(base64Part)) {
+            return base64Part;
+          }
+        }
+
+        if (base64Pattern.test(url)) {
+          return url;
+        }
+
+        console.warn(
+          "Skipping non-base64 attachment url; expected base64 or data URL.",
+          url,
+        );
+        return null;
+      })
+      .filter((url): url is string => Boolean(url));
+    const hasAttachments = attachmentUrls.length > 0;
+    const contentParts: ChatCompletionMessage["content"] =
+      message.sender === "user" && hasAttachments
+        ? [
+            ...(text
+              ? [
+                  {
+                    type: "text",
+                    text,
+                  } as const,
+                ]
+              : []),
+            ...attachmentUrls.map(
+              (url) =>
+                ({
+                  type: "image_url",
+                  image_url: {
+                    url,
+                  },
+                }) as const,
+            ),
+          ]
+        : text ?? "";
+
     return {
       role: message.sender === "user" ? "user" : "assistant",
-      content: text ?? "",
+      content: contentParts,
     };
   });
 

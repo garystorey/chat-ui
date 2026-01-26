@@ -33,6 +33,9 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
     }
     return renderMarkdown(message.content);
   }, [message.content, message.renderAsHtml]);
+  const attachments = message.attachments ?? [];
+  const hasAttachments = attachments.length > 0;
+  const hasContent = message.content.trim().length > 0;
 
   useEffect(() => {
     if (isStreaming) return;
@@ -114,11 +117,30 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
       className={`message message--${message.sender}`}
       aria-label={ariaLabel}
     >
-      <div
-        className="message__body"
-        ref={bodyRef}
-        dangerouslySetInnerHTML={{ __html: content }}
-      />
+      {hasContent && (
+        <div
+          className="message__body"
+          ref={bodyRef}
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+      )}
+      {hasAttachments && (
+        <div className="message__attachments" aria-label="Message attachments">
+          {attachments.map((attachment) => (
+            <figure key={attachment.id} className="message__attachment">
+              <img
+                src={attachment.url}
+                alt={attachment.name}
+                className="message__attachment-image"
+                loading="lazy"
+              />
+              <figcaption className="message__attachment-caption">
+                {attachment.name}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
     </article>
   );
 };
