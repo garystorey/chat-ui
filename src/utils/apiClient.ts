@@ -66,13 +66,33 @@ export async function apiStreamRequest<TMessage, TResponse>({
 
   if (!response.ok) {
     const errorData = await parseJson(response).catch(() => null);
-    const message =
-      (errorData &&
-      isJsonLike(errorData) &&
-      "message" in errorData &&
-      typeof (errorData as Record<string, unknown>).message === "string"
-        ? (errorData as Record<string, string>).message
-        : response.statusText) || "Request failed";
+    let message = response.statusText || "Request failed";
+
+    if (errorData && isJsonLike(errorData)) {
+      if (
+        "message" in errorData &&
+        typeof (errorData as Record<string, unknown>).message === "string"
+      ) {
+        message = (errorData as Record<string, string>).message;
+      } else if (
+        "error" in errorData &&
+        typeof (errorData as Record<string, unknown>).error === "string"
+      ) {
+        message = (errorData as Record<string, string>).error;
+      } else if (
+        "error" in errorData &&
+        isJsonLike((errorData as Record<string, unknown>).error)
+      ) {
+        const errorObject = (errorData as Record<string, unknown>)
+          .error as Record<string, unknown>;
+        if (
+          "message" in errorObject &&
+          typeof errorObject.message === "string"
+        ) {
+          message = errorObject.message;
+        }
+      }
+    }
 
     throw new ApiError(message, response.status, errorData);
   }
