@@ -62,12 +62,12 @@ export const toChatCompletionMessages = (
         if (url.startsWith("data:")) {
           const base64Part = url.split(",", 2)[1];
           if (base64Part && base64Pattern.test(base64Part)) {
-            return `data:${mimeType};base64,${base64Part}`;
+            return base64Part;
           }
         }
 
         if (base64Pattern.test(url)) {
-          return `data:${mimeType};base64,${url}`;
+          return url;
         }
 
         console.warn(
