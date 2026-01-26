@@ -49,7 +49,31 @@ export const toChatCompletionMessages = (
   messages.map((message) => {
     const text = getMessageTextContent(message);
     const attachments = message.attachments ?? [];
-    const hasAttachments = attachments.length > 0;
+    const attachmentUrls = attachments
+      .map((attachment) => {
+        const url = attachment.url.trim();
+        if (!url) {
+          return null;
+        }
+
+        if (url.startsWith("data:")) {
+          return url;
+        }
+
+        const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
+        if (base64Pattern.test(url)) {
+          const mimeType = attachment.mimeType || "image/png";
+          return `data:${mimeType};base64,${url}`;
+        }
+
+        console.warn(
+          "Skipping non-base64 attachment url; expected data URL or base64 string.",
+          url,
+        );
+        return null;
+      })
+      .filter((url): url is string => Boolean(url));
+    const hasAttachments = attachmentUrls.length > 0;
     const contentParts: ChatCompletionMessage["content"] =
       message.sender === "user" && hasAttachments
         ? [
@@ -61,12 +85,12 @@ export const toChatCompletionMessages = (
                   } as const,
                 ]
               : []),
-            ...attachments.map(
-              (attachment) =>
+            ...attachmentUrls.map(
+              (url) =>
                 ({
                   type: "image_url",
                   image_url: {
-                    url: attachment.url,
+                    url,
                   },
                 }) as const,
             ),
