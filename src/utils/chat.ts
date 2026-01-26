@@ -56,18 +56,22 @@ export const toChatCompletionMessages = (
           return null;
         }
 
+        const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
+        const mimeType = attachment.mimeType || "image/png";
+
         if (url.startsWith("data:")) {
-          return url;
+          const base64Part = url.split(",", 2)[1];
+          if (base64Part && base64Pattern.test(base64Part)) {
+            return `data:${mimeType};base64,${base64Part}`;
+          }
         }
 
-        const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
         if (base64Pattern.test(url)) {
-          const mimeType = attachment.mimeType || "image/png";
           return `data:${mimeType};base64,${url}`;
         }
 
         console.warn(
-          "Skipping non-base64 attachment url; expected data URL or base64 string.",
+          "Skipping non-base64 attachment url; expected base64 or data URL.",
           url,
         );
         return null;
