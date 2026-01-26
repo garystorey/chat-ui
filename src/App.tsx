@@ -97,19 +97,20 @@ const App = () => {
     ({
       type,
       message,
-      duration = 4000,
+      duration,
     }: {
       type: ToastType;
       message: string;
       duration?: number;
     }) => {
       const id = getId();
+      const resolvedDuration = duration ?? (type === "error" ? 8000 : 4000);
       setToasts((current) => [...current, { id, type, message }]);
 
-      if (duration > 0) {
+      if (resolvedDuration > 0) {
         const timeout = window.setTimeout(() => {
           dismissToast(id);
-        }, duration);
+        }, resolvedDuration);
         toastTimeoutsRef.current.set(id, timeout);
       }
     },
@@ -149,6 +150,7 @@ const App = () => {
     setSelectedModel,
     setIsLoadingModels,
     onError: (error) => {
+      console.error("Unable to load models.", error);
       showToast({
         type: "warning",
         message: formatErrorMessage(error, "Unable to load models."),

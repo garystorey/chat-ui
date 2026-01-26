@@ -37,17 +37,19 @@ function ImportButton({ onImportChats, onToast }: ImportButtonProps) {
           duration: 3000,
         });
       } else {
+        console.error("Chat import failed:", result.errors);
         onToast({
           type: "error",
           message: result.errors[0] || "Import failed",
-          duration: 4000,
+          duration: 8000,
         });
       }
     } catch (error) {
+      console.error("Chat import failed:", error);
       onToast({
         type: "error",
         message: formatErrorMessage(error, "Import failed."),
-        duration: 4000,
+        duration: 8000,
       });
     }
 

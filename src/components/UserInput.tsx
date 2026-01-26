@@ -141,7 +141,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         onToast?.({
           type: "error",
           message: recordingError,
-          duration: 4000,
+          duration: 8000,
         });
       }
     }, [onToast, recordingError]);
