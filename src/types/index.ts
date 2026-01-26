@@ -119,7 +119,7 @@ export type ChatCompletionStreamArgs = {
   onStreamUpdate: (content: string) => void;
   onStreamComplete: (content: string) => void;
   onError: (error: unknown) => void;
-  onSettled: () => void;
+  onSettled?: () => void;
 };
 
 export type ChatCompletionMutationVariables = {
