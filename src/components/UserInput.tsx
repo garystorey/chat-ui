@@ -430,107 +430,112 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               autoFocus
             />
           </div>
-          <div
-            className={`input-panel__dropzone${
-              isDragging ? " input-panel__dropzone--active" : ""
-            }`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            aria-label="Image drop zone"
-          >
-            <span className="sr-only">
-              Drop an image here or use the upload button. Up to{" "}
-              {MAX_IMAGE_ATTACHMENTS} images.
-            </span>
-            {attachments.length > 0 && (
-              <ul className="input-panel__attachment-list">
-                {attachments.map((attachment) => (
-                  <li key={attachment.id} className="input-panel__attachment">
-                    <span className="input-panel__attachment-name">
-                      {attachment.name}
-                    </span>
-                    <button
-                      type="button"
-                      className="input-panel__attachment-remove"
-                      onClick={() => handleRemoveAttachment(attachment.id)}
-                      aria-label={`Remove ${attachment.name}`}
-                    >
-                      <span className="sr-only">Remove</span>
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div className="input-panel__controls">
-            <div className="input-panel__actions">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="input-panel__file-input"
-                onChange={handleFileChange}
-                aria-hidden="true"
-                tabIndex={-1}
-              />
-              <button
-                type="button"
-                className="input-panel__icon-button"
-                onClick={handleFileClick}
-                aria-label="Add images"
-                title="Add images"
-                disabled={
-                  isResponding || attachments.length >= MAX_IMAGE_ATTACHMENTS
-                }
-              >
-                <ImageIcon />
-              </button>
-              <button
-                type="button"
-                className={micButtonClasses.join(" ")}
-                onClick={handleToggleRecording}
-                aria-label={
-                  isRecording ? "Stop voice input" : "Start voice input"
-                }
-                title={isRecording ? "Stop voice input" : "Start voice input"}
-                disabled={isResponding || !canRecord}
-              >
-                <MicIcon />
-              </button>
-            </div>
+          <div className="input-panel__footer">
             <div
-              className="input-panel__mic-status"
-              aria-live="polite"
-              role="status"
+              className={`input-panel__dropzone${
+                isDragging ? " input-panel__dropzone--active" : ""
+              }`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              aria-label="Image drop zone"
             >
-              <Show when={!!recordingStatus}>
-                <span>{recordingStatus}</span>
+              <span className="sr-only">
+                Drop an image here or use the upload button. Up to{" "}
+                {MAX_IMAGE_ATTACHMENTS} images.
+              </span>
+              <span className="input-panel__dropzone-text">
+                Drop images here or tap the upload button.
+              </span>
+              {attachments.length > 0 && (
+                <ul className="input-panel__attachment-list">
+                  {attachments.map((attachment) => (
+                    <li key={attachment.id} className="input-panel__attachment">
+                      <span className="input-panel__attachment-name">
+                        {attachment.name}
+                      </span>
+                      <button
+                        type="button"
+                        className="input-panel__attachment-remove"
+                        onClick={() => handleRemoveAttachment(attachment.id)}
+                        aria-label={`Remove ${attachment.name}`}
+                      >
+                        <span className="sr-only">Remove</span>
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div className="input-panel__controls">
+              <div className="input-panel__actions">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="input-panel__file-input"
+                  onChange={handleFileChange}
+                  aria-hidden="true"
+                  tabIndex={-1}
+                />
+                <button
+                  type="button"
+                  className="input-panel__icon-button"
+                  onClick={handleFileClick}
+                  aria-label="Add images"
+                  title="Add images"
+                  disabled={
+                    isResponding || attachments.length >= MAX_IMAGE_ATTACHMENTS
+                  }
+                >
+                  <ImageIcon />
+                </button>
+                <button
+                  type="button"
+                  className={micButtonClasses.join(" ")}
+                  onClick={handleToggleRecording}
+                  aria-label={
+                    isRecording ? "Stop voice input" : "Start voice input"
+                  }
+                  title={isRecording ? "Stop voice input" : "Start voice input"}
+                  disabled={isResponding || !canRecord}
+                >
+                  <MicIcon />
+                </button>
+              </div>
+              <div
+                className="input-panel__mic-status"
+                aria-live="polite"
+                role="status"
+              >
+                <Show when={!!recordingStatus}>
+                  <span>{recordingStatus}</span>
+                </Show>
+              </div>
+              <Show when={isResponding}>
+                <button
+                  type="button"
+                  className="input-panel__submit"
+                  aria-label="Stop response"
+                  title="Stop response"
+                  onClick={onStop}
+                >
+                  <StopIcon />
+                </button>
+              </Show>
+              <Show when={!isResponding}>
+                <button
+                  type="submit"
+                  className="input-panel__submit"
+                  aria-label="Send message"
+                  title="Send message"
+                >
+                  <SendIcon />
+                </button>
               </Show>
             </div>
-            <Show when={isResponding}>
-              <button
-                type="button"
-                className="input-panel__submit"
-                aria-label="Stop response"
-                title="Stop response"
-                onClick={onStop}
-              >
-                <StopIcon />
-              </button>
-            </Show>
-            <Show when={!isResponding}>
-              <button
-                type="submit"
-                className="input-panel__submit"
-                aria-label="Send message"
-                title="Send message"
-              >
-                <SendIcon />
-              </button>
-            </Show>
           </div>
           <div id="inputHint" className="sr-only">
             Press Enter to send and Shift+Enter for newline
