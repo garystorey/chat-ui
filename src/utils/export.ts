@@ -49,6 +49,7 @@ export const serializeMessage = (msg: Message) => ({
   id: msg.id,
   sender: msg.sender,
   content: msg.content,
+  ...(msg.attachments ? { attachments: msg.attachments } : {}),
   ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
 });
 
@@ -148,6 +149,22 @@ const isValidMessage = (msg: unknown): msg is Message => {
     typeof m.id === "string" &&
     (m.sender === "user" || m.sender === "bot") &&
     typeof m.content === "string" &&
+    (m.attachments === undefined ||
+      (Array.isArray(m.attachments) &&
+        m.attachments.every((attachment) => {
+          if (typeof attachment !== "object" || attachment === null) {
+            return false;
+          }
+          const a = attachment as Record<string, unknown>;
+          return (
+            typeof a.id === "string" &&
+            a.type === "image" &&
+            typeof a.name === "string" &&
+            typeof a.mimeType === "string" &&
+            typeof a.size === "number" &&
+            typeof a.url === "string"
+          );
+        }))) &&
     (m.renderAsHtml === undefined || typeof m.renderAsHtml === "boolean")
   );
 };

@@ -14,26 +14,68 @@ export const cloneMessages = (items: Message[]): Message[] =>
     ...item,
   }));
 
+export const getMessageTextContent = (message?: Message) => {
+  if (!message) {
+    return "";
+  }
+
+  return message.renderAsHtml
+    ? getPlainTextFromHtml(message.content)
+    : normalizeWhitespace(message.content);
+};
+
 export const getMessagePlainText = (message?: Message) => {
   if (!message) {
     return "";
   }
 
-  if (message.renderAsHtml) {
-    return getPlainTextFromHtml(message.content);
+  const baseText = getMessageTextContent(message);
+  const attachmentSummary = message.attachments?.length
+    ? `Image attachment${message.attachments.length > 1 ? "s" : ""} (${
+        message.attachments.length
+      })`
+    : "";
+
+  if (baseText && attachmentSummary) {
+    return `${baseText}\n${attachmentSummary}`;
   }
 
-  return normalizeWhitespace(message.content);
+  return baseText || attachmentSummary;
 };
 
 export const toChatCompletionMessages = (
   messages: Message[],
 ): ChatCompletionMessage[] =>
   messages.map((message) => {
-    const text = getMessagePlainText(message);
+    const text = getMessageTextContent(message);
+    const attachments = message.attachments ?? [];
+    const hasAttachments = attachments.length > 0;
+    const contentParts: ChatCompletionMessage["content"] =
+      message.sender === "user" && hasAttachments
+        ? [
+            ...(text
+              ? [
+                  {
+                    type: "text",
+                    text,
+                  } as const,
+                ]
+              : []),
+            ...attachments.map(
+              (attachment) =>
+                ({
+                  type: "image_url",
+                  image_url: {
+                    url: attachment.url,
+                  },
+                }) as const,
+            ),
+          ]
+        : text ?? "";
+
     return {
       role: message.sender === "user" ? "user" : "assistant",
-      content: text ?? "",
+      content: contentParts,
     };
   });
 
