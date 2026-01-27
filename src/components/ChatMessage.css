@@ -66,6 +66,36 @@
   background-color: var(--panel-solid);
 }
 
+.message__attachment-file {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  background-color: color-mix(in oklab, var(--panel) 85%, var(--bg) 15%);
+  color: inherit;
+  text-decoration: none;
+}
+
+.message__attachment-file:hover,
+.message__attachment-file:focus-visible {
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--panel-border) 65%);
+  background-color: color-mix(in oklab, var(--panel) 75%, var(--accent) 25%);
+}
+
+.message__attachment-file-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.message__attachment-file-meta {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  word-break: break-word;
+}
+
 .message__attachment-caption {
   font-size: 0.75rem;
   color: inherit;

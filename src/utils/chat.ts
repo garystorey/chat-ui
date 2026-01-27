@@ -1,6 +1,8 @@
 import type {
   ChatSummary,
   Message,
+  MessageAttachment,
+  ChatCompletionContentPart,
   ChatCompletionMessage,
   ChatCompletionResponse,
   ChatCompletionChoice,
@@ -31,7 +33,7 @@ export const getMessagePlainText = (message?: Message) => {
 
   const baseText = getMessageTextContent(message);
   const attachmentSummary = message.attachments?.length
-    ? `Image attachment${message.attachments.length > 1 ? "s" : ""} (${
+    ? `Attachment${message.attachments.length > 1 ? "s" : ""} (${
         message.attachments.length
       })`
     : "";
@@ -49,35 +51,8 @@ export const toChatCompletionMessages = (
   messages.map((message) => {
     const text = getMessageTextContent(message);
     const attachments = message.attachments ?? [];
-    const attachmentUrls = attachments
-      .map((attachment) => {
-        const url = attachment.url.trim();
-        if (!url) {
-          return null;
-        }
-
-        const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
-        const mimeType = attachment.mimeType || "image/png";
-
-        if (url.startsWith("data:")) {
-          const base64Part = url.split(",", 2)[1];
-          if (base64Part && base64Pattern.test(base64Part)) {
-            return base64Part;
-          }
-        }
-
-        if (base64Pattern.test(url)) {
-          return url;
-        }
-
-        console.warn(
-          "Skipping non-base64 attachment url; expected base64 or data URL.",
-          url,
-        );
-        return null;
-      })
-      .filter((url): url is string => Boolean(url));
-    const hasAttachments = attachmentUrls.length > 0;
+    const attachmentContentParts = buildAttachmentContentParts(attachments);
+    const hasAttachments = attachmentContentParts.length > 0;
     const contentParts: ChatCompletionMessage["content"] =
       message.sender === "user" && hasAttachments
         ? [
@@ -89,15 +64,7 @@ export const toChatCompletionMessages = (
                   } as const,
                 ]
               : []),
-            ...attachmentUrls.map(
-              (url) =>
-                ({
-                  type: "image_url",
-                  image_url: {
-                    url,
-                  },
-                }) as const,
-            ),
+            ...attachmentContentParts,
           ]
         : text ?? "";
 
@@ -106,6 +73,74 @@ export const toChatCompletionMessages = (
       content: contentParts,
     };
   });
+
+const DEFAULT_MIME_TYPE = "application/octet-stream";
+
+const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
+
+const toDataUrl = (url: string, mimeType: string) => {
+  if (url.startsWith("data:")) {
+    return url;
+  }
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  if (base64Pattern.test(url)) {
+    return `data:${mimeType || DEFAULT_MIME_TYPE};base64,${url}`;
+  }
+
+  return null;
+};
+
+const buildImageUrl = (attachment: MessageAttachment) => {
+  const url = attachment.url.trim();
+  if (!url) {
+    return null;
+  }
+
+  const dataUrl = toDataUrl(url, attachment.mimeType || "image/png");
+  if (dataUrl) {
+    return dataUrl;
+  }
+
+  console.warn(
+    "Skipping attachment url; expected base64, data URL, or http(s) URL.",
+    url,
+  );
+  return null;
+};
+
+const buildAttachmentContentParts = (attachments: MessageAttachment[]) => {
+  const parts: ChatCompletionContentPart[] = [];
+
+  attachments.forEach((attachment) => {
+    if (attachment.type === "image" || attachment.mimeType.startsWith("image/")) {
+      const url = buildImageUrl(attachment);
+      if (!url) {
+        return;
+      }
+      parts.push({
+        type: "image_url",
+        image_url: {
+          url,
+        },
+      });
+      return;
+    }
+
+    const dataUrl =
+      toDataUrl(attachment.url, attachment.mimeType || DEFAULT_MIME_TYPE) ??
+      attachment.url;
+    parts.push({
+      type: "text",
+      text: `Attachment: ${attachment.name} (${attachment.mimeType || DEFAULT_MIME_TYPE}, ${attachment.size} bytes)\nData: ${dataUrl}`,
+    });
+  });
+
+  return parts;
+};
 
 export const getChatCompletionContentText = (
   content: ChatCompletionMessage["content"] | undefined,
