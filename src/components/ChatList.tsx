@@ -9,6 +9,7 @@ type ChatListProps = {
   activeChatId: string | null;
   onSelectChat: (chatId: string) => void;
   onRemoveChat: (chatId: string) => void;
+  onRenameChat: (chatId: string, nextTitle: string) => void;
 };
 
 function ChatList({
@@ -16,6 +17,7 @@ function ChatList({
   activeChatId,
   onSelectChat,
   onRemoveChat,
+  onRenameChat,
 }: ChatListProps) {
   return (
     <nav className="sidebar__chats" aria-label="Previous chats">
@@ -32,6 +34,7 @@ function ChatList({
             activeChatId={activeChatId}
             onSelectChat={onSelectChat}
             onRemoveChat={onRemoveChat}
+            onRenameChat={onRenameChat}
           />
         )}
       />

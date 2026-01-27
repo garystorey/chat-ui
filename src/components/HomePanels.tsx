@@ -13,6 +13,7 @@ export type HomePanelsProps = {
   activeChatId: string | null;
   onSelectChat: (chatId: string) => void;
   onRemoveChat: (chatId: string) => void;
+  onRenameChat: (chatId: string, nextTitle: string) => void;
   onImportChats: (chats: ChatSummary[]) => void;
   onToast: (toast: {
     type: ToastType;
@@ -79,6 +80,7 @@ const HomePanels = ({
   activeChatId,
   onSelectChat,
   onRemoveChat,
+  onRenameChat,
   onImportChats,
   onToast,
   currentChat,
@@ -170,6 +172,7 @@ const HomePanels = ({
                 activeChatId={activeChatId}
                 onSelectChat={onSelectChat}
                 onRemoveChat={onRemoveChat}
+                onRenameChat={onRenameChat}
               />
             </div>
           </Panel>
