@@ -38,6 +38,7 @@ import {
 import {
   cloneMessages,
   createChatRecordFromMessages,
+  buildChatPreview,
   formatErrorMessage,
   getId,
   sortChatsByUpdatedAt,
@@ -476,6 +477,36 @@ const App = () => {
     [activeChatId, cancelPendingResponse, resetChatState],
   );
 
+  const handleRenameChat = useCallback(
+    (chatId: string, nextTitle: string) => {
+      setChatHistory((current) => {
+        let didUpdate = false;
+        const next = current.map((chat) => {
+          if (chat.id !== chatId) {
+            return chat;
+          }
+
+          didUpdate = true;
+          const trimmedTitle = nextTitle.trim();
+          if (!trimmedTitle || trimmedTitle === chat.title) {
+            return chat;
+          }
+
+          const latestMessage = chat.messages[chat.messages.length - 1];
+          const preview = buildChatPreview(latestMessage, trimmedTitle);
+          return {
+            ...chat,
+            title: trimmedTitle,
+            preview,
+          };
+        });
+
+        return didUpdate ? next : current;
+      });
+    },
+    [setChatHistory],
+  );
+
   const handleImportChats = useCallback((importedChats: ChatSummary[]) => {
     if (importedChats.length === 0) return;
 
@@ -556,6 +587,7 @@ const App = () => {
               activeChatId={activeChatId}
               onSelectChat={handleSelectChat}
               onRemoveChat={handleRemoveChat}
+              onRenameChat={handleRenameChat}
               onImportChats={handleImportChats}
               onToast={showToast}
               currentChat={currentChat}

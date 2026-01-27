@@ -357,6 +357,25 @@
   line-height: 1.35;
 }
 
+.sidebar__chat--editing {
+  cursor: default;
+}
+
+.sidebar__chat-input {
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  background-color: var(--input-bg);
+  color: var(--text);
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+}
+
+.sidebar__chat-input:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent) 65%, transparent);
+  outline-offset: 2px;
+}
+
+.sidebar__chat-rename,
 .sidebar__chat-remove {
   border: 1px solid color-mix(in oklab, var(--panel-border) 80%, transparent);
   background-color: color-mix(in oklab, var(--panel) 90%, transparent 10%);
@@ -367,9 +386,29 @@
   transition:
     background-color var(--duration-sm) var(--ease-out),
     color var(--duration-sm) var(--ease-out),
-    border-color var(--duration-sm) var(--ease-out);
+  border-color var(--duration-sm) var(--ease-out);
 }
 
+.sidebar__chat-rename {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+}
+
+.sidebar__chat-rename:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sidebar__chat-rename-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.sidebar__chat-rename:hover,
+.sidebar__chat-rename:focus-visible,
 .sidebar__chat-remove:hover,
 .sidebar__chat-remove:focus-visible {
   background-color: color-mix(in oklab, var(--panel) 88%, var(--accent) 12%);
