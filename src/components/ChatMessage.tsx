@@ -1,7 +1,7 @@
 import hljs from "highlight.js";
 import { memo, useEffect, useMemo, useRef } from "react";
 import type { Message } from "../types";
-import { renderMarkdown } from "../utils";
+import { renderMarkdown, sanitizeHtml } from "../utils";
 import "./ChatMessage.css";
 
 const copyIcon = `
@@ -29,7 +29,7 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const content = useMemo(() => {
     if (message.renderAsHtml) {
-      return message.content;
+      return sanitizeHtml(message.content);
     }
     return renderMarkdown(message.content);
   }, [message.content, message.renderAsHtml]);

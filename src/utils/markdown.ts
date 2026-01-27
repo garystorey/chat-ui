@@ -17,3 +17,7 @@ marked.setOptions({
 export function renderMarkdown(text: string): string {
   return DOMPurify.sanitize(marked.parse(text) as string);
 }
+
+export function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html);
+}
