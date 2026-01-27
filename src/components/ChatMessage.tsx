@@ -126,19 +126,42 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
       )}
       {hasAttachments && (
         <div className="message__attachments" aria-label="Message attachments">
-          {attachments.map((attachment) => (
-            <figure key={attachment.id} className="message__attachment">
-              <img
-                src={attachment.url}
-                alt={attachment.name}
-                className="message__attachment-image"
-                loading="lazy"
-              />
-              <figcaption className="message__attachment-caption">
-                {attachment.name}
-              </figcaption>
-            </figure>
-          ))}
+          {attachments.map((attachment) => {
+            const isImage =
+              attachment.type === "image" ||
+              attachment.mimeType.startsWith("image/");
+
+            return (
+              <figure key={attachment.id} className="message__attachment">
+                {isImage ? (
+                  <img
+                    src={attachment.url}
+                    alt={attachment.name}
+                    className="message__attachment-image"
+                    loading="lazy"
+                  />
+                ) : (
+                  <a
+                    href={attachment.url}
+                    download={attachment.name}
+                    className="message__attachment-file"
+                  >
+                    <span className="message__attachment-file-name">
+                      {attachment.name}
+                    </span>
+                    <span className="message__attachment-file-meta">
+                      {attachment.mimeType || "Attachment"}
+                    </span>
+                  </a>
+                )}
+                {isImage && (
+                  <figcaption className="message__attachment-caption">
+                    {attachment.name}
+                  </figcaption>
+                )}
+              </figure>
+            );
+          })}
         </div>
       )}
     </article>

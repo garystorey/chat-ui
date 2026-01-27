@@ -200,7 +200,7 @@ export type ConnectionStatus = "online" | "offline" | "connecting";
 
 export type MessageAttachment = {
   id: string;
-  type: "image";
+  type: "image" | "file";
   name: string;
   mimeType: string;
   size: number;

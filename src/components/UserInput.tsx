@@ -68,8 +68,8 @@ type UserInputProps = {
   }) => void;
 };
 
-const MAX_IMAGE_ATTACHMENTS = 4;
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_ATTACHMENTS = 4;
+const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 
 const readFileAsDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -78,10 +78,10 @@ const readFileAsDataUrl = (file: File): Promise<string> =>
       if (typeof reader.result === "string") {
         resolve(reader.result);
       } else {
-        reject(new Error("Unable to read image data"));
+        reject(new Error("Unable to read attachment data"));
       }
     };
-    reader.onerror = () => reject(new Error("Unable to read image file"));
+    reader.onerror = () => reject(new Error("Unable to read attachment file"));
     reader.readAsDataURL(file);
   });
 
@@ -306,10 +306,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           return;
         }
 
-        if (attachments.length + files.length > MAX_IMAGE_ATTACHMENTS) {
+        if (attachments.length + files.length > MAX_ATTACHMENTS) {
           onToast?.({
             type: "warning",
-            message: `You can attach up to ${MAX_IMAGE_ATTACHMENTS} images.`,
+            message: `You can attach up to ${MAX_ATTACHMENTS} files.`,
           });
           return;
         }
@@ -317,15 +317,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
         const nextAttachments: MessageAttachment[] = [];
 
         for (const file of files) {
-          if (!file.type.startsWith("image/")) {
-            onToast?.({
-              type: "warning",
-              message: `${file.name} is not an image file.`,
-            });
-            continue;
-          }
-
-          if (file.size > MAX_IMAGE_BYTES) {
+          if (file.size > MAX_ATTACHMENT_BYTES) {
             onToast?.({
               type: "warning",
               message: `${file.name} exceeds the 5MB limit.`,
@@ -337,7 +329,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
             const url = await readFileAsDataUrl(file);
             nextAttachments.push({
               id: getId(),
-              type: "image",
+              type: file.type.startsWith("image/") ? "image" : "file",
               name: file.name,
               mimeType: file.type,
               size: file.size,
@@ -346,7 +338,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           } catch (error) {
             onToast?.({
               type: "error",
-              message: formatErrorMessage(error, "Unable to attach image."),
+              message: formatErrorMessage(error, "Unable to attach file."),
             });
           }
         }
@@ -438,14 +430,14 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              aria-label="Image drop zone"
+              aria-label="Attachment drop zone"
             >
               <span className="sr-only">
-                Drop an image here or use the upload button. Up to{" "}
-                {MAX_IMAGE_ATTACHMENTS} images.
+                Drop files here or use the upload button. Up to{" "}
+                {MAX_ATTACHMENTS} files.
               </span>
               <span className="input-panel__dropzone-text">
-                Drop images here or tap the upload button.
+                Drop files here or tap the upload button.
               </span>
               {attachments.length > 0 && (
                 <ul className="input-panel__attachment-list">
@@ -473,7 +465,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="*/*"
                   multiple
                   className="input-panel__file-input"
                   onChange={handleFileChange}
@@ -484,10 +476,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                   type="button"
                   className="input-panel__icon-button"
                   onClick={handleFileClick}
-                  aria-label="Add images"
-                  title="Add images"
+                  aria-label="Add attachments"
+                  title="Add attachments"
                   disabled={
-                    isResponding || attachments.length >= MAX_IMAGE_ATTACHMENTS
+                    isResponding || attachments.length >= MAX_ATTACHMENTS
                   }
                 >
                   <ImageIcon />
