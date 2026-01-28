@@ -312,6 +312,12 @@
   gap: 0.45rem;
 }
 
+.sidebar__chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
 .sidebar__chat {
   flex: 1 1 auto;
   text-align: left;
@@ -487,7 +493,72 @@
   gap: 0.5rem;
 }
 
+.recent-panel__list .sidebar__chat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-width: 300px;
+  flex: 1 1 calc((100% - 1.5rem) / 3);
+  max-width: calc((100% - 1.5rem) / 3);
+  border-radius: 1.1rem;
+  padding: 0.95rem 1.1rem;
+  background-color: color-mix(in oklab, var(--panel) 88%, transparent 12%);
+  border: 1px solid color-mix(in oklab, var(--panel-border) 70%, transparent);
+  box-shadow: var(--shadow);
+  transition:
+    transform var(--duration-sm) var(--ease-out),
+    box-shadow var(--duration-sm) var(--ease-out),
+    border-color var(--duration-sm) var(--ease-out);
+}
+
+.recent-panel__list .sidebar__chat {
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  padding: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.35rem;
+}
+
+.recent-panel__list .sidebar__chat-item:hover,
+.recent-panel__list .sidebar__chat-item:focus-within {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-strong);
+  border-color: color-mix(in oklab, var(--panel-border) 55%, var(--accent) 45%);
+}
+
+.recent-panel__list .sidebar__chat-item:has(.sidebar__chat--active) {
+  background-color: color-mix(in oklab, var(--panel) 80%, var(--accent) 20%);
+  border-color: color-mix(in oklab, var(--panel-border) 35%, var(--accent) 65%);
+}
+
+.recent-panel__list .sidebar__chat-title {
+  font-size: 1.05rem;
+}
+
+.recent-panel__list .sidebar__chat-preview {
+  font-size: 0.95rem;
+}
+
+.recent-panel__list .sidebar__chat-rename,
+.recent-panel__list .sidebar__chat-remove {
+  border-radius: 0.75rem;
+}
+
+.recent-panel__list .sidebar__chat-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+
 .recent-panel__list .sidebar__chat-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
   max-height: 420px;
 }
 
