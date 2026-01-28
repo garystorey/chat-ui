@@ -56,6 +56,21 @@ const ChatListItem = ({
             chat.id === activeChatId ? "sidebar__chat--active" : ""
           }`}
         >
+          <div className="sidebar__chat-header">
+            <div className="sidebar__chat-heading" />
+            <button
+              type="button"
+              className="sidebar__chat-remove"
+              onClick={(event) => {
+                event.stopPropagation();
+                onRemoveChat(chat.id);
+              }}
+              aria-label={`Remove ${chat.title}`}
+              title={`Remove ${chat.title}`}
+            >
+              &times;
+            </button>
+          </div>
           <label className="sr-only" htmlFor={`rename-${chat.id}`}>
             Rename chat
           </label>
@@ -80,52 +95,61 @@ const ChatListItem = ({
           <span className="sidebar__chat-preview">{chat.preview}</span>
         </div>
       ) : (
-        <button
-          type="button"
+        <div
           className={`sidebar__chat ${
             chat.id === activeChatId ? "sidebar__chat--active" : ""
           }`}
+          role="button"
+          tabIndex={0}
           onClick={() => onSelectChat(chat.id)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onSelectChat(chat.id);
+            }
+          }}
           onDoubleClick={(event) => {
             event.preventDefault();
             setIsRenaming(true);
           }}
           title={chat.title}
         >
-          <span className="sidebar__chat-title">{chat.title}</span>
+          <div className="sidebar__chat-header">
+            <div className="sidebar__chat-heading">
+              <span className="sidebar__chat-title">{chat.title}</span>
+              <button
+                type="button"
+                className="sidebar__chat-rename"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsRenaming(true);
+                }}
+                aria-label={`Rename ${chat.title}`}
+                title={`Rename ${chat.title}`}
+                disabled={isRenaming}
+              >
+                <span className="sidebar__chat-rename-icon" aria-hidden="true">
+                  ✎
+                </span>
+                <span className="sr-only">Rename</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              className="sidebar__chat-remove"
+              onClick={(event) => {
+                event.stopPropagation();
+                onRemoveChat(chat.id);
+              }}
+              aria-label={`Remove ${chat.title}`}
+              title={`Remove ${chat.title}`}
+            >
+              &times;
+            </button>
+          </div>
           <span className="sidebar__chat-preview">{chat.preview}</span>
-        </button>
+        </div>
       )}
-      <div className="sidebar__chat-actions">
-        <button
-          type="button"
-          className="sidebar__chat-rename"
-          onClick={(event) => {
-            event.stopPropagation();
-            setIsRenaming(true);
-          }}
-          aria-label={`Rename ${chat.title}`}
-          title={`Rename ${chat.title}`}
-          disabled={isRenaming}
-        >
-          <span className="sidebar__chat-rename-icon" aria-hidden="true">
-            ✎
-          </span>
-          <span className="sr-only">Rename</span>
-        </button>
-        <button
-          type="button"
-          className="sidebar__chat-remove"
-          onClick={(event) => {
-            event.stopPropagation();
-            onRemoveChat(chat.id);
-          }}
-          aria-label={`Remove ${chat.title}`}
-          title={`Remove ${chat.title}`}
-        >
-          &times;
-        </button>
-      </div>
     </div>
   );
 };
