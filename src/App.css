@@ -550,6 +550,16 @@
   gap: 0.35rem;
 }
 
+.recent-panel__list .sidebar__chat-header {
+  position: relative;
+  padding-right: 2.4rem;
+}
+
+.recent-panel__list .sidebar__chat:hover,
+.recent-panel__list .sidebar__chat:focus-visible {
+  transform: none;
+}
+
 .recent-panel__list .sidebar__chat-remove {
   top: 0.6rem;
   right: 0.6rem;
