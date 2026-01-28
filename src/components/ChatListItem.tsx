@@ -96,34 +96,36 @@ const ChatListItem = ({
           <span className="sidebar__chat-preview">{chat.preview}</span>
         </button>
       )}
-      <button
-        type="button"
-        className="sidebar__chat-rename"
-        onClick={(event) => {
-          event.stopPropagation();
-          setIsRenaming(true);
-        }}
-        aria-label={`Rename ${chat.title}`}
-        title={`Rename ${chat.title}`}
-        disabled={isRenaming}
-      >
-        <span className="sidebar__chat-rename-icon" aria-hidden="true">
-          ✎
-        </span>
-        <span className="sr-only">Rename</span>
-      </button>
-      <button
-        type="button"
-        className="sidebar__chat-remove"
-        onClick={(event) => {
-          event.stopPropagation();
-          onRemoveChat(chat.id);
-        }}
-        aria-label={`Remove ${chat.title}`}
-        title={`Remove ${chat.title}`}
-      >
-        &times;
-      </button>
+      <div className="sidebar__chat-actions">
+        <button
+          type="button"
+          className="sidebar__chat-rename"
+          onClick={(event) => {
+            event.stopPropagation();
+            setIsRenaming(true);
+          }}
+          aria-label={`Rename ${chat.title}`}
+          title={`Rename ${chat.title}`}
+          disabled={isRenaming}
+        >
+          <span className="sidebar__chat-rename-icon" aria-hidden="true">
+            ✎
+          </span>
+          <span className="sr-only">Rename</span>
+        </button>
+        <button
+          type="button"
+          className="sidebar__chat-remove"
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemoveChat(chat.id);
+          }}
+          aria-label={`Remove ${chat.title}`}
+          title={`Remove ${chat.title}`}
+        >
+          &times;
+        </button>
+      </div>
     </div>
   );
 };
