@@ -551,7 +551,6 @@
 }
 
 .recent-panel__list .sidebar__chat-header {
-  position: relative;
   padding-right: 2.4rem;
 }
 
@@ -561,6 +560,7 @@
 }
 
 .recent-panel__list .sidebar__chat-remove {
+  position: absolute;
   top: 0.6rem;
   right: 0.6rem;
 }
