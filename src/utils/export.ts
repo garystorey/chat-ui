@@ -99,10 +99,12 @@ export const downloadFile = (
   content: string,
   filename: string,
   format: ExportFormat,
+  fallbackName = "conversation",
 ): void => {
   const { mimeType, extension } = FORMAT_CONFIG[format];
   const sanitized = sanitizeFilename(filename);
-  const fullFilename = `${sanitized}.${extension}`;
+  const safeBaseName = sanitized || sanitizeFilename(fallbackName) || "download";
+  const fullFilename = `${safeBaseName}.${extension}`;
 
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -131,7 +133,7 @@ export const exportAllChats = (chats: ChatSummary[]): void => {
   const timestamp = formatDate(Date.now()).replace(/[^a-z0-9]/gi, "-");
   const filename = `chat-history-${timestamp}`;
   const content = exportAllChatsAsJSON(chats);
-  downloadFile(content, filename, "json");
+  downloadFile(content, filename, "json", "chat-history");
 };
 
 // Import functionality
