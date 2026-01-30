@@ -445,36 +445,32 @@ const App = () => {
 
   const handleRemoveChat = useCallback(
     (chatId: string) => {
-      let removalOccurred = false;
       const isRemovingActiveChat = chatId === activeChatId;
+      if (chatHistory.length === 0) {
+        return;
+      }
 
-      setChatHistory((current) => {
-        if (current.length === 0) {
-          return current;
-        }
-
-        const filtered = current.filter((chat) => chat.id !== chatId);
-
-        if (filtered.length === current.length) {
-          return current;
-        }
-
-        removalOccurred = true;
-
-        return filtered;
-      });
+      const nextChatHistory = chatHistory.filter((chat) => chat.id !== chatId);
+      const removalOccurred = nextChatHistory.length !== chatHistory.length;
 
       if (!removalOccurred) {
         return;
       }
 
+      setChatHistory(nextChatHistory);
       cancelPendingResponse();
 
       if (isRemovingActiveChat) {
         resetChatState();
       }
     },
-    [activeChatId, cancelPendingResponse, resetChatState],
+    [
+      activeChatId,
+      cancelPendingResponse,
+      chatHistory,
+      resetChatState,
+      setChatHistory,
+    ],
   );
 
   const handleRenameChat = useCallback(
