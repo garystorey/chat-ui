@@ -135,7 +135,10 @@ const useAvailableModels = ({
             return "";
           });
         }
+
+        hasFetchedRef.current = true;
       } catch (error) {
+        hasFetchedRef.current = false;
         if (!abortController.signal.aborted) {
           console.error("Failed to fetch models", error);
           onErrorRef.current?.(error);
@@ -148,7 +151,6 @@ const useAvailableModels = ({
     };
 
     void fetchModels();
-    hasFetchedRef.current = true;
 
     return () => {
       cancelled = true;
