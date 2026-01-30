@@ -14,7 +14,6 @@ import {
   ExportButton,
   HomePanels,
   Show,
-  ToastStack,
   UserInput,
 } from "./components";
 
@@ -22,8 +21,6 @@ import type {
   ChatSummary,
   ConnectionStatus,
   Message,
-  ToastItem,
-  ToastType,
   UserInputSendPayload,
 } from "./types";
 import {
@@ -34,6 +31,7 @@ import {
   useHydrateActiveChat,
   useAvailableModels,
   useChatCompletionStream,
+  useToast,
 } from "./hooks";
 import {
   cloneMessages,
@@ -64,7 +62,7 @@ const App = () => {
   const [selectedModel, setSelectedModel] = useState("");
   const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [modelsRefreshKey, setModelsRefreshKey] = useState(0);
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const { showToast } = useToast();
   const {
     status: chatCompletionStatus,
     reset: resetChatCompletion,
@@ -82,50 +80,6 @@ const App = () => {
 
     resetChatCompletion();
   }, [resetChatCompletion]);
-
-  const toastTimeoutsRef = useRef(new Map<string, number>());
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id));
-    const timeout = toastTimeoutsRef.current.get(id);
-    if (timeout) {
-      window.clearTimeout(timeout);
-      toastTimeoutsRef.current.delete(id);
-    }
-  }, []);
-
-  const showToast = useCallback(
-    ({
-      type,
-      message,
-      duration,
-    }: {
-      type: ToastType;
-      message: string;
-      duration?: number;
-    }) => {
-      const id = getId();
-      const resolvedDuration = duration ?? (type === "error" ? 8000 : 4000);
-      setToasts((current) => [...current, { id, type, message }]);
-
-      if (resolvedDuration > 0) {
-        const timeout = window.setTimeout(() => {
-          dismissToast(id);
-        }, resolvedDuration);
-        toastTimeoutsRef.current.set(id, timeout);
-      }
-    },
-    [dismissToast],
-  );
-
-  useEffect(() => {
-    return () => {
-      toastTimeoutsRef.current.forEach((timeout) =>
-        window.clearTimeout(timeout),
-      );
-      toastTimeoutsRef.current.clear();
-    };
-  }, []);
 
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
@@ -600,7 +554,6 @@ const App = () => {
           </Show>
         </div>
       </main>
-      <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </article>
   );
 };

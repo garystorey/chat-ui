@@ -10,6 +10,7 @@ export { default as Suggestions } from "./Suggestions";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { default as ThinkingIndicator } from "./ThinkingIndicator";
 export { default as ToastStack } from "./Toast";
+export { default as ToastProvider } from "./ToastProvider";
 export { default as UserInput } from "./UserInput";
 export { default as Heading } from "./Heading";
 export { default as ChatHeader } from "./ChatHeader";
