@@ -129,7 +129,15 @@ const App = () => {
 
   useTheme();
   useToggleBodyClass("chat-open", isChatOpen);
-  usePersistChatHistory(chatHistory, setChatHistory);
+  usePersistChatHistory(chatHistory, setChatHistory, (error) => {
+    showToast({
+      type: "warning",
+      message: formatErrorMessage(
+        error,
+        "Unable to save chat history. Changes may not persist.",
+      ),
+    });
+  });
   useHydrateActiveChat({
     activeChatId,
     chatHistory,
