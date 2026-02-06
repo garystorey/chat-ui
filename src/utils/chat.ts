@@ -175,7 +175,7 @@ export const getChatCompletionContentText = (
 };
 
 export const stripAssistantArtifacts = (text: string) =>
-  text.replace(/\s*<(?:begin_of_box|end_of_box)>\s*/g, "");
+  text.replace(/\s*<\|?(?:begin_of_box|end_of_box)\|?>\s*/g, "");
 
 export const buildChatCompletionResponse = (
   chunks: ChatCompletionStreamResponse[],
