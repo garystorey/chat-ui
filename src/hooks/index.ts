@@ -11,5 +11,6 @@ export { default as useHydrateActiveChat } from "./useHydrateActiveChat";
 export { default as useConnectionListeners } from "./useConnectionListeners";
 export { default as useSpeechRecognition } from "./useSpeechRecognition";
 export { default as useAvailableModels } from "./useAvailableModels";
+export { SELECTED_MODEL_STORAGE_KEY } from "./useAvailableModels";
 export { default as useToast } from "./useToast";
 export { default as useToastManager } from "./useToastManager";

@@ -5,6 +5,25 @@ import useLatestRef from "./useLatestRef";
 
 const DEFAULT_SERVER_MODEL = "default";
 
+export const SELECTED_MODEL_STORAGE_KEY = "chat-ui-selected-model";
+
+const getStoredSelectedModelId = (): string | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const stored = window.localStorage.getItem(SELECTED_MODEL_STORAGE_KEY);
+    if (!stored) {
+      return null;
+    }
+
+    return stored;
+  } catch {
+    return null;
+  }
+};
+
 const getLoadedModelId = (data: unknown): string | null => {
   if (!isJsonLike(data)) {
     return null;
@@ -120,6 +139,8 @@ const useAvailableModels = ({
 
           setAvailableModels(nextModels);
           setSelectedModel((currentSelected) => {
+            const storedSelected = getStoredSelectedModelId();
+
             if (loadedModelId) {
               return loadedModelId;
             }
@@ -128,11 +149,15 @@ const useAvailableModels = ({
               return currentSelected;
             }
 
+            if (storedSelected && nextModels.includes(storedSelected)) {
+              return storedSelected;
+            }
+
             if (nextModels.includes(DEFAULT_SERVER_MODEL)) {
               return DEFAULT_SERVER_MODEL;
             }
 
-            return "";
+            return nextModels[0] ?? "";
           });
         }
 

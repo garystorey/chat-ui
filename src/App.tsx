@@ -30,6 +30,7 @@ import {
   usePersistChatHistory,
   useHydrateActiveChat,
   useAvailableModels,
+  SELECTED_MODEL_STORAGE_KEY,
   useChatCompletionStream,
   useToast,
 } from "./hooks";
@@ -120,6 +121,20 @@ const App = () => {
       });
     },
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      if (selectedModel) {
+        window.localStorage.setItem(SELECTED_MODEL_STORAGE_KEY, selectedModel);
+      } else {
+        window.localStorage.removeItem(SELECTED_MODEL_STORAGE_KEY);
+      }
+    } catch {}
+  }, [selectedModel]);
 
   useEffect(() => {
     return () => {
