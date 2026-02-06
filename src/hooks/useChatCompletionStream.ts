@@ -18,6 +18,8 @@ import type {
 } from "../types";
 import { CHAT_COMPLETION_PATH } from "../config";
 
+const STREAM_IDLE_TIMEOUT_MS = 2 * 60 * 1000;
+
 const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
 
 const stripDataUrlPrefix = (value: string) => {
@@ -123,57 +125,43 @@ export default function useChatCompletionStream() {
     mutationKey: ["chatCompletion"],
     networkMode: "always",
     mutationFn: async ({ body, signal, onChunk }) => {
-      try {
-        return await apiStreamRequest<
-          ChatCompletionStreamResponse,
-          ChatCompletionResponse
-        >({
+      const attempt = (nextBody: ChatCompletionRequest) => {
+        if (signal?.aborted) {
+          throw new DOMException("Aborted", "AbortError");
+        }
+
+        return apiStreamRequest<ChatCompletionStreamResponse, ChatCompletionResponse>({
           path: CHAT_COMPLETION_PATH,
           method: "POST",
-          body,
+          body: nextBody,
           signal,
+          idleTimeoutMs: STREAM_IDLE_TIMEOUT_MS,
           onMessage: onChunk,
           buildResponse: buildChatCompletionResponse,
         });
+      };
+
+      try {
+        return await attempt(body);
       } catch (error) {
-        if (
-          error instanceof ApiError &&
-          error.status === 400 &&
-          hasImageParts(body)
-        ) {
+        if (signal?.aborted) {
+          throw error;
+        }
+
+        if (error instanceof ApiError && error.status === 400 && hasImageParts(body)) {
           const message = error.message.toLowerCase();
 
           if (message.includes("base64") || message.includes("encoded image")) {
             const result = transformImageUrls(body, (value) => toRawBase64(value));
             if (result.didTransform) {
-              return apiStreamRequest<
-                ChatCompletionStreamResponse,
-                ChatCompletionResponse
-              >({
-                path: CHAT_COMPLETION_PATH,
-                method: "POST",
-                body: result.body,
-                signal,
-                onMessage: onChunk,
-                buildResponse: buildChatCompletionResponse,
-              });
+              return attempt(result.body);
             }
           }
 
           if (message.includes("invalid url")) {
             const result = transformImageUrls(body, (value) => toDataUrl(value));
             if (result.didTransform) {
-              return apiStreamRequest<
-                ChatCompletionStreamResponse,
-                ChatCompletionResponse
-              >({
-                path: CHAT_COMPLETION_PATH,
-                method: "POST",
-                body: result.body,
-                signal,
-                onMessage: onChunk,
-                buildResponse: buildChatCompletionResponse,
-              });
+              return attempt(result.body);
             }
           }
         }
@@ -213,7 +201,7 @@ export default function useChatCompletionStream() {
           return;
         }
 
-        streamFlushTimeoutRef.current = window.setTimeout(() => {
+        streamFlushTimeoutRef.current = setTimeout(() => {
           streamFlushTimeoutRef.current = null;
           flushStreamBuffer();
         }, 100);

@@ -15,7 +15,7 @@ const useToastManager = () => {
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
     const timeout = toastTimeoutsRef.current.get(id);
-    if (timeout) {
+    if (timeout !== undefined) {
       window.clearTimeout(timeout);
       toastTimeoutsRef.current.delete(id);
     }

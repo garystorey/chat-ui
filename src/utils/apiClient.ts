@@ -42,6 +42,7 @@ export async function apiStreamRequest<TMessage, TResponse>({
   body,
   headers,
   signal,
+  idleTimeoutMs,
   onMessage,
   parseMessage,
   buildResponse,
@@ -112,27 +113,55 @@ export async function apiStreamRequest<TMessage, TResponse>({
   const parse =
     parseMessage ?? ((data: string) => JSON.parse(data) as TMessage);
 
-  while (!shouldStop) {
-    const { value, done } = await reader.read();
-    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+  const readWithTimeout = async () => {
+    if (!idleTimeoutMs || idleTimeoutMs <= 0) {
+      return reader.read();
+    }
 
-    const result = parseSseEvents<TMessage>(buffer, done, (data) => {
-      if (data === "[DONE]") {
-        shouldStop = true;
-        return true;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    try {
+      return await Promise.race([
+        reader.read(),
+        new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(new Error("Stream idle timeout"));
+          }, idleTimeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
       }
-      try {
-        const message = parse(data);
-        messages.push(message);
-        onMessage?.(message);
-      } catch (error) {
-        console.error("Failed to parse stream message", error);
-      }
-      return false;
+    }
+  };
+
+  try {
+    while (!shouldStop) {
+      const { value, done } = await readWithTimeout();
+      buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+
+      const result = parseSseEvents<TMessage>(buffer, done, (data) => {
+        if (data === "[DONE]") {
+          shouldStop = true;
+          return true;
+        }
+        try {
+          const message = parse(data);
+          messages.push(message);
+          onMessage?.(message);
+        } catch (error) {
+          console.error("Failed to parse stream message", error);
+        }
+        return false;
+      });
+
+      buffer = result.remainder;
+      shouldStop = shouldStop || result.shouldStop || done;
+    }
+  } finally {
+    reader.cancel().catch(() => {
+      /* best-effort cleanup */
     });
-
-    buffer = result.remainder;
-    shouldStop = shouldStop || result.shouldStop || done;
   }
 
   return buildResponse(messages);

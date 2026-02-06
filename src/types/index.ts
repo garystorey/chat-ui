@@ -75,6 +75,7 @@ export type ApiStreamRequestOptions<TMessage, TResponse> = {
   body?: unknown;
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  idleTimeoutMs?: number;
   onMessage?: (message: TMessage) => void;
   parseMessage?: (data: string) => TMessage;
   buildResponse: (messages: TMessage[]) => TResponse;

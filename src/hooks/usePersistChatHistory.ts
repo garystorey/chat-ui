@@ -18,9 +18,14 @@ const usePersistChatHistory = (
       return;
     }
 
-    const storedChatHistory = window.localStorage.getItem(
-      CHAT_HISTORY_STORAGE_KEY,
-    );
+    let storedChatHistory: string | null = null;
+    try {
+      storedChatHistory = window.localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
+    } catch (error) {
+      console.error("Unable to access stored chat history", error);
+      setHasHydrated(true);
+      return;
+    }
 
     if (!storedChatHistory) {
       setHasHydrated(true);
