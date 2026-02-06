@@ -1,7 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { API_BASE_URL } from "../../src/config";
-import { apiStreamRequest } from "../../src/utils";
+const API_BASE_URL = "https://api.example.com";
+
+const loadApiClient = async () => {
+  vi.resetModules();
+  vi.doMock("../../src/config", () => ({
+    getApiBaseUrl: () => API_BASE_URL,
+    getOpenAIApiKey: () => "",
+    OPENAI_BETA_FEATURES: "assistants=v2",
+  }));
+
+  return import("../../src/utils/apiClient");
+};
 
 const encoder = new TextEncoder();
 const createSseResponse = (chunks: string[], status = 200) =>
@@ -26,6 +36,7 @@ describe("apiStreamRequest", () => {
   });
 
   it("returns parsed JSON for non-stream responses", async () => {
+    const { apiStreamRequest } = await loadApiClient();
     const responseData = { status: "ok", payload: { id: "123" } };
     const response = new Response(JSON.stringify(responseData), {
       status: 200,
@@ -61,6 +72,7 @@ describe("apiStreamRequest", () => {
   });
 
   it("throws an ApiError with parsed response information when the request fails", async () => {
+    const { apiStreamRequest } = await loadApiClient();
     const response = new Response(JSON.stringify({ message: "Failure" }), {
       status: 500,
       statusText: "Internal",
@@ -82,6 +94,7 @@ describe("apiStreamRequest", () => {
   });
 
   it("streams SSE messages, parsing and forwarding each message to callbacks", async () => {
+    const { apiStreamRequest } = await loadApiClient();
     const response = createSseResponse([
       'data: {"text":"first"}\n\n',
       'data: {"text":"se',
@@ -117,6 +130,7 @@ describe("apiStreamRequest", () => {
   });
 
   it("logs parse errors and continues processing subsequent SSE messages", async () => {
+    const { apiStreamRequest } = await loadApiClient();
     const response = createSseResponse([
       'data: {"text":"ok"}\n\n',
       "data: invalid-json\n\n",

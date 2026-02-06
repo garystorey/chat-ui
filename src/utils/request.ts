@@ -1,4 +1,4 @@
-import { API_BASE_URL, OPENAI_API_KEY, OPENAI_BETA_FEATURES } from "../config";
+import { getApiBaseUrl, getOpenAIApiKey, OPENAI_BETA_FEATURES } from "../config";
 import { ApiRequestOptions } from "../types";
 
 export const isJsonLike = (
@@ -60,8 +60,9 @@ export const buildRequest = ({
     ...headers,
   };
 
-  if (OPENAI_API_KEY && !requestHeaders.Authorization) {
-    requestHeaders.Authorization = `Bearer ${OPENAI_API_KEY}`;
+  const openAIApiKey = getOpenAIApiKey();
+  if (openAIApiKey && !requestHeaders.Authorization) {
+    requestHeaders.Authorization = `Bearer ${openAIApiKey}`;
   }
 
   if (OPENAI_BETA_FEATURES && !requestHeaders["OpenAI-Beta"]) {
@@ -83,7 +84,8 @@ export const buildRequest = ({
     }
   }
 
-  const url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  const baseUrl = getApiBaseUrl();
+  const url = `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
 
   return {
     url,

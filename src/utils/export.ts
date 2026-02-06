@@ -160,7 +160,7 @@ const isValidMessage = (msg: unknown): msg is Message => {
           const a = attachment as Record<string, unknown>;
           return (
             typeof a.id === "string" &&
-            a.type === "image" &&
+            (a.type === "image" || a.type === "file") &&
             typeof a.name === "string" &&
             typeof a.mimeType === "string" &&
             typeof a.size === "number" &&

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, type SetStateAction } from "react";
 
-import { API_BASE_URL } from "../config";
+import { getApiBaseUrl } from "../config";
 import { ConnectionStatus } from "../types";
 
 const logConnectionError = (message: string, error?: unknown) => {
@@ -29,7 +29,11 @@ const useConnectionListeners = ({
       try {
         setConnectionStatus("connecting");
 
-        const response = await fetch(API_BASE_URL, { method: "HEAD", signal });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(baseUrl, {
+          method: "HEAD",
+          signal,
+        });
         const isApiAvailable =
           response.ok || (response.status >= 400 && response.status < 600);
         const nextStatus: ConnectionStatus = isApiAvailable

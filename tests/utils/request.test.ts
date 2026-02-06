@@ -5,8 +5,8 @@ const loadRequestModule = async (
 ) => {
   vi.resetModules();
   vi.doMock("../../src/config", () => ({
-    API_BASE_URL: "https://api.example.com",
-    OPENAI_API_KEY: configOverrides.apiKey ?? "",
+    getApiBaseUrl: () => "https://api.example.com",
+    getOpenAIApiKey: () => configOverrides.apiKey ?? "",
     OPENAI_BETA_FEATURES: configOverrides.beta ?? "assistants=v2",
   }));
 

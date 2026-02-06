@@ -36,11 +36,11 @@ describe("ChatMessage", () => {
       ...baseMessage,
       id: "msg-html",
       renderAsHtml: true,
-      content: '<strong data-testid="trusted">Trusted content</strong>',
+      content: "<strong>Trusted content</strong>",
     };
 
     render(<ChatMessage message={htmlMessage} />);
 
-    expect(screen.getByTestId("trusted")).toHaveTextContent("Trusted content");
+    expect(screen.getByText("Trusted content")).toBeInTheDocument();
   });
 });

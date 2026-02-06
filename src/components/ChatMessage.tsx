@@ -131,30 +131,43 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
               attachment.type === "image" ||
               attachment.mimeType.startsWith("image/");
 
+            const url = attachment.url.trim();
+            const isRemote =
+              url.startsWith("http://") || url.startsWith("https://");
+            const isInlineSafeImage =
+              isImage &&
+              !isRemote &&
+              (url.startsWith("data:") || url.startsWith("blob:"));
+
             return (
               <figure key={attachment.id} className="message__attachment">
-                {isImage ? (
+                {isInlineSafeImage ? (
                   <img
-                    src={attachment.url}
+                    src={url}
                     alt={attachment.name}
                     className="message__attachment-image"
                     loading="lazy"
                   />
                 ) : (
                   <a
-                    href={attachment.url}
-                    download={attachment.name}
+                    href={url}
+                    {...(!isRemote ? { download: attachment.name } : {})}
+                    {...(isRemote
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                     className="message__attachment-file"
                   >
                     <span className="message__attachment-file-name">
                       {attachment.name}
                     </span>
                     <span className="message__attachment-file-meta">
-                      {attachment.mimeType || "Attachment"}
+                      {isRemote
+                        ? "External link"
+                        : attachment.mimeType || "Attachment"}
                     </span>
                   </a>
                 )}
-                {isImage && (
+                {isInlineSafeImage && (
                   <figcaption className="message__attachment-caption">
                     {attachment.name}
                   </figcaption>
