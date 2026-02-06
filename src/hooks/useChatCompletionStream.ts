@@ -13,8 +13,102 @@ import type {
   ChatCompletionStreamArgs,
   ChatCompletionResponse,
   ChatCompletionStreamResponse,
+  ChatCompletionRequest,
+  ChatCompletionContentPart,
 } from "../types";
 import { CHAT_COMPLETION_PATH } from "../config";
+
+const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
+
+const stripDataUrlPrefix = (value: string) => {
+  const match = value.match(/^data:.*?;base64,(.*)$/);
+  return match?.[1] ?? null;
+};
+
+const toRawBase64 = (value: string) => {
+  if (value.startsWith("data:")) {
+    const extracted = stripDataUrlPrefix(value);
+    return extracted && base64Pattern.test(extracted) ? extracted : null;
+  }
+
+  return base64Pattern.test(value) ? value : null;
+};
+
+const toDataUrl = (value: string) => {
+  if (value.startsWith("data:")) {
+    return value;
+  }
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+  if (base64Pattern.test(value)) {
+    return `data:image/png;base64,${value}`;
+  }
+  return null;
+};
+
+type ChatCompletionImagePart = Extract<ChatCompletionContentPart, { type: "image_url" }>;
+
+const isImagePart = (part: ChatCompletionContentPart): part is ChatCompletionImagePart =>
+  part.type === "image_url" &&
+  "image_url" in part &&
+  typeof (part as { image_url?: { url?: unknown } }).image_url?.url === "string";
+
+const hasImageParts = (body: ChatCompletionRequest) =>
+  Array.isArray(body.messages) &&
+  body.messages.some((message) => {
+    const { content } = message;
+    return Array.isArray(content) && content.some((part) => isImagePart(part));
+  });
+
+const transformImageUrls = (
+  body: ChatCompletionRequest,
+  transformer: (value: string) => string | null,
+) => {
+  let didTransform = false;
+
+  const nextMessages = body.messages.map((message) => {
+    const { content } = message;
+    if (!Array.isArray(content)) {
+      return message;
+    }
+
+    const nextContent = content.map((part) => {
+      if (!isImagePart(part)) {
+        return part;
+      }
+
+      const currentUrl = part.image_url.url;
+
+      const nextUrl = transformer(currentUrl);
+      if (!nextUrl || nextUrl === currentUrl) {
+        return part;
+      }
+
+      didTransform = true;
+      return {
+        ...part,
+        image_url: {
+          ...part.image_url,
+          url: nextUrl,
+        },
+      };
+    });
+
+    return {
+      ...message,
+      content: nextContent,
+    };
+  });
+
+  return {
+    didTransform,
+    body: {
+      ...body,
+      messages: nextMessages,
+    },
+  };
+};
 
 export default function useChatCompletionStream() {
   const {
@@ -29,17 +123,63 @@ export default function useChatCompletionStream() {
     mutationKey: ["chatCompletion"],
     networkMode: "always",
     mutationFn: async ({ body, signal, onChunk }) => {
-      return apiStreamRequest<
-        ChatCompletionStreamResponse,
-        ChatCompletionResponse
-      >({
-        path: CHAT_COMPLETION_PATH,
-        method: "POST",
-        body,
-        signal,
-        onMessage: onChunk,
-        buildResponse: buildChatCompletionResponse,
-      });
+      try {
+        return await apiStreamRequest<
+          ChatCompletionStreamResponse,
+          ChatCompletionResponse
+        >({
+          path: CHAT_COMPLETION_PATH,
+          method: "POST",
+          body,
+          signal,
+          onMessage: onChunk,
+          buildResponse: buildChatCompletionResponse,
+        });
+      } catch (error) {
+        if (
+          error instanceof ApiError &&
+          error.status === 400 &&
+          hasImageParts(body)
+        ) {
+          const message = error.message.toLowerCase();
+
+          if (message.includes("base64") || message.includes("encoded image")) {
+            const result = transformImageUrls(body, (value) => toRawBase64(value));
+            if (result.didTransform) {
+              return apiStreamRequest<
+                ChatCompletionStreamResponse,
+                ChatCompletionResponse
+              >({
+                path: CHAT_COMPLETION_PATH,
+                method: "POST",
+                body: result.body,
+                signal,
+                onMessage: onChunk,
+                buildResponse: buildChatCompletionResponse,
+              });
+            }
+          }
+
+          if (message.includes("invalid url")) {
+            const result = transformImageUrls(body, (value) => toDataUrl(value));
+            if (result.didTransform) {
+              return apiStreamRequest<
+                ChatCompletionStreamResponse,
+                ChatCompletionResponse
+              >({
+                path: CHAT_COMPLETION_PATH,
+                method: "POST",
+                body: result.body,
+                signal,
+                onMessage: onChunk,
+                buildResponse: buildChatCompletionResponse,
+              });
+            }
+          }
+        }
+
+        throw error;
+      }
     },
   });
   const pendingRequestRef = useRef<AbortController | null>(null);

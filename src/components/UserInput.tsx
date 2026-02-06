@@ -71,6 +71,42 @@ type UserInputProps = {
 const MAX_ATTACHMENTS = 4;
 const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 
+const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
+
+const inferMimeTypeFromName = (name: string) => {
+  const lower = name.trim().toLowerCase();
+
+  if (lower.endsWith(".png")) {
+    return "image/png";
+  }
+
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+
+  if (lower.endsWith(".webp")) {
+    return "image/webp";
+  }
+
+  if (lower.endsWith(".gif")) {
+    return "image/gif";
+  }
+
+  if (lower.endsWith(".bmp")) {
+    return "image/bmp";
+  }
+
+  if (lower.endsWith(".tif") || lower.endsWith(".tiff")) {
+    return "image/tiff";
+  }
+
+  if (lower.endsWith(".svg")) {
+    return "image/svg+xml";
+  }
+
+  return "";
+};
+
 const readFileAsDataUrl = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -306,7 +342,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           return;
         }
 
-        if (attachments.length + files.length > MAX_ATTACHMENTS) {
+        if (attachments.length >= MAX_ATTACHMENTS) {
           onToast?.({
             type: "warning",
             message: `You can attach up to ${MAX_ATTACHMENTS} files.`,
@@ -314,9 +350,19 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
           return;
         }
 
+        const remainingSlots = MAX_ATTACHMENTS - attachments.length;
+        const nextFiles = files.slice(0, remainingSlots);
+
+        if (files.length > remainingSlots) {
+          onToast?.({
+            type: "warning",
+            message: `You can attach up to ${MAX_ATTACHMENTS} files.`,
+          });
+        }
+
         const nextAttachments: MessageAttachment[] = [];
 
-        for (const file of files) {
+        for (const file of nextFiles) {
           if (file.size > MAX_ATTACHMENT_BYTES) {
             onToast?.({
               type: "warning",
@@ -325,13 +371,25 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
             continue;
           }
 
+          const inferredMimeType =
+            file.type || inferMimeTypeFromName(file.name);
+          const isImage = inferredMimeType.startsWith("image/");
+
+          if (isImage && !ALLOWED_IMAGE_MIME_TYPES.has(inferredMimeType)) {
+            onToast?.({
+              type: "warning",
+              message: `${file.name} is not a supported image type. Use PNG or JPEG.`,
+            });
+            continue;
+          }
+
           try {
             const url = await readFileAsDataUrl(file);
             nextAttachments.push({
               id: getId(),
-              type: file.type.startsWith("image/") ? "image" : "file",
+              type: isImage ? "image" : "file",
               name: file.name,
-              mimeType: file.type,
+              mimeType: inferredMimeType || "application/octet-stream",
               size: file.size,
               url,
             });

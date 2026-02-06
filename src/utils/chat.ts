@@ -76,6 +76,8 @@ export const toChatCompletionMessages = (
 
 const DEFAULT_MIME_TYPE = "application/octet-stream";
 
+const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
+
 const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
 
 const toDataUrl = (url: string, mimeType: string) => {
@@ -117,6 +119,18 @@ const buildAttachmentContentParts = (attachments: MessageAttachment[]) => {
 
   attachments.forEach((attachment) => {
     if (attachment.type === "image" || attachment.mimeType.startsWith("image/")) {
+      if (
+        attachment.mimeType &&
+        attachment.mimeType.startsWith("image/") &&
+        !ALLOWED_IMAGE_MIME_TYPES.has(attachment.mimeType)
+      ) {
+        console.warn(
+          "Skipping unsupported image attachment mime type.",
+          attachment.mimeType,
+        );
+        return;
+      }
+
       const url = buildImageUrl(attachment);
       if (!url) {
         return;

@@ -145,7 +145,11 @@ const App = () => {
   }, [connectionStatus, showToast]);
 
   const persistChatHistory = useCallback(
-    (chatId: string | null, nextMessages: Message[], previewMessage?: Message) => {
+    (
+      chatId: string | null,
+      nextMessages: Message[],
+      previewMessage?: Message,
+    ) => {
       if (!chatId) {
         return;
       }
@@ -263,7 +267,10 @@ const App = () => {
         console.error("Chat completion request failed", error);
         showToast({
           type: "error",
-          message: formatErrorMessage(error, "Unable to complete the response."),
+          message: formatErrorMessage(
+            error,
+            "Unable to complete the response.",
+          ),
         });
         updateAssistantMessageContent(
           assistantMessageId,
