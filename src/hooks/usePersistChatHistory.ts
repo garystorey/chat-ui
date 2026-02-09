@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import type { ChatSummary } from "../types";
+import { parseChatPayload } from "../utils";
 import useLatestRef from "./useLatestRef";
 
 const CHAT_HISTORY_STORAGE_KEY = "chatHistory";
@@ -33,8 +34,20 @@ const usePersistChatHistory = (
     }
 
     try {
-      const parsedChatHistory = JSON.parse(storedChatHistory) as ChatSummary[];
-      setChatHistory(parsedChatHistory);
+      const parsed = JSON.parse(storedChatHistory) as unknown;
+      const normalizedChats = parseChatPayload(parsed);
+
+      if (normalizedChats.length > 0) {
+        setChatHistory(normalizedChats);
+      } else if (
+        (Array.isArray(parsed) && parsed.length === 0) ||
+        (typeof parsed === "object" &&
+          parsed !== null &&
+          Array.isArray((parsed as { chats?: unknown }).chats) &&
+          (parsed as { chats?: unknown[] }).chats?.length === 0)
+      ) {
+        setChatHistory([]);
+      }
     } catch (error) {
       console.error("Unable to parse stored chat history", error);
     }
