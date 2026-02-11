@@ -14,7 +14,7 @@ if (!el) {
   throw new Error('no root element')
 }
 
-ReactDOM.createRoot(el) as HTMLElement).render(
+ReactDOM.createRoot(el).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
