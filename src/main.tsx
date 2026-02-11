@@ -8,16 +8,16 @@ import "./styles/highlight.css";
 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+const el = document.getElementById("root") as HTMLElement
+
+if (!el) {
+  throw new Error('no root element')
+}
+
+ReactDOM.createRoot(el) as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
-      {import.meta.env.DEV ? (
-        <ReactQueryDevtools
-          buttonPosition="bottom-left"
-          initialIsOpen={false}
-        />
-      ) : null}
     </QueryClientProvider>
   </React.StrictMode>,
 );
