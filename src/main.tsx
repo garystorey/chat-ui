@@ -8,7 +8,7 @@ import "./styles/highlight.css";
 
 const queryClient = new QueryClient();
 
-const el = document.getElementById("root") as HTMLElement
+const el = document.getElementById("root")
 
 if (!el) {
   throw new Error('no root element')
