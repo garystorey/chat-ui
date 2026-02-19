@@ -19,8 +19,12 @@ import {
 
 import type {
   ChatSummary,
+  ChatCompletionMessage,
+  ChatCompletionRequest,
+  ChatCompletionResponse,
   ConnectionStatus,
   Message,
+  MessageToolInvocation,
   UserInputSendPayload,
 } from "./types";
 import {
@@ -38,16 +42,38 @@ import {
   cloneMessages,
   createChatRecordFromMessages,
   buildChatPreview,
+  executeLocalToolCalls,
+  extractAssistantReply,
+  extractAssistantToolCalls,
   formatErrorMessage,
+  getAssistantChoice,
   getId,
+  LOCAL_CHAT_TOOLS,
   sortChatsByUpdatedAt,
+  toCompletedToolInvocations,
   toChatCompletionMessages,
+  toPendingToolInvocations,
+  toToolResultMessages,
   upsertChatHistoryWithMessages,
 } from "./utils";
 
-import { ASSISTANT_ERROR_MESSAGE, defaultChats, suggestions } from "./config";
+import {
+  ASSISTANT_ERROR_MESSAGE,
+  ENABLE_TOOL_CALLS,
+  MAX_TOOL_CALL_ROUNDS,
+  defaultChats,
+  suggestions,
+} from "./config";
 
 import "./App.css";
+
+const isAbortError = (error: unknown) =>
+  error instanceof DOMException && error.name === "AbortError";
+
+const areToolInvocationsEqual = (
+  left: MessageToolInvocation[] | undefined,
+  right: MessageToolInvocation[] | undefined,
+) => JSON.stringify(left ?? []) === JSON.stringify(right ?? []);
 
 const App = () => {
   const [messages, setMessages] = useAtom(messagesAtom);
@@ -226,6 +252,46 @@ const App = () => {
     persistChatHistory(chatId, messages, lastMessage);
   }, [activeChatId, messages, persistChatHistory]);
 
+  const updateAssistantToolInvocations = useCallback(
+    (
+      assistantMessageId: string,
+      chatId: string,
+      toolInvocations: MessageToolInvocation[],
+      { skipIfUnchanged = false } = {},
+    ) => {
+      setMessages((current) => {
+        let previewMessage: Message | undefined;
+        const next = current.map((message) => {
+          if (message.id !== assistantMessageId) {
+            return message;
+          }
+
+          if (
+            skipIfUnchanged &&
+            areToolInvocationsEqual(message.toolInvocations, toolInvocations)
+          ) {
+            previewMessage = message;
+            return message;
+          }
+
+          const updated: Message = {
+            ...message,
+            toolInvocations,
+          };
+          previewMessage = updated;
+          return updated;
+        });
+
+        if (previewMessage) {
+          persistChatHistory(chatId, next, previewMessage);
+        }
+
+        return next;
+      });
+    },
+    [persistChatHistory, setMessages],
+  );
+
   const handleSend = useCallback(
     async ({ text, attachments, model }: UserInputSendPayload) => {
       const trimmedText = text?.trim() ?? "";
@@ -279,6 +345,10 @@ const App = () => {
 
       const conversationForRequest = [...messages, userMessage];
       const handleCompletionError = (error: unknown) => {
+        if (isAbortError(error)) {
+          return;
+        }
+
         console.error("Chat completion request failed", error);
         showToast({
           type: "error",
@@ -312,18 +382,113 @@ const App = () => {
           },
         );
 
-      sendChatCompletion({
-        body: {
-          model: modelToUse,
-          messages: toChatCompletionMessages(conversationForRequest),
-          stream: true,
-        },
-        onStreamUpdate: (content) =>
-          updateAssistantMessageContent(assistantMessageId, chatId, content),
-        onStreamComplete: handleFinalAssistantReply,
-        onError: handleCompletionError,
-        onSettled: () => {},
-      });
+      const streamRequest = (body: ChatCompletionRequest) =>
+        new Promise<ChatCompletionResponse>((resolve, reject) => {
+          let didSettle = false;
+
+          sendChatCompletion({
+            body,
+            onStreamUpdate: (content) =>
+              updateAssistantMessageContent(assistantMessageId, chatId, content),
+            onStreamComplete: handleFinalAssistantReply,
+            onResponse: (response) => {
+              didSettle = true;
+              resolve(response);
+            },
+            onError: (error) => {
+              didSettle = true;
+              reject(error);
+            },
+            onSettled: () => {
+              if (!didSettle) {
+                reject(new DOMException("Aborted", "AbortError"));
+              }
+            },
+          });
+        });
+
+      if (!ENABLE_TOOL_CALLS) {
+        sendChatCompletion({
+          body: {
+            model: modelToUse,
+            messages: toChatCompletionMessages(conversationForRequest),
+            stream: true,
+          },
+          onStreamUpdate: (content) =>
+            updateAssistantMessageContent(assistantMessageId, chatId, content),
+          onStreamComplete: handleFinalAssistantReply,
+          onError: handleCompletionError,
+          onSettled: () => {},
+        });
+
+        return true;
+      }
+
+      try {
+        let requestMessages = toChatCompletionMessages(conversationForRequest);
+        let toolRoundCount = 0;
+
+        while (true) {
+          const response = await streamRequest({
+            model: modelToUse,
+            messages: requestMessages,
+            stream: true,
+            tools: LOCAL_CHAT_TOOLS,
+            tool_choice: "auto",
+            parallel_tool_calls: false,
+          });
+
+          const assistantChoice = getAssistantChoice(response);
+          const assistantToolCalls = extractAssistantToolCalls(response);
+          const shouldExecuteTools =
+            assistantChoice?.finish_reason === "tool_calls" &&
+            assistantToolCalls.length > 0;
+
+          if (!shouldExecuteTools) {
+            const finalAssistantReply = extractAssistantReply(response);
+            if (finalAssistantReply) {
+              handleFinalAssistantReply(finalAssistantReply);
+            }
+            break;
+          }
+
+          if (toolRoundCount >= MAX_TOOL_CALL_ROUNDS) {
+            throw new Error("Reached tool execution limit.");
+          }
+
+          toolRoundCount += 1;
+
+          updateAssistantToolInvocations(
+            assistantMessageId,
+            chatId,
+            toPendingToolInvocations(assistantToolCalls),
+          );
+
+          const executionResults = await executeLocalToolCalls(
+            assistantToolCalls,
+          );
+
+          updateAssistantToolInvocations(
+            assistantMessageId,
+            chatId,
+            toCompletedToolInvocations(executionResults),
+          );
+
+          const assistantToolMessage: ChatCompletionMessage = {
+            role: "assistant",
+            content: assistantChoice?.message?.content ?? null,
+            tool_calls: assistantToolCalls,
+          };
+
+          requestMessages = [
+            ...requestMessages,
+            assistantToolMessage,
+            ...toToolResultMessages(executionResults),
+          ];
+        }
+      } catch (error) {
+        handleCompletionError(error);
+      }
 
       return true;
     },
@@ -340,6 +505,7 @@ const App = () => {
       setMessages,
       selectedModel,
       updateAssistantMessageContent,
+      updateAssistantToolInvocations,
       showToast,
     ],
   );

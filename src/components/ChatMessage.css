@@ -46,6 +46,80 @@
   margin-top: 0.75rem;
 }
 
+.message__tools {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.message__tool {
+  border: 1px solid color-mix(in oklab, var(--panel-border) 75%, transparent);
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.7rem;
+  background-color: color-mix(in oklab, var(--panel) 88%, var(--bg) 12%);
+}
+
+.message__tool-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.message__tool-name {
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+
+.message__tool-status {
+  font-size: 0.7rem;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+
+.message__tool-status--pending,
+.message__tool-status--running {
+  background-color: color-mix(in oklab, var(--status-info) 18%, transparent);
+  border-color: color-mix(in oklab, var(--status-info) 28%, transparent);
+}
+
+.message__tool-status--success {
+  background-color: color-mix(in oklab, var(--status-success) 20%, transparent);
+  border-color: color-mix(in oklab, var(--status-success) 30%, transparent);
+}
+
+.message__tool-status--error {
+  background-color: color-mix(in oklab, var(--status-error) 20%, transparent);
+  border-color: color-mix(in oklab, var(--status-error) 30%, transparent);
+}
+
+.message__tool-content {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.45rem;
+  overflow: auto;
+  border: 1px solid color-mix(in oklab, var(--panel-border) 60%, transparent);
+}
+
+.message__tool-content + .message__tool-content {
+  margin-top: 0.5rem;
+}
+
+.message__tool-content--arguments {
+  background-color: color-mix(in oklab, var(--panel) 75%, var(--bg) 25%);
+}
+
+.message__tool-content--result {
+  background-color: color-mix(in oklab, var(--panel) 85%, var(--accent) 15%);
+}
+
 .message__attachments:first-child {
   margin-top: 0;
 }

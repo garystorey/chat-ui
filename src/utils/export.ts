@@ -50,6 +50,7 @@ export const serializeMessage = (msg: Message) => ({
   sender: msg.sender,
   content: msg.content,
   ...(msg.attachments ? { attachments: msg.attachments } : {}),
+  ...(msg.toolInvocations ? { toolInvocations: msg.toolInvocations } : {}),
   ...(msg.renderAsHtml ? { renderAsHtml: true } : {}),
 });
 
@@ -165,6 +166,24 @@ const isValidMessage = (msg: unknown): msg is Message => {
             typeof a.mimeType === "string" &&
             typeof a.size === "number" &&
             typeof a.url === "string"
+          );
+        }))) &&
+    (m.toolInvocations === undefined ||
+      (Array.isArray(m.toolInvocations) &&
+        m.toolInvocations.every((invocation) => {
+          if (typeof invocation !== "object" || invocation === null) {
+            return false;
+          }
+          const i = invocation as Record<string, unknown>;
+          return (
+            typeof i.id === "string" &&
+            typeof i.name === "string" &&
+            typeof i.arguments === "string" &&
+            (i.status === "pending" ||
+              i.status === "running" ||
+              i.status === "success" ||
+              i.status === "error") &&
+            (i.result === undefined || typeof i.result === "string")
           );
         }))) &&
     (m.renderAsHtml === undefined || typeof m.renderAsHtml === "boolean")

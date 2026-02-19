@@ -4,12 +4,18 @@ import {
   getMessagePlainText,
   toChatCompletionMessages,
   getChatCompletionContentText,
+  buildChatCompletionResponse,
   extractAssistantReply,
+  extractAssistantToolCalls,
   buildChatTitle,
   buildChatPreview,
   createChatRecordFromMessages,
 } from "../../src/utils/chat";
-import type { Message, ChatCompletionResponse } from "../../src/types";
+import type {
+  Message,
+  ChatCompletionResponse,
+  ChatCompletionStreamResponse,
+} from "../../src/types";
 
 vi.mock("../../src/utils/id", () => ({
   getId: vi.fn(() => "chat-id"),
@@ -93,6 +99,67 @@ describe("chat utilities", () => {
 
     expect(extractAssistantReply(response)).toBe("Done");
     expect(extractAssistantReply({ choices: [] })).toBe("");
+  });
+
+  it("reconstructs streamed tool call chunks into full assistant tool calls", () => {
+    const chunks: ChatCompletionStreamResponse[] = [
+      {
+        id: "cmpl-1",
+        choices: [
+          {
+            index: 0,
+            delta: {
+              role: "assistant",
+              tool_calls: [
+                {
+                  index: 0,
+                  id: "call_1",
+                  type: "function",
+                  function: {
+                    name: "echo",
+                    arguments: "{",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      {
+        id: "cmpl-1",
+        choices: [
+          {
+            index: 0,
+            delta: {
+              tool_calls: [
+                {
+                  index: 0,
+                  function: {
+                    arguments: '"text":"hello"}',
+                  },
+                },
+              ],
+            },
+            finish_reason: "tool_calls",
+          },
+        ],
+      },
+    ];
+
+    const response = buildChatCompletionResponse(chunks);
+
+    expect(response.choices[0]?.finish_reason).toBe("tool_calls");
+    expect(response.choices[0]?.message.content).toBeNull();
+    expect(extractAssistantToolCalls(response)).toEqual([
+      {
+        id: "call_1",
+        type: "function",
+        function: {
+          name: "echo",
+          arguments: '{"text":"hello"}',
+        },
+      },
+    ]);
   });
 
   it("builds chat titles and previews from message content and fallbacks", () => {

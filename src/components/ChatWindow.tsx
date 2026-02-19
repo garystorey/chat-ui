@@ -27,7 +27,8 @@ const ChatWindow = ({ messages, isResponding }: ChatWindowProps) => {
     isResponding &&
     messages.length > 0 &&
     messages[messages.length - 1]?.sender === "bot" &&
-    messages[messages.length - 1]?.content.trim() === "";
+    messages[messages.length - 1]?.content.trim() === "" &&
+    (messages[messages.length - 1]?.toolInvocations?.length ?? 0) === 0;
   const visibleMessages = shouldHidePendingAssistant
     ? messages.slice(0, -1)
     : messages;

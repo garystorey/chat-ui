@@ -39,6 +39,7 @@ export type Message = {
   content: string;
   renderAsHtml?: boolean;
   attachments?: MessageAttachment[];
+  toolInvocations?: MessageToolInvocation[];
 };
 
 export type PreviewChat = {
@@ -88,6 +89,38 @@ export type ChatCompletionRole =
   | "assistant"
   | "tool";
 
+export type ChatCompletionFunctionTool = {
+  type: "function";
+  function: {
+    name: string;
+    description?: string;
+    parameters?: Record<string, unknown>;
+    strict?: boolean;
+  };
+};
+
+export type ChatCompletionTool = ChatCompletionFunctionTool;
+
+export type ChatCompletionToolChoice =
+  | "none"
+  | "auto"
+  | "required"
+  | {
+      type: "function";
+      function: {
+        name: string;
+      };
+    };
+
+export type ChatCompletionToolCall = {
+  id: string;
+  type: "function";
+  function: {
+    name: string;
+    arguments: string;
+  };
+};
+
 type ChatCompletionContentPartType= "text" | "output_text" | "input_text" | "image_url";
 type ChatCompletionImageContentPartDetail = "auto" | "low" | "high";
 
@@ -112,13 +145,19 @@ export type ChatCompletionContentPart =
 
 export type ChatCompletionMessage = {
   role: ChatCompletionRole;
-  content: string | ChatCompletionContentPart[];
+  content?: string | ChatCompletionContentPart[] | null;
+  name?: string;
+  tool_calls?: ChatCompletionToolCall[];
+  tool_call_id?: string;
 };
 
 export type ChatCompletionRequest = {
   model: string;
   messages: ChatCompletionMessage[];
   stream?: boolean;
+  tools?: ChatCompletionTool[];
+  tool_choice?: ChatCompletionToolChoice;
+  parallel_tool_calls?: boolean;
   [key: string]: unknown;
 };
 
@@ -137,24 +176,19 @@ export type ChatCompletionResponse = {
 export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = 
   Pick<T, Exclude<keyof T, Keys>> &
   {
-    [K in Keys]-?: Required<Pick<T, K>> & Partial<Record<Exclude<Keys, K>, never>>
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>
   }[Keys];
 
 export type ChatCompletionDeltaToolCall =
-  | {
-      index: number;
-      id?: string;
-      type?: never;
-    }
-  | {
-      index: number;
-      id?: string;
-      type: "function";
-      function: {
-        name: string;
-        arguments: string;
-      };
+  {
+    index: number;
+    id?: string;
+    type?: "function";
+    function?: {
+      name?: string;
+      arguments?: string;
     };
+  };
 
 export type ChatCompletionDeltaBase = {
   role?: ChatCompletionRole;
@@ -183,6 +217,7 @@ export type ChatCompletionStreamArgs = {
   body: ChatCompletionRequest;
   onStreamUpdate: (content: string) => void;
   onStreamComplete: (content: string) => void;
+  onResponse?: (response: ChatCompletionResponse) => void;
   onError: (error: unknown) => void;
   onSettled?: () => void;
 };
@@ -191,6 +226,20 @@ export type ChatCompletionMutationVariables = {
   body: ChatCompletionRequest;
   signal?: AbortSignal;
   onChunk?: (chunk: ChatCompletionStreamResponse) => void;
+};
+
+export type MessageToolInvocationStatus =
+  | "pending"
+  | "running"
+  | "success"
+  | "error";
+
+export type MessageToolInvocation = {
+  id: string;
+  name: string;
+  arguments: string;
+  status: MessageToolInvocationStatus;
+  result?: string;
 };
 
 /* ---------------------------------------------

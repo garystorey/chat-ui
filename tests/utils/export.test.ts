@@ -16,6 +16,15 @@ const buildChat = (id: string, updatedAt: number): ChatSummary => ({
       id: `msg-${id}`,
       sender: "user",
       content: "Hello",
+      toolInvocations: [
+        {
+          id: `tool-${id}`,
+          name: "echo",
+          arguments: '{"text":"Hello"}',
+          status: "success",
+          result: '{"text":"Hello"}',
+        },
+      ],
       renderAsHtml: false,
     },
   ],
@@ -32,6 +41,7 @@ describe("export helpers", () => {
     expect(parsed.updatedAt).toBe(chat.updatedAt);
     expect(parsed.updatedAtFormatted).toContain("2024");
     expect(parsed.messages).toHaveLength(1);
+    expect(parsed.messages[0]?.toolInvocations).toBeTruthy();
   });
 
   it("exports all chats with summary metadata", () => {

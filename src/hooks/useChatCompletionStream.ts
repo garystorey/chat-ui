@@ -166,6 +166,29 @@ export default function useChatCompletionStream() {
           }
         }
 
+        if (
+          error instanceof ApiError &&
+          error.status === 400 &&
+          Array.isArray(body.tools) &&
+          body.tools.length > 0
+        ) {
+          const message = error.message.toLowerCase();
+          const indicatesToolSupportMismatch =
+            message.includes("tool") ||
+            message.includes("function") ||
+            message.includes("tool_choice");
+
+          if (indicatesToolSupportMismatch) {
+            const fallbackBody: ChatCompletionRequest = {
+              ...body,
+            };
+            delete fallbackBody.tools;
+            delete fallbackBody.tool_choice;
+            delete fallbackBody.parallel_tool_calls;
+            return attempt(fallbackBody);
+          }
+        }
+
         throw error;
       }
     },
@@ -181,6 +204,7 @@ export default function useChatCompletionStream() {
       body,
       onStreamUpdate,
       onStreamComplete,
+      onResponse,
       onError,
       onSettled,
     }: ChatCompletionStreamArgs) => {
@@ -248,6 +272,7 @@ export default function useChatCompletionStream() {
           onSuccess: (response: ChatCompletionResponse) => {
             flushStreamBuffer();
             clearStreamState();
+            onResponse?.(response);
 
             const finalAssistantReply = extractAssistantReply(response);
             if (!finalAssistantReply) {

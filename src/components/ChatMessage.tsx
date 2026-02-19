@@ -34,7 +34,9 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
     return renderMarkdown(message.content);
   }, [message.content, message.renderAsHtml]);
   const attachments = message.attachments ?? [];
+  const toolInvocations = message.toolInvocations ?? [];
   const hasAttachments = attachments.length > 0;
+  const hasToolInvocations = toolInvocations.length > 0;
   const hasContent = message.content.trim().length > 0;
 
   useEffect(() => {
@@ -123,6 +125,32 @@ const ChatMessage = ({ message, isStreaming = false }: ChatMessageProps) => {
           ref={bodyRef}
           dangerouslySetInnerHTML={{ __html: content }}
         />
+      )}
+      {hasToolInvocations && (
+        <div className="message__tools" aria-label="Tool activity">
+          {toolInvocations.map((invocation) => (
+            <section className="message__tool" key={invocation.id}>
+              <header className="message__tool-header">
+                <span className="message__tool-name">{invocation.name}</span>
+                <span
+                  className={`message__tool-status message__tool-status--${invocation.status}`}
+                >
+                  {invocation.status}
+                </span>
+              </header>
+              {invocation.arguments?.trim() ? (
+                <pre className="message__tool-content message__tool-content--arguments">
+                  <code>{invocation.arguments}</code>
+                </pre>
+              ) : null}
+              {invocation.result?.trim() ? (
+                <pre className="message__tool-content message__tool-content--result">
+                  <code>{invocation.result}</code>
+                </pre>
+              ) : null}
+            </section>
+          ))}
+        </div>
       )}
       {hasAttachments && (
         <div className="message__attachments" aria-label="Message attachments">

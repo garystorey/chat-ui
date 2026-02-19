@@ -21,6 +21,7 @@ describe("ChatListItem", () => {
         activeChatId={chat.id}
         onSelectChat={vi.fn()}
         onRemoveChat={vi.fn()}
+        onRenameChat={vi.fn()}
       />,
     );
 
@@ -36,6 +37,7 @@ describe("ChatListItem", () => {
         activeChatId={null}
         onSelectChat={onSelectChat}
         onRemoveChat={vi.fn()}
+        onRenameChat={vi.fn()}
       />,
     );
 
@@ -58,6 +60,7 @@ describe("ChatListItem", () => {
         activeChatId={null}
         onSelectChat={onSelectChat}
         onRemoveChat={onRemoveChat}
+        onRenameChat={vi.fn()}
       />,
     );
 

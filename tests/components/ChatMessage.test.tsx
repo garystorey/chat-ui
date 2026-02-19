@@ -43,4 +43,28 @@ describe("ChatMessage", () => {
 
     expect(screen.getByText("Trusted content")).toBeInTheDocument();
   });
+
+  it("renders tool invocation metadata when present", () => {
+    const messageWithTool: Message = {
+      ...baseMessage,
+      id: "msg-tool",
+      sender: "bot",
+      content: "",
+      toolInvocations: [
+        {
+          id: "tool-1",
+          name: "echo",
+          arguments: '{"text":"Hello"}',
+          status: "success",
+          result: '{"text":"Hello"}',
+        },
+      ],
+    };
+
+    render(<ChatMessage message={messageWithTool} />);
+
+    expect(screen.getByText("echo")).toBeInTheDocument();
+    expect(screen.getByText("success")).toBeInTheDocument();
+    expect(screen.getAllByText('{"text":"Hello"}')).toHaveLength(2);
+  });
 });

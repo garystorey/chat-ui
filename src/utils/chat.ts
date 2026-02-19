@@ -7,6 +7,7 @@ import type {
   ChatCompletionResponse,
   ChatCompletionChoice,
   ChatCompletionStreamResponse,
+  ChatCompletionToolCall,
 } from "../types";
 import { getId } from "./id";
 import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "./text";
@@ -14,6 +15,20 @@ import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "./text";
 export const cloneMessages = (items: Message[]): Message[] =>
   items.map((item) => ({
     ...item,
+    ...(item.attachments
+      ? {
+          attachments: item.attachments.map((attachment) => ({
+            ...attachment,
+          })),
+        }
+      : {}),
+    ...(item.toolInvocations
+      ? {
+          toolInvocations: item.toolInvocations.map((invocation) => ({
+            ...invocation,
+          })),
+        }
+      : {}),
   }));
 
 export const getMessageTextContent = (message?: Message) => {
@@ -185,6 +200,10 @@ export const buildChatCompletionResponse = (
   }
 
   const aggregated = new Map<number, ChatCompletionChoice>();
+  const toolCallsByChoice = new Map<
+    number,
+    Map<number, ChatCompletionToolCall>
+  >();
 
   chunks.forEach((chunk) => {
     chunk.choices?.forEach((choice) => {
@@ -203,6 +222,38 @@ export const buildChatCompletionResponse = (
           existing.message.content = `${existing.message.content ?? ""}${deltaText}`;
         }
       }
+      if (choice.delta?.tool_calls?.length) {
+        const indexedToolCalls =
+          toolCallsByChoice.get(choice.index) ?? new Map<number, ChatCompletionToolCall>();
+
+        choice.delta.tool_calls.forEach((toolCallDelta) => {
+          const existingToolCall = indexedToolCalls.get(toolCallDelta.index) ?? {
+            id: toolCallDelta.id ?? `tool-call-${choice.index}-${toolCallDelta.index}`,
+            type: "function",
+            function: {
+              name: "",
+              arguments: "",
+            },
+          };
+
+          if (toolCallDelta.id) {
+            existingToolCall.id = toolCallDelta.id;
+          }
+          if (toolCallDelta.type) {
+            existingToolCall.type = toolCallDelta.type;
+          }
+          if (toolCallDelta.function?.name) {
+            existingToolCall.function.name = toolCallDelta.function.name;
+          }
+          if (typeof toolCallDelta.function?.arguments === "string") {
+            existingToolCall.function.arguments += toolCallDelta.function.arguments;
+          }
+
+          indexedToolCalls.set(toolCallDelta.index, existingToolCall);
+        });
+
+        toolCallsByChoice.set(choice.index, indexedToolCalls);
+      }
       if (choice.finish_reason !== undefined) {
         existing.finish_reason = choice.finish_reason;
       }
@@ -211,9 +262,31 @@ export const buildChatCompletionResponse = (
     });
   });
 
+  const choices = Array.from(aggregated.values())
+    .sort((a, b) => a.index - b.index)
+    .map((choice) => {
+      const indexedToolCalls = toolCallsByChoice.get(choice.index);
+      if (indexedToolCalls?.size) {
+        const toolCalls = Array.from(indexedToolCalls.entries())
+          .sort(([left], [right]) => left - right)
+          .map(([, call]) => call);
+
+        choice.message.tool_calls = toolCalls;
+      }
+
+      if (
+        choice.finish_reason === "tool_calls" &&
+        !getChatCompletionContentText(choice.message.content)
+      ) {
+        choice.message.content = null;
+      }
+
+      return choice;
+    });
+
   return {
     id: chunks[chunks.length - 1]?.id,
-    choices: Array.from(aggregated.values()).sort((a, b) => a.index - b.index),
+    choices,
   };
 };
 
@@ -230,6 +303,15 @@ export const extractAssistantReply = (response: ChatCompletionResponse) => {
   );
   return stripAssistantArtifacts(content).trim();
 };
+
+export const getAssistantChoice = (response: ChatCompletionResponse) =>
+  response?.choices?.find(
+    (choice: ChatCompletionChoice) => choice.message.role === "assistant",
+  );
+
+export const extractAssistantToolCalls = (
+  response: ChatCompletionResponse,
+) => getAssistantChoice(response)?.message?.tool_calls ?? [];
 
 const buildChatText = (
   message: Message | undefined,
