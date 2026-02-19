@@ -20,7 +20,13 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+const el = document.getElementById("root");
+
+if (!el) {
+  throw new Error("no root element");
+}
+
+ReactDOM.createRoot(el).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary
