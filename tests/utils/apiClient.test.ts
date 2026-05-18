@@ -4,15 +4,16 @@ const API_BASE_URL = "https://api.example.com";
 
 const loadApiClient = async () => {
   vi.resetModules();
-  vi.doMock("../../src/config", () => ({
-    API_BASE_URL,
-    getApiBaseUrl: () => API_BASE_URL,
-    getOpenAIApiKey: () => "",
-    OPENAI_BETA_FEATURES: "assistants=v2",
-    OPENAI_API_KEY: "",
+  vi.doMock("../../src/config/env", () => ({
+    readViteEnv: (key: string) =>
+      ({
+        VITE_API_BASE_URL: API_BASE_URL,
+      })[key],
+    readViteBooleanEnv: vi.fn(),
+    readViteIntegerEnv: vi.fn(),
   }));
 
-  return import("../../src/utils/apiClient");
+  return import("../../src/utils/transport");
 };
 
 const encoder = new TextEncoder();

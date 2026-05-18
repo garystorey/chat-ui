@@ -2,10 +2,10 @@ import type {
   ChatSummary,
   Message,
   ChatCompletionMessage,
-} from "../types";
-import { getId } from "./id";
-import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "./text";
-import { buildAttachmentContentParts } from "./transform/chat";
+} from "../../types";
+import { getId } from "../shared/id";
+import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "../shared/text";
+import { buildAttachmentContentParts } from "../transform/chat";
 export {
   getChatCompletionContentText,
   stripAssistantArtifacts,
@@ -13,7 +13,7 @@ export {
   extractAssistantReply,
   getAssistantChoice,
   extractAssistantToolCalls,
-} from "./transform/chat";
+} from "../transform/chat";
 
 export const cloneMessages = (items: Message[]): Message[] =>
   items.map((item) => ({

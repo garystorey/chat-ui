@@ -1,5 +1,5 @@
 import type { ChatSummary } from "../types";
-import { parseChatPayload } from "../utils/export";
+import { parseChatPayload } from "../utils/chat";
 import type { EnvironmentAdapter } from "./adapters/environmentAdapter";
 import { defaultEnvironmentAdapter } from "./adapters/environmentAdapter";
 

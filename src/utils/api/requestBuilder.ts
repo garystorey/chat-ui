@@ -1,6 +1,6 @@
-import { OPENAI_BETA_FEATURES } from "../config";
-import { ApiRequestOptions } from "../types";
-import { getApiBaseUrl, getOpenAIApiKey } from "./config";
+import { OPENAI_BETA_FEATURES } from "../../config/App.config";
+import { ApiRequestOptions } from "../../types";
+import { getApiBaseUrl, getOpenAIApiKey } from "../shared/config";
 
 export const buildRequestOptions = ({
   path,

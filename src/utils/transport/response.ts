@@ -3,7 +3,7 @@ import {
   createApiError,
   defaultErrorHandler,
 } from "../adapters/errorHandler";
-import { parseJson } from "../request";
+import { parseJson } from "../api";
 
 export const throwApiResponseError = async (
   response: Response,

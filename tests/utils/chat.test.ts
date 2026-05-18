@@ -17,7 +17,10 @@ import type {
   ChatCompletionStreamResponse,
 } from "../../src/types";
 
-vi.mock("../../src/utils/id", () => ({
+vi.mock("../../src/utils/shared/id", async () => ({
+  ...(await vi.importActual<typeof import("../../src/utils/shared/id")>(
+    "../../src/utils/shared/id",
+  )),
   getId: vi.fn(() => "chat-id"),
 }));
 

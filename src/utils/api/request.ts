@@ -1,4 +1,4 @@
-import { ApiRequestOptions } from "../types";
+import { ApiRequestOptions } from "../../types";
 import { buildRequestOptions } from "./requestBuilder";
 
 export const isJsonLike = (

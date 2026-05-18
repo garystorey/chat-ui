@@ -3,7 +3,7 @@ import {
   truncate,
   normalizeWhitespace,
   getPlainTextFromHtml,
-} from "../../src/utils/text";
+} from "../../src/utils/shared";
 
 describe("text utilities", () => {
   it("truncates long strings and leaves short strings untouched", () => {

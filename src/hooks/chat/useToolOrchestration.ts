@@ -4,7 +4,7 @@ import type {
   ChatCompletionTool,
   MessageToolInvocation,
 } from "../../types";
-import { runToolOrchestration } from "../../utils/toolOrchestrator";
+import { runToolOrchestration } from "../../utils/tools";
 
 export default function useToolOrchestration() {
   const [status, setStatus] = useState<"idle" | "running" | "error">("idle");

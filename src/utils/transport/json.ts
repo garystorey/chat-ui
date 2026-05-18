@@ -1,7 +1,7 @@
 import type { ApiRequestOptions } from "../../types";
 import type { ErrorHandler } from "../adapters/errorHandler";
 import { defaultErrorHandler } from "../adapters/errorHandler";
-import { buildRequest, parseJson } from "../request";
+import { buildRequest, parseJson } from "../api";
 import { throwApiResponseError } from "./response";
 
 export type ApiJsonRequestOptions<TResponse> = ApiRequestOptions & {

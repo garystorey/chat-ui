@@ -16,8 +16,10 @@ const tabs: HomeTab[] = [
   },
 ];
 
-export default function useHomePanels(chatHistory: ChatSummary[]) {
-  const [activeTab, setActiveTab] = useState<HomeTab["id"]>("suggestions");
+export default function useHomePanels(
+  chatHistory: ChatSummary[],
+  activeTab: HomeTab["id"],
+) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredChats = useMemo(() => {
@@ -36,7 +38,6 @@ export default function useHomePanels(chatHistory: ChatSummary[]) {
   return {
     tabs,
     activeTab,
-    setActiveTab,
     searchTerm,
     setSearchTerm,
     filteredChats,

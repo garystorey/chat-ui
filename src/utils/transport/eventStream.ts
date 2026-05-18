@@ -1,7 +1,6 @@
 import type { ApiStreamRequestOptions } from "../../types";
 import { defaultErrorHandler } from "../adapters/errorHandler";
-import { buildRequest, parseJson } from "../request";
-import { parseSseEvents } from "../sseParser";
+import { buildRequest, parseJson, parseSseEvents } from "../api";
 import { isEventStreamResponse, throwApiResponseError } from "./response";
 
 export async function apiStreamRequest<TMessage, TResponse>({

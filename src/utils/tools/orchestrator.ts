@@ -7,16 +7,16 @@ import type {
   ChatCompletionToolCall,
   LocalToolExecutionResult,
   MessageToolInvocation,
-} from "../types";
+} from "../../types";
 import {
   extractAssistantToolCalls,
   getAssistantChoice,
-} from "./transform";
+} from "../transform";
 import {
   toPendingToolInvocations,
   toCompletedToolInvocations,
   toToolResultMessages,
-} from "./tools";
+} from "./localTools";
 
 export type RunToolOrchestrationOptions = {
   model: string;

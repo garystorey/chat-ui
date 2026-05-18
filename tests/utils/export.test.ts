@@ -3,7 +3,7 @@ import {
   exportAllChatsAsJSON,
   exportChatAsJSON,
   serializeChat,
-} from "../../src/utils/export";
+} from "../../src/utils/chat";
 import type { ChatSummary } from "../../src/types";
 
 const buildChat = (id: string, updatedAt: number): ChatSummary => ({

@@ -1,5 +1,5 @@
 import { createContext, useMemo, type ReactNode } from "react";
-import { useToastManager, type ToastOptions } from "../../hooks";
+import useToastManager, { type ToastOptions } from "../../hooks/ui/useToastManager";
 import ToastStack from "./Toast";
 
 export type ToastContextValue = {

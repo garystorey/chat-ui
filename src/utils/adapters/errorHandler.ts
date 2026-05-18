@@ -1,4 +1,4 @@
-import { ApiError, isJsonLike } from "../request";
+import { ApiError, isJsonLike } from "../api";
 
 type ErrorData = Record<string, unknown>;
 

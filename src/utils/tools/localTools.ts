@@ -3,7 +3,7 @@ import type {
   ChatCompletionTool,
   ChatCompletionToolCall,
   MessageToolInvocation,
-} from "../types";
+} from "../../types";
 
 const UTC_OFFSET_PATTERN = /^[+-](?:0\d|1[0-4]):[0-5]\d$/;
 

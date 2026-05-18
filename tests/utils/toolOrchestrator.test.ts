@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { runToolOrchestration } from "../../src/utils/toolOrchestrator";
+import { runToolOrchestration } from "../../src/utils/tools";
 import type {
   ChatCompletionMessage,
   ChatCompletionResponse,

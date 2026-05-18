@@ -21,6 +21,7 @@ import type {
   ChatCompletionRequest,
   ChatCompletionResponse,
   ConnectionStatus,
+  HomeTab,
   Message,
   MessageToolInvocation,
   UserInputSendPayload,
@@ -78,6 +79,7 @@ const App = () => {
     sortChatsByUpdatedAt(defaultChats),
   );
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [homeTab, setHomeTab] = useState<HomeTab["id"]>("suggestions");
   const { connectionStatus, setConnectionStatus } = useConnection();
   const {
     availableModels,
@@ -97,6 +99,8 @@ const App = () => {
   const { run: runToolOrchestrationHook } = useToolOrchestration();
   const isResponding = chatCompletionStatus === "pending";
   const isNewChat = messages.length === 0;
+  const isHistoryOpen = homeTab === "recent";
+  const showHomePanels = isNewChat || isHistoryOpen;
 
   const cancelPendingResponse = useCallback(() => {
     if (pendingRequestRef.current) {
@@ -460,6 +464,7 @@ const App = () => {
     setActiveChatId(null);
     setInputValue("");
     setChatOpen(false);
+    setHomeTab("suggestions");
   }, [setActiveChatId, setChatOpen, setInputValue, setMessages]);
 
   const handleNewChat = useCallback(() => {
@@ -481,6 +486,7 @@ const App = () => {
       setMessages(cloneMessages(selectedChat.messages));
       setInputValue("");
       setChatOpen(true);
+      setHomeTab("suggestions");
     },
     [
       archiveCurrentConversation,
@@ -580,6 +586,15 @@ const App = () => {
     [],
   );
 
+  const handleShowChats = useCallback(() => {
+    setHomeTab("suggestions");
+  }, []);
+
+  const handleShowHistory = useCallback(() => {
+    setHomeTab("recent");
+    setChatOpen(false);
+  }, [setChatOpen]);
+
   return (
     <article className="app">
       <a
@@ -589,6 +604,62 @@ const App = () => {
       >
         Skip to conversation
       </a>
+      <aside className="app__rail" aria-label="Primary navigation">
+        <div className="app__rail-brand" aria-hidden="true">
+          <svg viewBox="0 0 32 32" focusable="false">
+            <path d="M8 10.5A4.5 4.5 0 0 1 12.5 6h8A4.5 4.5 0 0 1 25 10.5v5A4.5 4.5 0 0 1 20.5 20H16l-5 4v-4.1A4.5 4.5 0 0 1 8 15.5v-5Z" />
+            <path d="M6 14v4.5A4.5 4.5 0 0 0 10.5 23H15" />
+          </svg>
+        </div>
+        <div className="app__rail-nav">
+          <button
+            type="button"
+            className={`app__rail-link ${
+              !isHistoryOpen ? "app__rail-link--active" : ""
+            }`}
+            onClick={handleShowChats}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+              <path d="M5 6.5A3.5 3.5 0 0 1 8.5 3h7A3.5 3.5 0 0 1 19 6.5v4A3.5 3.5 0 0 1 15.5 14H12l-4 3v-3A3.5 3.5 0 0 1 5 10.5v-4Z" />
+              <path d="M4 12v1.5A3.5 3.5 0 0 0 7.5 17H12" />
+            </svg>
+            <span>Chats</span>
+          </button>
+          <button
+            type="button"
+            className={`app__rail-link ${
+              isHistoryOpen ? "app__rail-link--active" : ""
+            }`}
+            onClick={handleShowHistory}
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 7v5l3 2" />
+            </svg>
+            <span>History</span>
+          </button>
+        </div>
+      </aside>
+      <nav className="app__mobile-nav" aria-label="Primary navigation">
+        <button
+          type="button"
+          className={`app__mobile-nav-link ${
+            !isHistoryOpen ? "app__mobile-nav-link--active" : ""
+          }`}
+          onClick={handleShowChats}
+        >
+          Chats
+        </button>
+        <button
+          type="button"
+          className={`app__mobile-nav-link ${
+            isHistoryOpen ? "app__mobile-nav-link--active" : ""
+          }`}
+          onClick={handleShowHistory}
+        >
+          History
+        </button>
+      </nav>
       <ChatHeader
         handleNewChat={handleNewChat}
         onRetryConnection={handleRetryConnection}
@@ -601,12 +672,12 @@ const App = () => {
       />
       <main className="chat-wrapper" aria-label="Chat interface">
         <div className="chat-main">
-          <Show when={!isNewChat}>
+          <Show when={!showHomePanels}>
             <div className="chat-main__actions">
               <ExportButton currentChat={currentChat} allChats={chatHistory} />
             </div>
           </Show>
-          <Show when={!isNewChat}>
+          <Show when={!showHomePanels}>
             <ChatWindow messages={messages} isResponding={isResponding} />
           </Show>
 
@@ -623,7 +694,7 @@ const App = () => {
             />
           </div>
 
-          <Show when={isNewChat}>
+          <Show when={showHomePanels}>
             <HomePanels
               suggestionItems={suggestionItems}
               chatHistory={chatHistory}
@@ -635,6 +706,7 @@ const App = () => {
               onToast={showToast}
               currentChat={currentChat}
               allChats={chatHistory}
+              activeTab={homeTab}
             />
           </Show>
         </div>

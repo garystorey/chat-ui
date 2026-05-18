@@ -1,5 +1,5 @@
-import type { ChatSummary, Message } from "../types";
-import { buildChatPreview, getMessagePlainText } from "./chat";
+import type { ChatSummary, Message } from "../../types";
+import { buildChatPreview, getMessagePlainText } from "./messages";
 
 export type ExportFormat = "markdown" | "json" | "text";
 

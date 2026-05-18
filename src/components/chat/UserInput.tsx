@@ -10,7 +10,7 @@ import {
   useState,
   type DragEvent,
 } from "react";
-import { ImageIcon, MicIcon, SendIcon, StopIcon } from "../icons";
+import { MicIcon, SendIcon, StopIcon } from "../icons";
 import {
   combineValueWithTranscript,
   formatErrorMessage,
@@ -472,6 +472,7 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
               ref={textareaRef}
               rows={3}
               value={value}
+              placeholder="Type your message..."
               spellCheck
               required
               onChange={handleChange}
@@ -494,8 +495,34 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 Drop files here or use the upload button. Up to{" "}
                 {MAX_ATTACHMENTS} files.
               </span>
-              <span className="input-panel__dropzone-text">
-                Drop files here or tap the upload button.
+              <span className="input-panel__dropzone-copy">
+                <button
+                  type="button"
+                  className="input-panel__dropzone-trigger"
+                  onClick={handleFileClick}
+                  aria-label="Add attachments"
+                  title="Add attachments"
+                  disabled={
+                    isResponding || attachments.length >= MAX_ATTACHMENTS
+                  }
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="input-panel__dropzone-icon"
+                    viewBox="0 0 24 24"
+                    focusable="false"
+                  >
+                    <path d="m21.4 11.6-8.9 8.9a6 6 0 0 1-8.5-8.5l9.7-9.7a4 4 0 0 1 5.7 5.7l-9.8 9.8a2 2 0 0 1-2.8-2.8l8.9-8.9" />
+                  </svg>
+                </button>
+                <span>
+                  <span className="input-panel__dropzone-text">
+                    Drop files here or tap the upload button.
+                  </span>
+                  <span className="input-panel__dropzone-hint">
+                    Supports images, documents, spreadsheets & more
+                  </span>
+                </span>
               </span>
               {attachments.length > 0 && (
                 <ul className="input-panel__attachment-list">
@@ -530,18 +557,6 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                   aria-hidden="true"
                   tabIndex={-1}
                 />
-                <button
-                  type="button"
-                  className="input-panel__icon-button"
-                  onClick={handleFileClick}
-                  aria-label="Add attachments"
-                  title="Add attachments"
-                  disabled={
-                    isResponding || attachments.length >= MAX_ATTACHMENTS
-                  }
-                >
-                  <ImageIcon />
-                </button>
                 <button
                   type="button"
                   className={micButtonClasses.join(" ")}
@@ -586,6 +601,10 @@ const UserInput = forwardRef<HTMLTextAreaElement, UserInputProps>(
                 </button>
               </Show>
             </div>
+          </div>
+          <div className="input-panel__keyboard-hint" aria-hidden="true">
+            Enter to send <span aria-hidden="true">-</span> Shift + Enter for
+            new line
           </div>
           <div id="inputHint" className="sr-only">
             Press Enter to send and Shift+Enter for newline

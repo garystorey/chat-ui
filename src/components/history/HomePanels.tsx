@@ -3,7 +3,7 @@ import type { ChatSummary, HomeTab, Suggestion, ToastType } from "../../types";
 import ExportButton from "./ExportButton";
 import ImportButton from "./ImportButton";
 import ChatList from "./ChatList";
-import { List, Show } from "../elements";
+import { Show } from "../elements";
 import Suggestions from "../chat/Suggestions";
 import { useHomePanels } from "../../hooks";
 
@@ -22,6 +22,7 @@ export type HomePanelsProps = {
   }) => void;
   currentChat: ChatSummary | null;
   allChats: ChatSummary[];
+  activeTab: HomeTab["id"];
 };
 
 // tabs are provided by `useHomePanels`
@@ -74,44 +75,20 @@ const HomePanels = ({
   onToast,
   currentChat,
   allChats,
+  activeTab,
 }: HomePanelsProps) => {
   const {
     tabs,
-    activeTab,
-    setActiveTab,
     searchTerm,
     setSearchTerm,
     filteredChats,
-  } = useHomePanels(chatHistory);
+  } = useHomePanels(chatHistory, activeTab);
 
   return (
-    <section className="home-panels" aria-label="Start and recent chats">
-      <div
-        className="home-panels__tabs"
-        role="tablist"
-        aria-label="Start and recent tabs"
-      >
-        <List<HomeTab>
-          className="home-panels__tab-list"
-          items={tabs}
-          keyfield="id"
-          as={(tab) => (
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              className={`home-panels__tab ${
-                activeTab === tab.id ? "home-panels__tab--active" : ""
-              }`}
-              onClick={() => setActiveTab(tab.id)}
-              id={tab.tabId}
-              aria-controls={tab.panelId}
-            >
-              {tab.label}
-            </button>
-          )}
-        />
-      </div>
+    <section
+      className={`home-panels home-panels--${activeTab}`}
+      aria-label="Start and recent chats"
+    >
       <div className="home-panels__body">
         <Show when={activeTab === "suggestions"}>
           <Panel panelId={tabs[0].panelId} tabId={tabs[0].tabId}>

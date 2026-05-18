@@ -1,4 +1,4 @@
-import { ApiError } from "./request";
+import { ApiError } from "../api/request";
 
 type StackFrameDetails = {
   functionName: string | null;

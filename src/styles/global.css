@@ -1,5 +1,5 @@
 :root {
-  --max-chat-width: 120ch;
+  --max-chat-width: 100%;
   --chat-open-height: 85vh;
   --bubble-radius: 0.75rem;
 

@@ -4,15 +4,27 @@ const loadRequestModule = async (
   configOverrides: Partial<{ apiKey: string; beta: string }> = {},
 ) => {
   vi.resetModules();
-  vi.doMock("../../src/config", () => ({
+  vi.doMock("../../src/config/env", () => ({
+    readViteEnv: (key: string) =>
+      ({
+        VITE_API_BASE_URL: "https://api.example.com",
+        VITE_OPENAI_API_KEY: configOverrides.apiKey ?? "",
+      })[key],
+    readViteBooleanEnv: vi.fn(),
+    readViteIntegerEnv: vi.fn(),
+  }));
+  vi.doMock("../../src/config/App.config", () => ({
     API_BASE_URL: "https://api.example.com",
-    getApiBaseUrl: () => "https://api.example.com",
-    getOpenAIApiKey: () => configOverrides.apiKey ?? "",
-    OPENAI_BETA_FEATURES: configOverrides.beta ?? "assistants=v2",
     OPENAI_API_KEY: configOverrides.apiKey ?? "",
+    CHAT_COMPLETION_PATH: "/v1/chat/completions",
+    ASSISTANT_ERROR_MESSAGE:
+      "Sorry, I had trouble reaching the assistant. Please try again.",
+    OPENAI_BETA_FEATURES: configOverrides.beta ?? "assistants=v2",
+    ENABLE_TOOL_CALLS: false,
+    MAX_TOOL_CALL_ROUNDS: 4,
   }));
 
-  return import("../../src/utils/request");
+  return import("../../src/utils/api");
 };
 
 describe("request utilities", () => {
