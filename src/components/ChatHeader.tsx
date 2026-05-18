@@ -1,25 +1,20 @@
-import { ConnectionStatus } from "../types";
 import Show from "./Show";
 import ThemeToggle from "./ThemeToggle";
+import useConnectionStatus from "../hooks/useConnectionStatus";
 
 interface ChatHeaderProps {
   handleNewChat: () => void;
-  connectionStatus: ConnectionStatus;
-  statusLabel: string;
-  retryConnection: () => void;
   availableModels: string[];
   selectedModel: string;
   setSelectedModel: (model: string) => void;
   isResponding: boolean;
   isLoadingModels: boolean;
   hasHeaderModelOptions: boolean;
+  onRetryConnection?: () => void;
 }
 
 function ChatHeader({
   handleNewChat,
-  connectionStatus,
-  statusLabel,
-  retryConnection,
   availableModels,
   selectedModel,
   setSelectedModel,
@@ -27,6 +22,8 @@ function ChatHeader({
   isLoadingModels,
   hasHeaderModelOptions,
 }: ChatHeaderProps) {
+  const { connectionStatus, statusLabel, retryConnection } =
+    useConnectionStatus();
   const showModelPlaceholder = hasHeaderModelOptions && !selectedModel;
 
   return (
@@ -44,7 +41,10 @@ function ChatHeader({
           aria-live="polite"
           aria-label={`Connection status: ${statusLabel}. Click to retry connection.`}
           title={`Connection status: ${statusLabel}. Click to retry connection.`}
-          onClick={retryConnection}
+          onClick={() => {
+            retryConnection();
+            onRetryConnection?.();
+          }}
         >
           <span
             className={`app__status-dot app__status-dot--${connectionStatus}`}

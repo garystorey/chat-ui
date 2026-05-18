@@ -11,6 +11,15 @@ import type {
 } from "../types";
 import { getId } from "./id";
 import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "./text";
+import {
+  buildAttachmentContentParts,
+  getChatCompletionContentText,
+  stripAssistantArtifacts,
+  buildChatCompletionResponse,
+  extractAssistantReply,
+  getAssistantChoice,
+  extractAssistantToolCalls,
+} from "./transform/chat";
 
 export const cloneMessages = (items: Message[]): Message[] =>
   items.map((item) => ({
@@ -89,87 +98,7 @@ export const toChatCompletionMessages = (
     };
   });
 
-const DEFAULT_MIME_TYPE = "application/octet-stream";
-
-const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/png", "image/jpeg"]);
-
-const base64Pattern = /^[A-Za-z0-9+/]+={0,2}$/;
-
-const toDataUrl = (url: string, mimeType: string) => {
-  if (url.startsWith("data:")) {
-    return url;
-  }
-
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
-  if (base64Pattern.test(url)) {
-    return `data:${mimeType || DEFAULT_MIME_TYPE};base64,${url}`;
-  }
-
-  return null;
-};
-
-const buildImageUrl = (attachment: MessageAttachment) => {
-  const url = attachment.url.trim();
-  if (!url) {
-    return null;
-  }
-
-  const dataUrl = toDataUrl(url, attachment.mimeType || "image/png");
-  if (dataUrl) {
-    return dataUrl;
-  }
-
-  console.warn(
-    "Skipping attachment url; expected base64, data URL, or http(s) URL.",
-    url,
-  );
-  return null;
-};
-
-const buildAttachmentContentParts = (attachments: MessageAttachment[]) => {
-  const parts: ChatCompletionContentPart[] = [];
-
-  attachments.forEach((attachment) => {
-    if (attachment.type === "image" || attachment.mimeType.startsWith("image/")) {
-      if (
-        attachment.mimeType &&
-        attachment.mimeType.startsWith("image/") &&
-        !ALLOWED_IMAGE_MIME_TYPES.has(attachment.mimeType)
-      ) {
-        console.warn(
-          "Skipping unsupported image attachment mime type.",
-          attachment.mimeType,
-        );
-        return;
-      }
-
-      const url = buildImageUrl(attachment);
-      if (!url) {
-        return;
-      }
-      parts.push({
-        type: "image_url",
-        image_url: {
-          url,
-        },
-      });
-      return;
-    }
-
-    const dataUrl =
-      toDataUrl(attachment.url, attachment.mimeType || DEFAULT_MIME_TYPE) ??
-      attachment.url;
-    parts.push({
-      type: "text",
-      text: `Attachment: ${attachment.name} (${attachment.mimeType || DEFAULT_MIME_TYPE}, ${attachment.size} bytes)\nData: ${dataUrl}`,
-    });
-  });
-
-  return parts;
-};
+// Attachment and content helpers moved to `src/utils/transform/chat.ts`
 
 export const getChatCompletionContentText = (
   content: ChatCompletionMessage["content"] | undefined,

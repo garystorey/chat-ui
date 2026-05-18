@@ -1,6 +1,7 @@
 import { useCallback, useEffect, type SetStateAction } from "react";
+import useAsyncAction from "./useAsyncAction";
 
-import { getApiBaseUrl } from "../config";
+import { getApiBaseUrl } from "../utils";
 import { ConnectionStatus } from "../types";
 
 const logConnectionError = (message: string, error?: unknown) => {
@@ -67,9 +68,6 @@ const useConnectionListeners = ({
   useEffect(() => {
     const abortController = new AbortController();
 
-    updateStatus(abortController.signal).catch(() => {
-      /* handled in updateStatus */
-    });
 
     const handleOnline = () => {
       updateStatus(abortController.signal).catch(() => {
@@ -94,6 +92,14 @@ const useConnectionListeners = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [updateStatus]);
+
+  useAsyncAction(
+    async (signal) => {
+      await updateStatus(signal);
+    },
+    [updateStatus],
+    (err) => logConnectionError("Unable to connect to API.", err),
+  );
 
   return useCallback(() => updateStatus(), [updateStatus]);
 };

@@ -7,3 +7,5 @@ export * from "./errors";
 export * from "./text";
 export * from "./request";
 export * from "./tools";
+export * from "./toolOrchestrator";
+export * from "./config";

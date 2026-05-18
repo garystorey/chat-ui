@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import type { ChatSummary, HomeTab, Suggestion, ToastType } from "../types";
 import ExportButton from "./ExportButton";
 import ImportButton from "./ImportButton";
@@ -6,6 +6,7 @@ import ChatList from "./ChatList";
 import List from "./List";
 import Show from "./Show";
 import Suggestions from "./Suggestions";
+import useHomePanels from "../hooks/useHomePanels";
 
 export type HomePanelsProps = {
   suggestionItems: Suggestion[];
@@ -24,23 +25,7 @@ export type HomePanelsProps = {
   allChats: ChatSummary[];
 };
 
-const tabs: HomeTab[] = [
-  {
-    id: "suggestions",
-    label: "Suggestions",
-    tabId: "tab-start",
-    panelId: "panel-start",
-  },
-  {
-    id: "recent",
-    label: "Recent",
-    tabId: "tab-recent",
-    panelId: "panel-recent",
-  },
-];
-
-const suggestionsTab = tabs[0];
-const recentTab = tabs[1];
+// tabs are provided by `useHomePanels`
 
 type PanelProps = {
   panelId: string;
@@ -57,7 +42,12 @@ const Panel = ({
   as: Component = "div",
   children,
 }: PanelProps) => (
-  <Component role="tabpanel" id={panelId} aria-labelledby={tabId} className={className}>
+  <Component
+    role="tabpanel"
+    id={panelId}
+    aria-labelledby={tabId}
+    className={className}
+  >
     {children}
   </Component>
 );
@@ -86,21 +76,14 @@ const HomePanels = ({
   currentChat,
   allChats,
 }: HomePanelsProps) => {
-  const [activeTab, setActiveTab] = useState<HomeTab["id"]>("suggestions");
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredChats = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      return chatHistory;
-    }
-
-    return chatHistory.filter((chat) => {
-      const titleMatch = chat.title.toLowerCase().includes(term);
-      const previewMatch = chat.preview.toLowerCase().includes(term);
-      return titleMatch || previewMatch;
-    });
-  }, [chatHistory, searchTerm]);
+  const {
+    tabs,
+    activeTab,
+    setActiveTab,
+    searchTerm,
+    setSearchTerm,
+    filteredChats,
+  } = useHomePanels(chatHistory);
 
   return (
     <section className="home-panels" aria-label="Start and recent chats">
@@ -132,7 +115,7 @@ const HomePanels = ({
       </div>
       <div className="home-panels__body">
         <Show when={activeTab === "suggestions"}>
-          <Panel panelId={suggestionsTab.panelId} tabId={suggestionsTab.tabId}>
+          <Panel panelId={tabs[0].panelId} tabId={tabs[0].tabId}>
             <PanelHeader title="Suggestions" />
             <Suggestions
               suggestions={suggestionItems}
@@ -144,8 +127,8 @@ const HomePanels = ({
           <Panel
             as="section"
             className="recent-panel"
-            panelId={recentTab.panelId}
-            tabId={recentTab.tabId}
+            panelId={tabs[1].panelId}
+            tabId={tabs[1].tabId}
           >
             <PanelHeader title="Recent chats">
               <label className="recent-panel__search" htmlFor="recentSearch">

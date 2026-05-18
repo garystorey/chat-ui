@@ -1,4 +1,3 @@
-import { useAtom } from "jotai";
 import {
   useCallback,
   useEffect,
@@ -7,7 +6,6 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import { messagesAtom } from "./atoms";
 import {
   ChatWindow,
   ChatHeader,
@@ -33,27 +31,24 @@ import {
   useToggleBodyClass,
   usePersistChatHistory,
   useHydrateActiveChat,
-  useAvailableModels,
-  SELECTED_MODEL_STORAGE_KEY,
   useChatCompletionStream,
   useToast,
 } from "./hooks";
+import useChatHeaderLogic from "./hooks/useChatHeaderLogic";
+import useToolOrchestration from "./hooks/useToolOrchestration";
+import { useChat } from "./contexts/ChatProvider";
+import { useConnection } from "./contexts/ConnectionContext";
 import {
   cloneMessages,
   createChatRecordFromMessages,
   buildChatPreview,
   executeLocalToolCalls,
-  extractAssistantReply,
-  extractAssistantToolCalls,
   formatErrorMessage,
-  getAssistantChoice,
   getId,
   LOCAL_CHAT_TOOLS,
+  runToolOrchestration,
   sortChatsByUpdatedAt,
-  toCompletedToolInvocations,
   toChatCompletionMessages,
-  toPendingToolInvocations,
-  toToolResultMessages,
   upsertChatHistoryWithMessages,
 } from "./utils";
 
@@ -76,19 +71,22 @@ const areToolInvocationsEqual = (
 ) => JSON.stringify(left ?? []) === JSON.stringify(right ?? []);
 
 const App = () => {
-  const [messages, setMessages] = useAtom(messagesAtom);
+  const { messages, setMessages } = useChat();
   const [inputValue, setInputValue] = useState("");
   const [isChatOpen, setChatOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatSummary[]>(() =>
     sortChatsByUpdatedAt(defaultChats),
   );
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] =
-    useState<ConnectionStatus>("connecting");
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [selectedModel, setSelectedModel] = useState("");
-  const [isLoadingModels, setIsLoadingModels] = useState(false);
-  const [modelsRefreshKey, setModelsRefreshKey] = useState(0);
+  const { connectionStatus, setConnectionStatus } = useConnection();
+  const {
+    availableModels,
+    selectedModel,
+    setSelectedModel,
+    isLoadingModels,
+    hasHeaderModelOptions,
+    refreshModels,
+  } = useChatHeaderLogic();
   const { showToast } = useToast();
   const {
     status: chatCompletionStatus,
@@ -96,6 +94,7 @@ const App = () => {
     send: sendChatCompletion,
     pendingRequestRef,
   } = useChatCompletionStream();
+  const { run: runToolOrchestrationHook } = useToolOrchestration();
   const isResponding = chatCompletionStatus === "pending";
   const isNewChat = messages.length === 0;
 
@@ -125,42 +124,13 @@ const App = () => {
     setMessages,
     setChatOpen,
   });
-  const retryConnection = useConnectionListeners({
-    setConnectionStatus,
-  });
+  const retryConnection = useConnectionListeners({ setConnectionStatus });
   const handleRetryConnection = useCallback(() => {
-    setModelsRefreshKey((current) => current + 1);
+    refreshModels();
     retryConnection();
-  }, [retryConnection]);
+  }, [retryConnection, refreshModels]);
 
-  useAvailableModels({
-    connectionStatus,
-    refreshKey: modelsRefreshKey,
-    setAvailableModels,
-    setSelectedModel,
-    setIsLoadingModels,
-    onError: (error) => {
-      console.error("Unable to load models.", error);
-      showToast({
-        type: "warning",
-        message: formatErrorMessage(error, "Unable to load models."),
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    try {
-      if (selectedModel) {
-        window.localStorage.setItem(SELECTED_MODEL_STORAGE_KEY, selectedModel);
-      } else {
-        window.localStorage.removeItem(SELECTED_MODEL_STORAGE_KEY);
-      }
-    } catch {}
-  }, [selectedModel]);
+  // model loading and selection handled by useChatHeaderLogic
 
   useEffect(() => {
     return () => {
@@ -382,31 +352,6 @@ const App = () => {
           },
         );
 
-      const streamRequest = (body: ChatCompletionRequest) =>
-        new Promise<ChatCompletionResponse>((resolve, reject) => {
-          let didSettle = false;
-
-          sendChatCompletion({
-            body,
-            onStreamUpdate: (content) =>
-              updateAssistantMessageContent(assistantMessageId, chatId, content),
-            onStreamComplete: handleFinalAssistantReply,
-            onResponse: (response) => {
-              didSettle = true;
-              resolve(response);
-            },
-            onError: (error) => {
-              didSettle = true;
-              reject(error);
-            },
-            onSettled: () => {
-              if (!didSettle) {
-                reject(new DOMException("Aborted", "AbortError"));
-              }
-            },
-          });
-        });
-
       if (!ENABLE_TOOL_CALLS) {
         sendChatCompletion({
           body: {
@@ -425,67 +370,23 @@ const App = () => {
       }
 
       try {
-        let requestMessages = toChatCompletionMessages(conversationForRequest);
-        let toolRoundCount = 0;
-
-        while (true) {
-          const response = await streamRequest({
-            model: modelToUse,
-            messages: requestMessages,
-            stream: true,
-            tools: LOCAL_CHAT_TOOLS,
-            tool_choice: "auto",
-            parallel_tool_calls: false,
-          });
-
-          const assistantChoice = getAssistantChoice(response);
-          const assistantToolCalls = extractAssistantToolCalls(response);
-          const shouldExecuteTools =
-            assistantChoice?.finish_reason === "tool_calls" &&
-            assistantToolCalls.length > 0;
-
-          if (!shouldExecuteTools) {
-            const finalAssistantReply = extractAssistantReply(response);
-            if (finalAssistantReply) {
-              handleFinalAssistantReply(finalAssistantReply);
-            }
-            break;
-          }
-
-          if (toolRoundCount >= MAX_TOOL_CALL_ROUNDS) {
-            throw new Error("Reached tool execution limit.");
-          }
-
-          toolRoundCount += 1;
-
-          updateAssistantToolInvocations(
-            assistantMessageId,
-            chatId,
-            toPendingToolInvocations(assistantToolCalls),
-          );
-
-          const executionResults = await executeLocalToolCalls(
-            assistantToolCalls,
-          );
-
-          updateAssistantToolInvocations(
-            assistantMessageId,
-            chatId,
-            toCompletedToolInvocations(executionResults),
-          );
-
-          const assistantToolMessage: ChatCompletionMessage = {
-            role: "assistant",
-            content: assistantChoice?.message?.content ?? null,
-            tool_calls: assistantToolCalls,
-          };
-
-          requestMessages = [
-            ...requestMessages,
-            assistantToolMessage,
-            ...toToolResultMessages(executionResults),
-          ];
-        }
+        await runToolOrchestrationHook({
+          model: modelToUse,
+          initialMessages: toChatCompletionMessages(conversationForRequest),
+          tools: LOCAL_CHAT_TOOLS,
+          maxToolRounds: MAX_TOOL_CALL_ROUNDS,
+          sendChatCompletion,
+          executeLocalToolCalls,
+          onStreamUpdate: (content) =>
+            updateAssistantMessageContent(assistantMessageId, chatId, content),
+          onStreamComplete: handleFinalAssistantReply,
+          applyToolInvocations: (toolInvocations) =>
+            updateAssistantToolInvocations(
+              assistantMessageId,
+              chatId,
+              toolInvocations,
+            ),
+        });
       } catch (error) {
         handleCompletionError(error);
       }
@@ -534,8 +435,6 @@ const App = () => {
     online: "Online",
     offline: "Offline",
   }[connectionStatus];
-
-  const hasHeaderModelOptions = availableModels.length > 0;
 
   const currentChat = useMemo(() => {
     if (!activeChatId || messages.length === 0) {
@@ -692,9 +591,7 @@ const App = () => {
       </a>
       <ChatHeader
         handleNewChat={handleNewChat}
-        connectionStatus={connectionStatus}
-        statusLabel={statusLabel}
-        retryConnection={handleRetryConnection}
+        onRetryConnection={handleRetryConnection}
         availableModels={availableModels}
         selectedModel={selectedModel}
         setSelectedModel={setSelectedModel}

@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { ChatProvider } from "./contexts/ChatProvider";
 import { ErrorBoundary, ErrorFallback, ToastProvider } from "./components";
 import "./styles/global.css";
 import "./styles/highlight.css";
@@ -41,7 +42,9 @@ ReactDOM.createRoot(el).render(
         )}
       >
         <ToastProvider>
-          <App />
+          <ChatProvider>
+            <App />
+          </ChatProvider>
         </ToastProvider>
       </ErrorBoundary>
     </QueryClientProvider>

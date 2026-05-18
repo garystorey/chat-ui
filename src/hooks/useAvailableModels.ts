@@ -1,7 +1,8 @@
-import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
+import { useRef, type Dispatch, type SetStateAction } from "react";
 import { buildRequest, isJsonLike, parseJson } from "../utils";
 import type { ConnectionStatus } from "../types";
 import useLatestRef from "./useLatestRef";
+import useAsyncAction from "./useAsyncAction";
 
 const DEFAULT_SERVER_MODEL = "default";
 
@@ -84,30 +85,27 @@ const useAvailableModels = ({
   const hasFetchedRef = useRef(false);
   const refreshKeyRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (connectionStatus !== "online") {
-      return undefined;
-    }
+  useAsyncAction(
+    async (signal) => {
+      if (connectionStatus !== "online") {
+        return;
+      }
 
-    const shouldRefresh = refreshKeyRef.current !== refreshKey;
+      const shouldRefresh = refreshKeyRef.current !== refreshKey;
 
-    if (hasFetchedRef.current && !shouldRefresh) {
-      return undefined;
-    }
+      if (hasFetchedRef.current && !shouldRefresh) {
+        return;
+      }
 
-    refreshKeyRef.current = refreshKey;
+      refreshKeyRef.current = refreshKey;
 
-    const abortController = new AbortController();
-    let cancelled = false;
-
-    const fetchModels = async () => {
       setIsLoadingModels(true);
       try {
         const { url, requestHeaders } = buildRequest({ path: "/v1/models" });
         const response = await fetch(url, {
           method: "GET",
           headers: requestHeaders,
-          signal: abortController.signal,
+          signal,
         });
 
         if (!response.ok) {
@@ -116,7 +114,7 @@ const useAvailableModels = ({
 
         const data = await parseJson(response);
 
-        if (cancelled || !isJsonLike(data)) {
+        if (signal.aborted || !isJsonLike(data)) {
           return;
         }
 
@@ -164,30 +162,25 @@ const useAvailableModels = ({
         hasFetchedRef.current = true;
       } catch (error) {
         hasFetchedRef.current = false;
-        if (!abortController.signal.aborted) {
+        if (!signal.aborted) {
           console.error("Failed to fetch models", error);
           onErrorRef.current?.(error);
         }
       } finally {
-        if (!cancelled) {
+        if (!signal.aborted) {
           setIsLoadingModels(false);
         }
       }
-    };
-
-    void fetchModels();
-
-    return () => {
-      cancelled = true;
-      abortController.abort();
-    };
-  }, [
-    connectionStatus,
-    refreshKey,
-    setAvailableModels,
-    setIsLoadingModels,
-    setSelectedModel,
-  ]);
+    },
+    [
+      connectionStatus,
+      refreshKey,
+      setAvailableModels,
+      setIsLoadingModels,
+      setSelectedModel,
+    ],
+    onErrorRef.current,
+  );
 };
 
 export default useAvailableModels;

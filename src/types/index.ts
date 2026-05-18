@@ -263,6 +263,8 @@ export type ToastItem = {
   type: ToastType;
 };
 
+export type LocalToolExecutionResult = import("../utils/tools").LocalToolExecutionResult;
+
 export type HomeTab = {
   id: "suggestions" | "recent";
   label: string;

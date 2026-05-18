@@ -5,9 +5,11 @@ const API_BASE_URL = "https://api.example.com";
 const loadApiClient = async () => {
   vi.resetModules();
   vi.doMock("../../src/config", () => ({
+    API_BASE_URL,
     getApiBaseUrl: () => API_BASE_URL,
     getOpenAIApiKey: () => "",
     OPENAI_BETA_FEATURES: "assistants=v2",
+    OPENAI_API_KEY: "",
   }));
 
   return import("../../src/utils/apiClient");
