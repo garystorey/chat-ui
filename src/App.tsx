@@ -681,19 +681,6 @@ const App = () => {
             <ChatWindow messages={messages} isResponding={isResponding} />
           </Show>
 
-          <div className="chat-main__inline-input chat-main__inline-input--home">
-            <UserInput
-              ref={inputRef}
-              value={inputValue}
-              onChange={setInputValue}
-              onSend={handleSend}
-              onStop={cancelPendingResponse}
-              isResponding={isResponding}
-              sendPayload={{ model: selectedModel }}
-              onToast={showToast}
-            />
-          </div>
-
           <Show when={showHomePanels}>
             <HomePanels
               suggestionItems={suggestionItems}
@@ -709,6 +696,19 @@ const App = () => {
               activeTab={homeTab}
             />
           </Show>
+
+          <div className="chat-main__inline-input">
+            <UserInput
+              ref={inputRef}
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              onStop={cancelPendingResponse}
+              isResponding={isResponding}
+              sendPayload={{ model: selectedModel }}
+              onToast={showToast}
+            />
+          </div>
         </div>
       </main>
     </article>

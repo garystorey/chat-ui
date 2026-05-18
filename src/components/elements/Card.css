@@ -1,19 +1,22 @@
 .suggestion-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  column-gap: 0.85rem;
+  row-gap: 0.58rem;
   background: linear-gradient(
-    150deg,
-    color-mix(in oklab, var(--panel-solid) 88%, var(--brand-shell) 12%),
-    color-mix(in oklab, var(--panel-solid) 92%, var(--brand-shell) 8%)
+    145deg,
+    color-mix(in oklab, var(--panel-solid) 90%, var(--bg) 10%),
+    color-mix(in oklab, var(--panel) 94%, var(--accent) 6%)
   );
   border: 1px solid
-    color-mix(in oklab, var(--panel-border) 62%, var(--accent) 38%);
-  border-radius: 1.1rem;
-  padding: 1.7rem 1.75rem;
+    color-mix(in oklab, var(--panel-border) 78%, var(--accent) 22%);
+  border-radius: 0.85rem;
+  padding: 1.25rem 1.15rem;
   color: var(--text);
-  box-shadow: var(--shadow);
-  min-height: 16.5rem;
+  box-shadow: var(--shadow-soft);
+  min-height: 10.5rem;
   position: relative;
   overflow: hidden;
   backdrop-filter: blur(10px) saturate(120%);
@@ -30,12 +33,12 @@
   border-radius: inherit;
   pointer-events: none;
   background: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--accent) 18%, transparent) 0%,
+    120deg,
+    color-mix(in oklab, var(--accent) 20%, transparent) 0%,
     transparent 60%,
-    color-mix(in oklab, var(--accent) 24%, transparent) 100%
+    color-mix(in oklab, var(--accent) 16%, transparent) 100%
   );
-  opacity: 0.12;
+  opacity: 0.1;
   transition: opacity var(--duration-sm) var(--ease-out);
 }
 
@@ -46,18 +49,19 @@
 
 .suggestion-card:hover,
 .suggestion-card:focus-within {
-  transform: translateY(-6px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-strong);
   border-color: color-mix(in oklab, var(--accent) 42%, var(--panel-border) 58%);
 }
 
 .suggestion-card__icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
+  grid-row: 1 / span 3;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.7rem;
   display: grid;
   place-items: center;
-  font-size: 1.35rem;
+  font-size: 1.16rem;
   background: linear-gradient(
     145deg,
     color-mix(in oklab, var(--accent) 38%, transparent),
@@ -69,46 +73,73 @@
 }
 
 .suggestion-card__title {
-  font-size: 1.15rem;
+  grid-column: 2;
+  font-size: 0.97rem;
   font-weight: 700;
   margin: 0;
-  letter-spacing: 0.2px;
+  letter-spacing: 0;
 }
 
 .suggestion-card__description {
+  grid-column: 2 / span 2;
   margin: 0;
-  font-size: 0.97rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.42;
   color: color-mix(in oklab, var(--muted) 85%, var(--text) 15%);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .suggestion-card__cta {
-  align-self: flex-end;
-  margin-top: auto;
-  margin-left: auto;
-  border: none;
-  background: linear-gradient(
-    135deg,
-    color-mix(in oklab, var(--accent-cta-start) 85%, var(--brand-shell) 15%),
-    var(--accent-cta-end)
-  );
-  color: var(--accent-cta-text);
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+  justify-self: end;
+  border: 1px solid color-mix(in oklab, var(--accent) 24%, transparent);
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  color: var(--text);
   font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.85rem;
+  font-size: 0.86rem;
+  padding: 0;
+  border-radius: 0.68rem;
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
+  width: 2.35rem;
+  height: 2.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     transform var(--duration-sm) var(--ease-out),
-    filter var(--duration-sm) var(--ease-out),
+    background-color var(--duration-sm) var(--ease-out),
     box-shadow var(--duration-sm) var(--ease-out);
 }
 
+.suggestion-card__cta span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.suggestion-card__cta svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .suggestion-card__cta:hover {
-  filter: brightness(1.05);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  transform: translateX(2px);
+  box-shadow: var(--glow);
 }
 
 .suggestion-card__cta:focus-visible {

@@ -108,9 +108,15 @@ const HomePanels = ({
           >
             <PanelHeader title="Recent chats">
               <label className="recent-panel__search" htmlFor="recentSearch">
-                <span className="recent-panel__search-icon" aria-hidden="true">
-                  🔍
-                </span>
+                <svg
+                  className="recent-panel__search-icon"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  focusable="false"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m16 16 4 4" />
+                </svg>
                 <span className="sr-only">Search chats</span>
                 <input
                   id="recentSearch"

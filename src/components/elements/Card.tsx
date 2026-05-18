@@ -51,8 +51,13 @@ function Card({
         className="suggestion-card__cta"
         onClick={onSelect}
         aria-describedby={`${titleId} ${descriptionId}`}
+        title={label}
       >
-        {label}
+        <span>{label}</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+          <path d="M5 12h13" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
       </button>
     </div>
   );
