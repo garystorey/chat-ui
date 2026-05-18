@@ -9,10 +9,9 @@ import type {
   MessageToolInvocation,
 } from "../types";
 import {
-  extractAssistantReply,
   extractAssistantToolCalls,
   getAssistantChoice,
-} from "./chat";
+} from "./transform";
 import {
   toPendingToolInvocations,
   toCompletedToolInvocations,

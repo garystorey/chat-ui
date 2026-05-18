@@ -75,45 +75,46 @@ This document records the set of candidate deepening opportunities discovered du
 
 This document now lists the outstanding architectural work and the remaining, focused actions that would deepen the repo's Modules and seams. Completed candidates have been removed or folded into the "Changes applied" section below.
 
-### A — Hooks: Fragmented Hook Implementations (REMAINING)
+### A — Hooks: Fragmented Hook Implementations (COMPLETED)
 
 - Files: `src/hooks/*`
 - Problem: Hook implementations are still inconsistent in patterns for state, side-effects and exports. Discovery requires bouncing between small files; common patterns are duplicated across hooks.
 - Remaining work:
-  - Define a small shared helper surface for recurring hook patterns (refs, abortable effects, standardized error surface).
-  - Group hooks by domain (chat, ui, network) and export domain indexes from `src/hooks/index.ts`.
-  - Add tests that assert consistent lifecycle and cleanup behaviour for the shared helpers.
+  - [x] Define a small shared helper surface for recurring hook patterns (refs, abortable effects, standardized error surface).
+  - [x] Group hooks by domain (chat, ui) and export domain indexes from `src/hooks/index.ts`; network grouping remains optional for future hook additions.
+  - [x] Add tests that assert consistent lifecycle and cleanup behaviour for the shared helpers.
+  - [x] Move remaining component-local event-listener effects onto `useAbortableEffect` so listener cleanup shares the same lifecycle seam.
 
-### B — Utils: Overloaded Utility Functions (PARTIAL — followups)
+### B — Utils: Overloaded Utility Functions (COMPLETED)
 
 - Files: `src/utils/*` (notably `apiClient.ts`, `request.ts`, `requestBuilder.ts`, `sseParser.ts`)
-- Status: Partial — streaming parsing and request-building have been extracted (`requestBuilder.ts`, `sseParser.ts`) to create clear seams.
+- Status: Complete — streaming parsing, request-building, error handling, transforms, and transport adapters have been extracted to create clear seams.
 - Remaining work:
-  - Split transforms and pure helpers into `src/utils/transform/*` where appropriate (e.g., chat/result transforms).
-  - Consolidate or formalize an `ErrorHandler` adapter (if not already present) and centralize error extraction/handling in `src/utils/adapters/errorHandler.ts`.
-  - Consider a transport layer separation (`src/utils/transport/*`) so SSE and non-SSE transports share `RequestBuilder` and error handling.
+  - [x] Split transforms and pure helpers into `src/utils/transform/*` where appropriate (e.g., chat/result transforms).
+  - [x] Consolidate or formalize an `ErrorHandler` adapter (if not already present) and centralize error extraction/handling in `src/utils/adapters/errorHandler.ts`.
+  - [x] Add a transport layer separation (`src/utils/transport/*`) so SSE and non-SSE transports share `RequestBuilder` and error handling.
 
 ## Next actionable steps
 
-- Pick one of the remaining items above to grill and implement next.
-- Proposed immediate work (short verticals):
-  1. Implement a `hooks/shared` helper with `useAbortableEffect` + a lightweight lifecycle contract; update 2–3 hooks to use it.
-  2. Move pure transforms to `src/utils/transform/` and add unit tests for them.
-  3. Add a formal `ErrorHandler` adapter module (if missing) and update `apiClient` to accept it explicitly.
+- No remaining documented deepening opportunities in this file.
 
 ---
 
-File created automatically by the architectural scan on 2026-05-15 and edited to reflect progress on 2026-05-18.
+File created automatically by the architectural scan on 2026-05-15 and edited to reflect progress on 2026-05-18 and 2026-05-18 (hooks-domain-index pass).
 
 ---
 
 ## Changes applied (summary)
 
+- Added domain-level hook indexes (`src/hooks/chat`, `src/hooks/ui`, `src/hooks/shared`) and made `src/hooks/index.ts` re-export domain modules for clearer discovery.
+- Deepened the shared hook lifecycle Module by fixing `useAbortableEffect` cleanup handling, adding abort/cleanup tests, and updating `useConnectionListeners`, `usePrefersReducedMotion`, and `useTheme` to use the shared lifecycle seam.
+- Moved component-local listener effects in `ChatMessage` and `ExportButton` onto `useAbortableEffect`; copy-code timers now clear during abort cleanup.
+- Deepened the chat transform Module by adding `src/utils/transform/index.ts`, moving transform callers to the focused seam, and adding direct transform tests.
+- Formalized the `ErrorHandler` adapter Module by centralizing error message extraction and `ApiError` creation, exporting the adapter seam, and adding adapter/API-client tests.
 - Implemented `useChatHeaderLogic` and `useHomePanels` to move UI logic into container hooks for `ChatHeader` and `HomePanels` respectively.
 - Extracted `requestBuilder.ts` and `sseParser.ts` to separate request-building and SSE parsing responsibilities from `apiClient`/`request`.
+- Added `src/utils/transport/*` with JSON and event-stream adapters sharing the same request-building and error handling seams, and moved model loading onto the JSON transport.
 - Added `useToolOrchestration` to wrap `runToolOrchestration` and reduce callback surface in `App`.
 - Ran full test suite; all tests pass.
 
 ---
-
-If you'd like, I can now: (a) implement the small `hooks/shared` helper and convert `useAvailableModels` and one other hook to use it, or (b) start moving pure transforms into `src/utils/transform/`. Which would you prefer?

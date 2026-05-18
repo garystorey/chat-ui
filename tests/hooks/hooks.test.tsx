@@ -1,11 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type React from "react";
-import useLatestRef from "../../src/hooks/useLatestRef";
-import useToggleBodyClass from "../../src/hooks/useToggleBodyClass";
-import usePrefersReducedMotion from "../../src/hooks/usePrefersReducedMotion";
-import useScrollToBottom from "../../src/hooks/useScrollToBottom";
-import useAutoResizeTextarea from "../../src/hooks/useAutoResizeTextarea";
+import {
+  useAbortableEffect,
+  useLatestRef,
+  useToggleBodyClass,
+  usePrefersReducedMotion,
+  useScrollToBottom,
+  useAutoResizeTextarea,
+} from "../../src/hooks";
 
 type MutableMediaQueryList = Omit<MediaQueryList, "matches"> & {
   matches: boolean;
@@ -82,6 +85,49 @@ afterEach(() => {
   document.body.className = "";
   vi.restoreAllMocks();
   Reflect.deleteProperty(window, "matchMedia");
+});
+
+describe("useAbortableEffect", () => {
+  it("aborts the provided signal and runs returned cleanup on unmount", () => {
+    const cleanup = vi.fn();
+    let signal: AbortSignal | undefined;
+
+    const { unmount } = renderHook(() =>
+      useAbortableEffect((nextSignal) => {
+        signal = nextSignal;
+        return cleanup;
+      }, []),
+    );
+
+    expect(signal?.aborted).toBe(false);
+
+    unmount();
+
+    expect(signal?.aborted).toBe(true);
+    expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs async cleanup if the hook unmounts before the effect resolves", async () => {
+    let resolveEffect: (cleanup: () => void) => void = () => {};
+    const cleanup = vi.fn();
+
+    const { unmount } = renderHook(() =>
+      useAbortableEffect(
+        () =>
+          new Promise<void | (() => void)>((resolve) => {
+            resolveEffect = resolve;
+          }),
+        [],
+      ),
+    );
+
+    unmount();
+    resolveEffect(cleanup);
+
+    await waitFor(() => {
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 describe("useLatestRef", () => {

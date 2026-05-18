@@ -95,6 +95,43 @@ describe("apiStreamRequest", () => {
     });
   });
 
+  it("uses a supplied error handler adapter when the request fails", async () => {
+    const { apiStreamRequest } = await loadApiClient();
+    const response = new Response(JSON.stringify({ message: "Failure" }), {
+      status: 503,
+      statusText: "Unavailable",
+      headers: { "content-type": "application/json" },
+    });
+    const errorHandler = {
+      extractMessage: vi.fn(() => "Adapted failure"),
+      handle: vi.fn(),
+    };
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(response);
+
+    await expect(
+      apiStreamRequest<{ message: string }, { data: string }>({
+        path: "/error",
+        errorHandler,
+        buildResponse: () => ({ data: "noop" }),
+      }),
+    ).rejects.toMatchObject({
+      message: "Adapted failure",
+      status: 503,
+      data: { message: "Failure" },
+    });
+
+    expect(errorHandler.extractMessage).toHaveBeenCalledWith(response, {
+      message: "Failure",
+    });
+    expect(errorHandler.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "ApiError",
+        message: "Adapted failure",
+      }),
+    );
+  });
+
   it("streams SSE messages, parsing and forwarding each message to callbacks", async () => {
     const { apiStreamRequest } = await loadApiClient();
     const response = createSseResponse([

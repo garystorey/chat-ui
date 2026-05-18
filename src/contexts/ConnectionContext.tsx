@@ -1,9 +1,14 @@
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type SetStateAction,
+} from "react";
 import type { ConnectionStatus } from "../types";
 
 type ConnectionContextValue = {
   connectionStatus: ConnectionStatus;
-  setConnectionStatus: (next: ConnectionStatus) => void;
+  setConnectionStatus: React.Dispatch<SetStateAction<ConnectionStatus>>;
 };
 
 const ConnectionContext = createContext<ConnectionContextValue | null>(null);

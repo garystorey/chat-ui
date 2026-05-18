@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import Card from "../../src/components/Card";
+import { Card } from "../../src/components";
 
 afterEach(() => {
   cleanup();

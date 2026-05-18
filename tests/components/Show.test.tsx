@@ -1,6 +1,6 @@
 import { describe, expect, it, afterEach } from "vitest";
 import { render, screen, cleanup } from "@testing-library/react";
-import Show from "../../src/components/Show";
+import { Show } from "../../src/components";
 
 afterEach(() => {
   cleanup();

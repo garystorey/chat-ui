@@ -1,18 +1,12 @@
 import type {
   ChatSummary,
   Message,
-  MessageAttachment,
-  ChatCompletionContentPart,
   ChatCompletionMessage,
-  ChatCompletionResponse,
-  ChatCompletionChoice,
-  ChatCompletionStreamResponse,
-  ChatCompletionToolCall,
 } from "../types";
 import { getId } from "./id";
 import { getPlainTextFromHtml, normalizeWhitespace, truncate } from "./text";
-import {
-  buildAttachmentContentParts,
+import { buildAttachmentContentParts } from "./transform/chat";
+export {
   getChatCompletionContentText,
   stripAssistantArtifacts,
   buildChatCompletionResponse,
@@ -97,150 +91,6 @@ export const toChatCompletionMessages = (
       content: contentParts,
     };
   });
-
-// Attachment and content helpers moved to `src/utils/transform/chat.ts`
-
-export const getChatCompletionContentText = (
-  content: ChatCompletionMessage["content"] | undefined,
-) => {
-  if (!content) {
-    return "";
-  }
-
-  if (typeof content === "string") {
-    return content;
-  }
-
-  return content
-    .map((part) =>
-      "text" in part && typeof part.text === "string" ? part.text : "",
-    )
-    .join("");
-};
-
-export const stripAssistantArtifacts = (text: string) =>
-  text.replace(/\s*<\|?(?:begin_of_box|end_of_box)\|?>\s*/g, "");
-
-export const buildChatCompletionResponse = (
-  chunks: ChatCompletionStreamResponse[],
-): ChatCompletionResponse => {
-  if (!chunks.length) {
-    return { choices: [] };
-  }
-
-  const aggregated = new Map<number, ChatCompletionChoice>();
-  const toolCallsByChoice = new Map<
-    number,
-    Map<number, ChatCompletionToolCall>
-  >();
-
-  chunks.forEach((chunk) => {
-    chunk.choices?.forEach((choice) => {
-      const existing = aggregated.get(choice.index) ?? {
-        index: choice.index,
-        message: { role: "assistant", content: "" },
-        finish_reason: null,
-      };
-
-      if (choice.delta?.role) {
-        existing.message.role = choice.delta.role;
-      }
-      if (choice.delta?.content) {
-        const deltaText = getChatCompletionContentText(choice.delta.content);
-        if (deltaText) {
-          existing.message.content = `${existing.message.content ?? ""}${deltaText}`;
-        }
-      }
-      if (choice.delta?.tool_calls?.length) {
-        const indexedToolCalls =
-          toolCallsByChoice.get(choice.index) ?? new Map<number, ChatCompletionToolCall>();
-
-        choice.delta.tool_calls.forEach((toolCallDelta) => {
-          const existingToolCall = indexedToolCalls.get(toolCallDelta.index) ?? {
-            id: toolCallDelta.id ?? `tool-call-${choice.index}-${toolCallDelta.index}`,
-            type: "function",
-            function: {
-              name: "",
-              arguments: "",
-            },
-          };
-
-          if (toolCallDelta.id) {
-            existingToolCall.id = toolCallDelta.id;
-          }
-          if (toolCallDelta.type) {
-            existingToolCall.type = toolCallDelta.type;
-          }
-          if (toolCallDelta.function?.name) {
-            existingToolCall.function.name = toolCallDelta.function.name;
-          }
-          if (typeof toolCallDelta.function?.arguments === "string") {
-            existingToolCall.function.arguments += toolCallDelta.function.arguments;
-          }
-
-          indexedToolCalls.set(toolCallDelta.index, existingToolCall);
-        });
-
-        toolCallsByChoice.set(choice.index, indexedToolCalls);
-      }
-      if (choice.finish_reason !== undefined) {
-        existing.finish_reason = choice.finish_reason;
-      }
-
-      aggregated.set(choice.index, existing);
-    });
-  });
-
-  const choices = Array.from(aggregated.values())
-    .sort((a, b) => a.index - b.index)
-    .map((choice) => {
-      const indexedToolCalls = toolCallsByChoice.get(choice.index);
-      if (indexedToolCalls?.size) {
-        const toolCalls = Array.from(indexedToolCalls.entries())
-          .sort(([left], [right]) => left - right)
-          .map(([, call]) => call);
-
-        choice.message.tool_calls = toolCalls;
-      }
-
-      if (
-        choice.finish_reason === "tool_calls" &&
-        !getChatCompletionContentText(choice.message.content)
-      ) {
-        choice.message.content = null;
-      }
-
-      return choice;
-    });
-
-  return {
-    id: chunks[chunks.length - 1]?.id,
-    choices,
-  };
-};
-
-export const extractAssistantReply = (response: ChatCompletionResponse) => {
-  if (!response?.choices?.length) {
-    return "";
-  }
-
-  const assistantChoice = response.choices.find(
-    (choice: ChatCompletionChoice) => choice.message.role === "assistant",
-  );
-  const content = getChatCompletionContentText(
-    assistantChoice?.message?.content,
-  );
-  return stripAssistantArtifacts(content).trim();
-};
-
-export const getAssistantChoice = (response: ChatCompletionResponse) =>
-  response?.choices?.find(
-    (choice: ChatCompletionChoice) => choice.message.role === "assistant",
-  );
-
-export const extractAssistantToolCalls = (
-  response: ChatCompletionResponse,
-) => getAssistantChoice(response)?.message?.tool_calls ?? [];
 
 const buildChatText = (
   message: Message | undefined,

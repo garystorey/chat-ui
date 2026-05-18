@@ -33,9 +33,9 @@ import {
   useHydrateActiveChat,
   useChatCompletionStream,
   useToast,
+  useChatHeaderLogic,
+  useToolOrchestration,
 } from "./hooks";
-import useChatHeaderLogic from "./hooks/useChatHeaderLogic";
-import useToolOrchestration from "./hooks/useToolOrchestration";
 import { useChat } from "./contexts/ChatProvider";
 import { useConnection } from "./contexts/ConnectionContext";
 import {

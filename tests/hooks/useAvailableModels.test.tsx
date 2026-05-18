@@ -21,7 +21,7 @@ const loadUseAvailableModels = async () => {
     };
   });
 
-  return import("../../src/hooks/useAvailableModels");
+  return import("../../src/hooks/chat/useAvailableModels");
 };
 
 describe("useAvailableModels", () => {

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import type { Message } from "../../src/types";
-import ChatMessage from "../../src/components/ChatMessage";
+import { ChatMessage } from "../../src/components";
 
 afterEach(() => {
   cleanup();

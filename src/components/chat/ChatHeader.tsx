@@ -1,0 +1,90 @@
+import Show from "../elements/Show";
+import ThemeToggle from "../theme/ThemeToggle";
+import { useConnectionStatus } from "../../hooks";
+
+interface ChatHeaderProps {
+  handleNewChat: () => void;
+  availableModels: string[];
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
+  isResponding: boolean;
+  isLoadingModels: boolean;
+  hasHeaderModelOptions: boolean;
+  onRetryConnection?: () => void;
+}
+
+function ChatHeader({
+  handleNewChat,
+  availableModels,
+  selectedModel,
+  setSelectedModel,
+  isResponding,
+  isLoadingModels,
+  hasHeaderModelOptions,
+  onRetryConnection,
+}: ChatHeaderProps) {
+  const { connectionStatus, statusLabel, retryConnection } =
+    useConnectionStatus();
+  const showModelPlaceholder = hasHeaderModelOptions && !selectedModel;
+
+  return (
+    <header className="app__topbar" aria-label="Chat controls">
+      <div className="app__topbar-left">
+        <button type="button" className="app__new-chat" onClick={handleNewChat}>
+          New Chat
+        </button>
+      </div>
+      <div className="app__topbar-right">
+        <button
+          type="button"
+          className="app__status"
+          role="status"
+          aria-live="polite"
+          aria-label={`Connection status: ${statusLabel}. Click to retry connection.`}
+          title={`Connection status: ${statusLabel}. Click to retry connection.`}
+          onClick={() => {
+            retryConnection();
+            onRetryConnection?.();
+          }}
+        >
+          <span
+            className={`app__status-dot app__status-dot--${connectionStatus}`}
+            aria-hidden="true"
+          />
+          <span className="app__status-label">{statusLabel}</span>
+        </button>
+        <div className="app__model-select">
+          <Show when={hasHeaderModelOptions}>
+            <label
+              className="app__model-select-control"
+              htmlFor="headerModelSelect"
+            >
+              <span className="app__model-label sr-only">Model</span>
+              <select
+                id="headerModelSelect"
+                value={selectedModel}
+                onChange={(event) => setSelectedModel(event.target.value)}
+                disabled={isResponding || isLoadingModels}
+                aria-label="Select model"
+              >
+                <Show when={showModelPlaceholder}>
+                  <option value="" disabled>
+                    Select a model
+                  </option>
+                </Show>
+                {availableModels.map((model) => (
+                  <option key={model} value={model}>
+                    {model.slice(model.lastIndexOf("/") + 1, model.length)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </Show>
+        </div>
+        <ThemeToggle />
+      </div>
+    </header>
+  );
+}
+
+export default ChatHeader;

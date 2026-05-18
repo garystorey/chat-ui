@@ -1,4 +1,6 @@
 
+import type { ErrorHandler } from "../utils/adapters/errorHandler";
+
 export type ThemeMode = "light" | "dark";
 
 export type ThemeId =
@@ -77,6 +79,7 @@ export type ApiStreamRequestOptions<TMessage, TResponse> = {
   headers?: Record<string, string>;
   signal?: AbortSignal;
   idleTimeoutMs?: number;
+  errorHandler?: ErrorHandler;
   onMessage?: (message: TMessage) => void;
   parseMessage?: (data: string) => TMessage;
   buildResponse: (messages: TMessage[]) => TResponse;

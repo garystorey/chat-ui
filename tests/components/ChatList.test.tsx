@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
-import ChatList from "../../src/components/ChatList";
+import { ChatList } from "../../src/components";
 import type { PreviewChat } from "../../src/types";
 
 afterEach(() => {

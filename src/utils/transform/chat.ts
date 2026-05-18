@@ -7,7 +7,6 @@ import type {
   ChatCompletionMessage,
   ChatCompletionToolCall,
 } from "../../types";
-import { getPlainTextFromHtml } from "../text";
 
 const DEFAULT_MIME_TYPE = "application/octet-stream";
 
@@ -229,5 +228,3 @@ export const getAssistantChoice = (response: ChatCompletionResponse) =>
 export const extractAssistantToolCalls = (
   response: ChatCompletionResponse,
 ) => getAssistantChoice(response)?.message?.tool_calls ?? [];
-
-export default {} as const;
